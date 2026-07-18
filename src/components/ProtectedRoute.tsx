@@ -6,10 +6,16 @@ import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  allowPendingOnboarding?: boolean;
+  isOnboardingRoute?: boolean;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  children,
+  allowPendingOnboarding = false,
+  isOnboardingRoute = false
+}) => {
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -42,6 +48,16 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   if (!isAuthenticated) {
     return <Navigate to={ROUTES.LOGIN} replace />;
+  }
+
+  // Redirect to onboarding if authenticated but onboarding is incomplete
+  if (!user?.isOnboarded && !allowPendingOnboarding) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  // Redirect to dashboard if already onboarded and trying to access onboarding wizard
+  if (user?.isOnboarded && isOnboardingRoute) {
+    return <Navigate to={ROUTES.DASHBOARD} replace />;
   }
 
   return <>{children}</>;

@@ -4,6 +4,7 @@ export interface User {
   email: string;
   avatar: string;
   role: string;
+  isOnboarded: boolean;
   createdAt: string;
   updatedAt: string;
 }

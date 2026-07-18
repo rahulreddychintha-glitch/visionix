@@ -1,0 +1,385 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 85vh;
+  padding: 100px 24px 120px 24px;
+  position: relative;
+  background-color: var(--bg-dark);
+}
+
+.card {
+  width: 100%;
+  max-width: 680px;
+  padding: 40px;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #ffffff 40%, var(--text-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+/* Form Groups & Layout Grid */
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.formGroupFull {
+  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .formGroupFull {
+    grid-column: span 1;
+  }
+}
+
+.formGroup label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.formGroupFull label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.fieldError {
+  color: #f87171;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Inputs, Selects, and Textareas */
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  transition: all var(--transition-fast);
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 10px rgba(88, 80, 236, 0.15);
+}
+
+.select option {
+  background-color: #0d0e15;
+  color: var(--text-primary);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Choice Chips Selection Grid */
+.chipLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+.chipGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.chip {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-card);
+  border-radius: 9999px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.chip:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+}
+
+.chipActive {
+  background: linear-gradient(135deg, rgba(88, 80, 236, 0.2), rgba(126, 58, 242, 0.2));
+  border-color: var(--color-primary);
+  color: var(--text-primary);
+  box-shadow: 0 0 10px rgba(88, 80, 236, 0.15);
+}
+
+/* Custom Skill Levels List Grid */
+.skillGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.skillRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-sm);
+  animation: skillFadeIn 0.2s ease-out forwards;
+}
+
+@keyframes skillFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.skillName {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.skillSelect {
+  width: auto;
+  max-width: 140px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+/* Step Progress Bar */
+.progressContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.progressLabel {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.progressTrack {
+  height: 6px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  border-radius: 9999px;
+  transition: width var(--transition-normal);
+}
+
+/* Wizard Step Layout Navigation */
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  border-top: 1px solid var(--border-card);
+  padding-top: 24px;
+  gap: 16px;
+}
+
+/* Success Congratulations Splash */
+.successContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px 0;
+  animation: successSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes successSlideIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.successIconWrapper {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2));
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
+}
+
+.successTitle {
+  font-size: 2.2rem;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.successDesc {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  max-width: 400px;
+}
+
+/* Onboarding Skeleton Skeletons & Saving States */
+.pulse {
+  animation: pulseAnimation 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseAnimation {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.5; }
+}
+
+.skeletonTitle {
+  height: 32px;
+  width: 50%;
+  background-color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+
+.skeletonSubtitle {
+  height: 18px;
+  width: 80%;
+  background-color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  margin-bottom: 24px;
+}
+
+.skeletonLine {
+  height: 48px;
+  width: 100%;
+  background-color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+}
+
+.statusIndicator {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.775rem;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  pointer-events: none;
+  user-select: none;
+  animation: statusFadeIn 0.3s ease-out forwards;
+}
+
+@keyframes statusFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.statusIcon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.statusSaving {
+  background-color: #f59e0b; /* Amber */
+  box-shadow: 0 0 8px #f59e0b;
+}
+
+.statusSaved {
+  background-color: #10b981; /* Emerald */
+  box-shadow: 0 0 8px #10b981;
+}
+
+.statusError {
+  background-color: #ef4444; /* Red */
+  box-shadow: 0 0 8px #ef4444;
+}
+
+.statusText {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Banner Alert styling */
+.errorAlert {
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--radius-sm);
+  color: #fca5a5;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+  animation: alertFadeIn 0.2s ease-out forwards;
+}
+
+@keyframes alertFadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+

@@ -8,6 +8,7 @@ export interface IUserDocument extends Document {
   password: string;
   avatar: string;
   role: string;
+  isOnboarded: boolean;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(password: string): Promise<boolean>;
@@ -42,6 +43,10 @@ const UserSchema = new Schema<IUserDocument>(
       type: String,
       enum: Object.values(ROLES),
       default: ROLES.USER,
+    },
+    isOnboarded: {
+      type: Boolean,
+      default: false,
     },
   },
   {
