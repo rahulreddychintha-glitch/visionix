@@ -330,3 +330,13 @@
   width: 100%;
   background-color: #10b981; /* Green */
 }
+
+/* Invalid inputs red border and subtle glow */
+.input[aria-invalid="true"] {
+  border-color: #ef4444 !important;
+}
+
+.input[aria-invalid="true"]:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.25) !important;
+}

@@ -65,30 +65,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = async (credentials: ILoginInput, rememberMe: boolean) => {
-    setIsLoading(true);
-    try {
-      const data = await AuthService.login(credentials);
-      setTokenState(data.token);
-      setUserState(data.user);
-      saveTokenToStorage(data.token, rememberMe);
-      saveUserToStorage(data.user, rememberMe);
-    } finally {
-      setIsLoading(false);
-    }
+    const data = await AuthService.login(credentials);
+    setTokenState(data.token);
+    setUserState(data.user);
+    saveTokenToStorage(data.token, rememberMe);
+    saveUserToStorage(data.user, rememberMe);
   };
 
   const register = async (data: IRegisterInput) => {
-    setIsLoading(true);
-    try {
-      const responseData = await AuthService.register(data);
-      setTokenState(responseData.token);
-      setUserState(responseData.user);
-      // Automatically login on signup - store in sessionStorage by default
-      saveTokenToStorage(responseData.token, false);
-      saveUserToStorage(responseData.user, false);
-    } finally {
-      setIsLoading(false);
-    }
+    const responseData = await AuthService.register(data);
+    setTokenState(responseData.token);
+    setUserState(responseData.user);
+    // Automatically login on signup - store in sessionStorage by default
+    saveTokenToStorage(responseData.token, false);
+    saveUserToStorage(responseData.user, false);
   };
 
   const logout = () => {

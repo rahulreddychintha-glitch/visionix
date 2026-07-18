@@ -4,7 +4,6 @@ import { ArrowLeft, Mail, Lock, AlertCircle, Loader2, Eye, EyeOff, CheckCircle2 
 import { useAuth } from '../hooks/useAuth';
 import { validateEmail } from '../utils/validation';
 import { extractErrorMessage } from '../utils/error';
-import axios from 'axios';
 import styles from './AuthPage.module.css';
 
 export const LoginPage = () => {
@@ -85,12 +84,21 @@ export const LoginPage = () => {
     } catch (err: unknown) {
       setIsLoading(false);
       
-      if (axios.isAxiosError(err) && err.response) {
-        const status = err.response.status;
-        const data = err.response.data;
+      const errorObj = err as any;
+      if (errorObj && typeof errorObj === 'object' && (errorObj.isAxiosError || errorObj.response !== undefined)) {
+        const response = errorObj.response;
+        
+        // If there is no response, treat it as a network/offline error
+        if (!response) {
+          setError(extractErrorMessage(err));
+          return;
+        }
+
+        const status = response.status;
+        const data = response.data;
         
         if (status === 401) {
-          setFieldErrors({ password: 'Incorrect email or password.' });
+          setFieldErrors({ password: 'Invalid email or password.' });
           document.getElementById('password')?.focus();
         } else if (status === 400 && data && Array.isArray(data.errors)) {
           // Map backend validation errors to fields
@@ -126,14 +134,14 @@ export const LoginPage = () => {
         <p className={styles.subtitle}>Sign in to continue your personalized career journey.</p>
         
         {success && (
-          <div className={styles.successAlert} role="alert">
+          <div className={styles.successAlert} role="alert" aria-live="polite">
             <CheckCircle2 size={16} />
             <span>{success}</span>
           </div>
         )}
 
         {error && (
-          <div className={styles.errorAlert} role="alert">
+          <div className={styles.errorAlert} role="alert" aria-live="assertive">
             <AlertCircle size={16} />
             <span>{error}</span>
           </div>
@@ -159,7 +167,7 @@ export const LoginPage = () => {
               />
             </div>
             {fieldErrors.email && (
-              <span id="email-error" role="alert" className={styles.fieldError}>
+              <span id="email-error" role="alert" aria-live="assertive" className={styles.fieldError}>
                 {fieldErrors.email}
               </span>
             )}
@@ -194,7 +202,7 @@ export const LoginPage = () => {
               </button>
             </div>
             {fieldErrors.password && (
-              <span id="password-error" role="alert" className={styles.fieldError}>
+              <span id="password-error" role="alert" aria-live="assertive" className={styles.fieldError}>
                 {fieldErrors.password}
               </span>
             )}

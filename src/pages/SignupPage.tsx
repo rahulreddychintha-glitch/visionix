@@ -10,7 +10,6 @@ import {
   getPasswordStrength 
 } from '../utils/validation';
 import { extractErrorMessage } from '../utils/error';
-import axios from 'axios';
 import styles from './AuthPage.module.css';
 
 export const SignupPage = () => {
@@ -155,9 +154,18 @@ export const SignupPage = () => {
     } catch (err: unknown) {
       setIsLoading(false);
       
-      if (axios.isAxiosError(err) && err.response) {
-        const status = err.response.status;
-        const data = err.response.data;
+      const errorObj = err as any;
+      if (errorObj && typeof errorObj === 'object' && (errorObj.isAxiosError || errorObj.response !== undefined)) {
+        const response = errorObj.response;
+        
+        // If there is no response, treat it as a network/offline error
+        if (!response) {
+          setError(extractErrorMessage(err));
+          return;
+        }
+
+        const status = response.status;
+        const data = response.data;
         
         if (status === 409) {
           setFieldErrors({ email: 'Email address is already registered.' });
@@ -197,14 +205,14 @@ export const SignupPage = () => {
         <p className={styles.subtitle}>Start mapping your high-growth AI career roadmap.</p>
         
         {success && (
-          <div className={styles.successAlert} role="alert">
+          <div className={styles.successAlert} role="alert" aria-live="polite">
             <CheckCircle2 size={16} />
             <span>{success}</span>
           </div>
         )}
 
         {error && (
-          <div className={styles.errorAlert} role="alert">
+          <div className={styles.errorAlert} role="alert" aria-live="assertive">
             <AlertCircle size={16} />
             <span>{error}</span>
           </div>
@@ -230,7 +238,7 @@ export const SignupPage = () => {
               />
             </div>
             {fieldErrors.fullName && (
-              <span id="name-error" role="alert" className={styles.fieldError}>
+              <span id="name-error" role="alert" aria-live="assertive" className={styles.fieldError}>
                 {fieldErrors.fullName}
               </span>
             )}
@@ -255,7 +263,7 @@ export const SignupPage = () => {
               />
             </div>
             {fieldErrors.email && (
-              <span id="email-error" role="alert" className={styles.fieldError}>
+              <span id="email-error" role="alert" aria-live="assertive" className={styles.fieldError}>
                 {fieldErrors.email}
               </span>
             )}
@@ -290,7 +298,7 @@ export const SignupPage = () => {
               </button>
             </div>
             {fieldErrors.password && (
-              <span id="password-error" role="alert" className={styles.fieldError}>
+              <span id="password-error" role="alert" aria-live="assertive" className={styles.fieldError}>
                 {fieldErrors.password}
               </span>
             )}
@@ -335,7 +343,7 @@ export const SignupPage = () => {
               </button>
             </div>
             {fieldErrors.confirmPassword && (
-              <span id="confirm-password-error" role="alert" className={styles.fieldError}>
+              <span id="confirm-password-error" role="alert" aria-live="assertive" className={styles.fieldError}>
                 {fieldErrors.confirmPassword}
               </span>
             )}

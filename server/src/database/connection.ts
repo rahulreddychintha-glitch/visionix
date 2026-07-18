@@ -7,7 +7,7 @@ import config from '../config/env';
  */
 export const connectDatabase = async (): Promise<void> => {
   try {
-    const conn = await mongoose.connect(config.MONGODB_URI, {
+    await mongoose.connect(config.MONGODB_URI, {
       serverSelectionTimeoutMS: 10000,
     });
     console.log('MongoDB Connected Successfully');

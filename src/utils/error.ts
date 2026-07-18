@@ -1,19 +1,18 @@
-import axios from 'axios';
 
 /**
  * Standard utility to extract error messages from backend API errors.
  */
-export const extractErrorMessage = (error: unknown): string => {
-  if (axios.isAxiosError(error)) {
+export const extractErrorMessage = (error: any): string => {
+  if (error && typeof error === 'object' && (error.isAxiosError || error.response !== undefined)) {
     // Check for network errors (no response from server)
     if (!error.response) {
-      return 'Unable to connect to the server.';
+      return 'Unable to connect to server.';
     }
 
     const status = error.response.status;
 
     if (status === 401) {
-      return 'Incorrect email or password.';
+      return 'Invalid email or password.';
     }
     if (status === 409) {
       return 'Email address is already registered.';

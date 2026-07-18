@@ -17,11 +17,27 @@ export const errorMiddleware = (
   res: Response,
   _next: NextFunction
 ): void => {
-  console.error('[Visionix] Server Error:', err.message);
+  // Determine status code first
+  let statusCode = err.statusCode ?? 500;
+  if (err.code === 11000) {
+    statusCode = 409;
+  } else if (err.name === 'ValidationError') {
+    statusCode = 422;
+  } else if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+    statusCode = 401;
+  }
+
+  const message =
+    statusCode === 500 ? 'An internal server error occurred.' : err.message;
+
+  // Log only unexpected server failures (500+)
+  if (statusCode >= 500) {
+    console.error(`[Visionix] [ERROR] Server Error (${statusCode}):`, err.stack || err.message);
+  }
 
   // Mongoose duplicate key (e.g. unique email constraint)
   if (err.code === 11000) {
-    sendError(res, 'A record with this value already exists.', [], 409);
+    sendError(res, 'Email address is already registered.', [], 409);
     return;
   }
 
@@ -40,10 +56,6 @@ export const errorMiddleware = (
     sendError(res, 'Token has expired. Please log in again.', [], 401);
     return;
   }
-
-  const statusCode = err.statusCode ?? 500;
-  const message =
-    statusCode === 500 ? 'An internal server error occurred.' : err.message;
 
   sendError(res, message, [], statusCode);
 };
