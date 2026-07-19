@@ -80,48 +80,70 @@ export const DashboardPage: React.FC = () => {
       <div className="glow-accent-secondary" style={{ width: '500px', height: '500px', bottom: '15%', right: '10%', opacity: 0.4 }}></div>
       <div className="glow-accent-tertiary" style={{ width: '400px', height: '400px', top: '40%', left: '45%', opacity: 0.3 }}></div>
 
-      {/* Independent Two-Column Layout */}
-      <div className={layoutStyles.dashboardTwoColumnLayout}>
-        
-        {/* LEFT COLUMN: Main content stack */}
-        <div className={layoutStyles.leftColumn}>
-          <WelcomeSection fullName={fullName} />
-          
-          <MemoizedStatsGrid stats={dashboardData?.stats} />
-          
-          <MemoizedRecommendedCareerCard 
-            dreamCareer={profile?.careerGoals?.dreamCareer || dashboardData?.careerRecommendation.title} 
-            careerDescription={dashboardData?.careerRecommendation.description}
-            interests={interests} 
-            matchPercentage={dashboardData?.careerRecommendation.matchPercentage}
-            salaryRange={dashboardData?.careerRecommendation.salaryRange}
-            difficulty={dashboardData?.careerRecommendation.difficulty}
-            estimatedTime={dashboardData?.careerRecommendation.estimatedTime}
-            expectedGrowth={dashboardData?.careerRecommendation.expectedGrowth}
-            learningProgress={dashboardData?.careerRecommendation.learningProgress}
-            topSkills={profile?.skills?.technicalSkills}
-          />
-          
-          <MemoizedContinueLearning />
-          
-          <MemoizedYouTubeLearning />
-          
-          <MemoizedScholarships scholarships={dashboardData?.scholarships} />
-        </div>
+      <div style={{
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+        position: 'relative',
+        zIndex: 1,
+      }}>
+        {/* Welcome greeting */}
+        <WelcomeSection fullName={fullName} />
 
-        {/* RIGHT COLUMN: Sidebar controls stack */}
-        <div className={layoutStyles.rightColumn}>
-          <MemoizedAiAssistantCard assistant={dashboardData?.assistant} />
+        {/* Master Dashboard Grid */}
+        <div className={layoutStyles.dashboardMasterGrid}>
           
-          <MemoizedRoadmapProgress milestones={dashboardData?.roadmap} />
-          
-          <MemoizedRecommendedSkills />
-          
-          <MemoizedUpcomingExams />
-          
-          <MemoizedTrendingCareers careers={dashboardData?.trendingCareers} />
-        </div>
+          {/* Row 1: Stats Grid (spans 9) & AI Assistant (spans 3) */}
+          <div className={layoutStyles.colSpan9}>
+            <MemoizedStatsGrid stats={dashboardData?.stats} />
+          </div>
+          <div className={layoutStyles.colSpan3}>
+            <MemoizedAiAssistantCard assistant={dashboardData?.assistant} />
+          </div>
 
+          {/* Row 2: Recommended Career (spans 9) & Career Roadmap (spans 3) */}
+          <div className={layoutStyles.colSpan9}>
+            <MemoizedRecommendedCareerCard 
+              dreamCareer={profile?.careerGoals?.dreamCareer || dashboardData?.careerRecommendation.title} 
+              careerDescription={dashboardData?.careerRecommendation.description}
+              interests={interests} 
+              matchPercentage={dashboardData?.careerRecommendation.matchPercentage}
+              salaryRange={dashboardData?.careerRecommendation.salaryRange}
+              difficulty={dashboardData?.careerRecommendation.difficulty}
+              estimatedTime={dashboardData?.careerRecommendation.estimatedTime}
+              expectedGrowth={dashboardData?.careerRecommendation.expectedGrowth}
+              learningProgress={dashboardData?.careerRecommendation.learningProgress}
+              topSkills={profile?.skills?.technicalSkills}
+            />
+          </div>
+          <div className={layoutStyles.colSpan3}>
+            <MemoizedRoadmapProgress milestones={dashboardData?.roadmap} />
+          </div>
+
+          {/* Lower Dashboard Section - Row 1 (Continue Learning, Target Skills, Trending Careers) */}
+          <div className={layoutStyles.colSpan6}>
+            <MemoizedContinueLearning />
+          </div>
+          <div className={layoutStyles.colSpan3}>
+            <MemoizedRecommendedSkills />
+          </div>
+          <div className={layoutStyles.colSpan3}>
+            <MemoizedTrendingCareers careers={dashboardData?.trendingCareers} />
+          </div>
+
+          {/* Lower Dashboard Section - Row 2 (YouTube Learning, Scholarships, Upcoming Exams) */}
+          <div className={layoutStyles.colSpan6}>
+            <MemoizedYouTubeLearning />
+          </div>
+          <div className={layoutStyles.colSpan3}>
+            <MemoizedScholarships scholarships={dashboardData?.scholarships} />
+          </div>
+          <div className={layoutStyles.colSpan3}>
+            <MemoizedUpcomingExams />
+          </div>
+
+        </div>
       </div>
     </DashboardLayout>
   );

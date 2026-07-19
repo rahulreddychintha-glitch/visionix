@@ -656,7 +656,8 @@
 .dashboardMasterGrid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 20px;
+  column-gap: 24px;
+  row-gap: 20px;
   align-items: stretch;
   width: 100%;
 }
@@ -673,26 +674,36 @@
   grid-column: span 4;
 }
 
+.colSpan6 {
+  grid-column: span 6;
+}
+
 @media (max-width: 1200px) {
   .dashboardMasterGrid {
     grid-template-columns: repeat(2, 1fr);
+    column-gap: 20px;
+    row-gap: 20px;
   }
   .colSpan9 {
     grid-column: span 2;
   }
   .colSpan3 {
-    grid-column: span 2;
+    grid-column: span 1;
   }
   .colSpan4 {
     grid-column: span 1;
+  }
+  .colSpan6 {
+    grid-column: span 2;
   }
 }
 
 @media (max-width: 768px) {
   .dashboardMasterGrid {
     grid-template-columns: 1fr;
+    row-gap: 16px;
   }
-  .colSpan9, .colSpan3, .colSpan4 {
+  .colSpan9, .colSpan3, .colSpan4, .colSpan6 {
     grid-column: span 1;
   }
 }
