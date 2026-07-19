@@ -91,8 +91,8 @@ export const DashboardPage: React.FC = () => {
         {/* Welcome greeting */}
         <WelcomeSection fullName={fullName} />
 
-        {/* Master Dashboard Grid */}
-        <div className={layoutStyles.dashboardMasterGrid}>
+        {/* Master Dashboard Grid (Row 1 and Row 2) */}
+        <div className={layoutStyles.dashboardMasterGrid} style={{ marginBottom: '4px' }}>
           
           {/* Row 1: Stats Grid (spans 9) & AI Assistant (spans 3) */}
           <div className={layoutStyles.colSpan9}>
@@ -121,27 +121,20 @@ export const DashboardPage: React.FC = () => {
             <MemoizedRoadmapProgress milestones={dashboardData?.roadmap} />
           </div>
 
-          {/* Lower Dashboard Section - Row 1 (Continue Learning, Target Skills, Trending Careers) */}
-          <div className={layoutStyles.colSpan6}>
-            <MemoizedContinueLearning />
-          </div>
-          <div className={layoutStyles.colSpan3}>
-            <MemoizedRecommendedSkills />
-          </div>
-          <div className={layoutStyles.colSpan3}>
-            <MemoizedTrendingCareers careers={dashboardData?.trendingCareers} />
-          </div>
+        </div>
 
-          {/* Lower Dashboard Section - Row 2 (YouTube Learning, Scholarships, Upcoming Exams) */}
-          <div className={layoutStyles.colSpan6}>
-            <MemoizedYouTubeLearning />
-          </div>
-          <div className={layoutStyles.colSpan3}>
-            <MemoizedScholarships scholarships={dashboardData?.scholarships} />
-          </div>
-          <div className={layoutStyles.colSpan3}>
-            <MemoizedUpcomingExams />
-          </div>
+        {/* Lower Dashboard Section - Strict 3-Column Grid */}
+        <div className={layoutStyles.dashboardLowerGrid}>
+          
+          {/* ROW 1: Continue Learning, Target Skills, Trending Careers */}
+          <MemoizedContinueLearning />
+          <MemoizedRecommendedSkills />
+          <MemoizedTrendingCareers careers={dashboardData?.trendingCareers} />
+
+          {/* ROW 2: YouTube Learning, Scholarships, Upcoming Exams */}
+          <MemoizedYouTubeLearning />
+          <MemoizedScholarships scholarships={dashboardData?.scholarships} />
+          <MemoizedUpcomingExams />
 
         </div>
       </div>

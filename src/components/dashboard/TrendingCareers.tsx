@@ -44,7 +44,7 @@ export const TrendingCareers: React.FC<TrendingCareersProps> = ({
         <Compass size={16} style={{ color: 'var(--color-primary)' }} />
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, justifyContent: 'center' }}>
         {careers.map((role) => (
           <div 
             key={role.title}

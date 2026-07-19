@@ -50,15 +50,15 @@ export const ContinueLearning: React.FC<ContinueLearningProps> = ({
         <BookOpen size={16} style={{ color: 'var(--color-primary)' }} />
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
         {courses.map((course) => (
           <div 
             key={course.title} 
             className={`${styles.courseItem} ${styles.interactiveListItem}`}
             style={{
               display: 'flex',
-              gap: '14px',
-              padding: '12px',
+              gap: '10px',
+              padding: '10px',
               borderRadius: '12px',
               background: 'rgba(255,255,255,0.01)',
               border: '1px solid rgba(255,255,255,0.03)',

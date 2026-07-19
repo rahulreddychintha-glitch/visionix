@@ -849,3 +849,28 @@
     grid-template-columns: 1fr;
   }
 }
+
+.dashboardLowerGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  width: 100%;
+  align-items: stretch;
+}
+
+.dashboardLowerGrid .premiumCard {
+  height: 100%;
+}
+
+@media (max-width: 1200px) {
+  .dashboardLowerGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboardLowerGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
