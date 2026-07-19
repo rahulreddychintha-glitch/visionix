@@ -34,7 +34,7 @@ export const WelcomeSection: React.FC<WelcomeSectionProps> = ({ fullName }) => {
           <h1 className={styles.welcomeTitle} style={{ fontSize: '2.1rem' }}>
             {getGreeting()}, {firstName} 👋
           </h1>
-          <p className={styles.welcomeSubtitle} style={{ marginTop: '6px' }}>
+          <p className={styles.welcomeSubtitle} style={{ marginTop: '2px' }}>
             {formatDate()}
           </p>
         </div>

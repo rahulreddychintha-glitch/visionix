@@ -335,3 +335,53 @@ p {
 .animate-slide-up {
   animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+/* Global Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  border: none;
+  line-height: 1;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #6F4BFF, #8A4DFF) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(111, 75, 255, 0.25) !important;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #7D5BFF, #975EFF) !important;
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 6px 20px rgba(111, 75, 255, 0.35) !important;
+}
+
+.btn-primary:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-secondary:active {
+  transform: translateY(0) scale(0.98) !important;
+}

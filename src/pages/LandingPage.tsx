@@ -130,7 +130,7 @@ export const LandingPage = () => {
                 </button>
                 
                 <button 
-                  className="btn btn-secondary" 
+                  className="btn btn-primary" 
                   aria-label="Watch Demo Video"
                   onClick={() => setIsDemoModalOpen(true)}
                 >
@@ -543,7 +543,7 @@ export const LandingPage = () => {
                 <ArrowRight size={18} />
               </button>
               <button 
-                className="btn btn-secondary" 
+                className="btn btn-primary" 
                 aria-label="Watch Demo Video"
                 onClick={() => setIsDemoModalOpen(true)}
               >

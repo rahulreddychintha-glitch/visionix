@@ -46,21 +46,21 @@ export const RecommendedCareerCard: React.FC<RecommendedCareerCardProps> = ({
       transition={{ duration: 0.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
     >
       {/* 1. Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
         <span className="text-label" style={{ fontSize: '0.675rem' }}>Recommended Career</span>
         <span className={styles.matchBadge}>Excellent Match</span>
       </div>
 
       {/* 2. Career Name */}
-      <h3 className="text-heading" style={{ fontSize: '1.6rem', marginBottom: '8px' }}>{dreamCareer}</h3>
+      <h3 className="text-heading" style={{ fontSize: '1.45rem', marginBottom: '4px' }}>{dreamCareer}</h3>
 
       {/* 3. Career Description */}
-      <p className="text-description" style={{ fontSize: '0.85rem', marginBottom: '24px', lineHeight: '1.5' }}>
+      <p className="text-description" style={{ fontSize: '0.85rem', marginBottom: '14px', lineHeight: '1.5' }}>
         {careerDescription}
       </p>
 
       {/* 4. Match Percentage Circle (Larger) & Details Grid */}
-      <div style={{ display: 'flex', gap: '28px', alignItems: 'center', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', gap: '28px', alignItems: 'center', marginBottom: '14px' }}>
         <div style={{ position: 'relative', width: '90px', height: '90px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <svg width="90" height="90" viewBox="0 0 90 90" style={{ transform: 'rotate(-90deg)' }}>
             <circle
@@ -96,7 +96,7 @@ export const RecommendedCareerCard: React.FC<RecommendedCareerCardProps> = ({
         </div>
 
         {/* Metadata grid of 4 fields */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px 24px', flex: 1 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px 20px', flex: 1 }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span className="text-caption" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.675rem' }}>
               <DollarSign size={10} style={{ color: 'var(--color-primary)' }} /> Salary
@@ -128,7 +128,7 @@ export const RecommendedCareerCard: React.FC<RecommendedCareerCardProps> = ({
       </div>
 
       {/* 5. Learning Progress */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span className="text-caption" style={{ fontWeight: 600 }}>Learning Progress</span>
           <span className="text-caption" style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{learningProgress}%</span>
@@ -139,7 +139,7 @@ export const RecommendedCareerCard: React.FC<RecommendedCareerCardProps> = ({
       </div>
 
       {/* 6. Skill Tags */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '14px' }}>
         <span className="text-label" style={{ fontSize: '0.675rem', color: 'var(--text-secondary)' }}>Top Skills</span>
         <div className={styles.tagsWrapper}>
           {skillTags.map((tag) => (

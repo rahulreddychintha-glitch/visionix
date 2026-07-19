@@ -58,7 +58,7 @@ export const RoadmapProgress: React.FC<RoadmapProgressProps> = ({
       style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
     >
       {/* Timeline Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
         <div>
           <h3 className="text-subheading">Roadmap Milestones</h3>
           <span className="text-caption" style={{ fontWeight: 600, color: 'var(--color-primary)', marginTop: '2px', display: 'inline-block' }}>
@@ -74,16 +74,16 @@ export const RoadmapProgress: React.FC<RoadmapProgressProps> = ({
           position: 'relative', 
           display: 'flex', 
           flexDirection: 'column', 
-          gap: '24px', 
+          gap: '20px', 
           flex: 1, 
-          paddingLeft: '12px' 
+          paddingLeft: '4px' 
         }}
       >
         {/* Connecting Vertical Line */}
         <div 
           style={{
             position: 'absolute',
-            left: '23px',
+            left: '15px',
             top: '20px',
             bottom: '20px',
             width: '4px',
