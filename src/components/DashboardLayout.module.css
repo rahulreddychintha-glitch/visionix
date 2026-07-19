@@ -806,3 +806,31 @@
     display: none;
   }
 }
+
+.dashboardTwoColumnLayout {
+  display: grid;
+  grid-template-columns: 9fr 3fr;
+  gap: 20px;
+  width: 100%;
+  align-items: flex-start;
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .dashboardTwoColumnLayout {
+    grid-template-columns: 1fr;
+  }
+}

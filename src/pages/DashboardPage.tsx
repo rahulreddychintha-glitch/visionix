@@ -11,7 +11,6 @@ import { RecommendedCareerCard } from '../components/dashboard/RecommendedCareer
 import { ContinueLearning } from '../components/dashboard/ContinueLearning';
 import { UpcomingExams } from '../components/dashboard/UpcomingExams';
 import { RecommendedSkills } from '../components/dashboard/RecommendedSkills';
-import { LearningResources } from '../components/dashboard/LearningResources';
 import { YouTubeLearning } from '../components/dashboard/YouTubeLearning';
 import { Scholarships } from '../components/dashboard/Scholarships';
 import { TrendingCareers } from '../components/dashboard/TrendingCareers';
@@ -81,71 +80,48 @@ export const DashboardPage: React.FC = () => {
       <div className="glow-accent-secondary" style={{ width: '500px', height: '500px', bottom: '15%', right: '10%', opacity: 0.4 }}></div>
       <div className="glow-accent-tertiary" style={{ width: '400px', height: '400px', top: '40%', left: '45%', opacity: 0.3 }}></div>
 
-      <div style={{
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px',
-        position: 'relative',
-        zIndex: 1,
-      }}>
-        {/* Welcome greeting */}
-        <WelcomeSection fullName={fullName} />
-
-        {/* Responsive Dashboard Grid layout with perfect axis alignment */}
-        <div className={layoutStyles.dashboardMasterGrid}>
-          {/* Row 1: Stats Grid (spans 9) & AI Assistant (spans 3) */}
-          <div className={layoutStyles.colSpan9}>
-            <MemoizedStatsGrid stats={dashboardData?.stats} />
-          </div>
-          <div className={layoutStyles.colSpan3}>
-            <MemoizedAiAssistantCard assistant={dashboardData?.assistant} />
-          </div>
-
-          {/* Row 2: Recommended Career (spans 9) & Career Roadmap (spans 3) */}
-          <div className={layoutStyles.colSpan9}>
-            <MemoizedRecommendedCareerCard 
-              dreamCareer={profile?.careerGoals?.dreamCareer || dashboardData?.careerRecommendation.title} 
-              careerDescription={dashboardData?.careerRecommendation.description}
-              interests={interests} 
-              matchPercentage={dashboardData?.careerRecommendation.matchPercentage}
-              salaryRange={dashboardData?.careerRecommendation.salaryRange}
-              difficulty={dashboardData?.careerRecommendation.difficulty}
-              estimatedTime={dashboardData?.careerRecommendation.estimatedTime}
-              expectedGrowth={dashboardData?.careerRecommendation.expectedGrowth}
-              learningProgress={dashboardData?.careerRecommendation.learningProgress}
-              topSkills={profile?.skills?.technicalSkills}
-            />
-          </div>
-          <div className={layoutStyles.colSpan3}>
-            <MemoizedRoadmapProgress milestones={dashboardData?.roadmap} />
-          </div>
-
-          {/* Row 3: Continue Learning (4) & Upcoming Exams (4) & Target Skills (4) */}
-          <div className={layoutStyles.colSpan4}>
-            <MemoizedContinueLearning />
-          </div>
-          <div className={layoutStyles.colSpan4}>
-            <MemoizedUpcomingExams />
-          </div>
-          <div className={layoutStyles.colSpan4}>
-            <MemoizedRecommendedSkills />
-          </div>
-
-          {/* Row 4: Learning Resources (3) & YouTube Learning (3) & Scholarships (3) & Trending Careers (3) */}
-          <div className={layoutStyles.colSpan3}>
-            <MemoizedLearningResources resources={dashboardData?.learningResources} />
-          </div>
-          <div className={layoutStyles.colSpan3}>
-            <MemoizedYouTubeLearning />
-          </div>
-          <div className={layoutStyles.colSpan3}>
-            <MemoizedScholarships scholarships={dashboardData?.scholarships} />
-          </div>
-          <div className={layoutStyles.colSpan3}>
-            <MemoizedTrendingCareers careers={dashboardData?.trendingCareers} />
-          </div>
+      {/* Independent Two-Column Layout */}
+      <div className={layoutStyles.dashboardTwoColumnLayout}>
+        
+        {/* LEFT COLUMN: Main content stack */}
+        <div className={layoutStyles.leftColumn}>
+          <WelcomeSection fullName={fullName} />
+          
+          <MemoizedStatsGrid stats={dashboardData?.stats} />
+          
+          <MemoizedRecommendedCareerCard 
+            dreamCareer={profile?.careerGoals?.dreamCareer || dashboardData?.careerRecommendation.title} 
+            careerDescription={dashboardData?.careerRecommendation.description}
+            interests={interests} 
+            matchPercentage={dashboardData?.careerRecommendation.matchPercentage}
+            salaryRange={dashboardData?.careerRecommendation.salaryRange}
+            difficulty={dashboardData?.careerRecommendation.difficulty}
+            estimatedTime={dashboardData?.careerRecommendation.estimatedTime}
+            expectedGrowth={dashboardData?.careerRecommendation.expectedGrowth}
+            learningProgress={dashboardData?.careerRecommendation.learningProgress}
+            topSkills={profile?.skills?.technicalSkills}
+          />
+          
+          <MemoizedContinueLearning />
+          
+          <MemoizedYouTubeLearning />
+          
+          <MemoizedScholarships scholarships={dashboardData?.scholarships} />
         </div>
+
+        {/* RIGHT COLUMN: Sidebar controls stack */}
+        <div className={layoutStyles.rightColumn}>
+          <MemoizedAiAssistantCard assistant={dashboardData?.assistant} />
+          
+          <MemoizedRoadmapProgress milestones={dashboardData?.roadmap} />
+          
+          <MemoizedRecommendedSkills />
+          
+          <MemoizedUpcomingExams />
+          
+          <MemoizedTrendingCareers careers={dashboardData?.trendingCareers} />
+        </div>
+
       </div>
     </DashboardLayout>
   );
@@ -159,7 +135,6 @@ const MemoizedRecommendedCareerCard = React.memo(RecommendedCareerCard);
 const MemoizedContinueLearning = React.memo(ContinueLearning);
 const MemoizedUpcomingExams = React.memo(UpcomingExams);
 const MemoizedRecommendedSkills = React.memo(RecommendedSkills);
-const MemoizedLearningResources = React.memo(LearningResources);
 const MemoizedYouTubeLearning = React.memo(YouTubeLearning);
 const MemoizedScholarships = React.memo(Scholarships);
 const MemoizedTrendingCareers = React.memo(TrendingCareers);
