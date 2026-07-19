@@ -662,6 +662,10 @@
   width: 100%;
 }
 
+.dashboardMasterGrid .premiumCard {
+  height: 100%;
+}
+
 .colSpan9 {
   grid-column: span 9;
 }

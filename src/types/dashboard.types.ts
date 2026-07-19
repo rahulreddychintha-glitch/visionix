@@ -56,10 +56,10 @@ export interface RoadmapMilestone {
 }
 
 export interface LearningResourceData {
-  provider: 'Coursera' | 'Udemy' | 'edX' | 'YouTube' | 'roadmap.sh';
+  provider: string;
   title: string;
   duration: string;
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  difficulty: string;
   rating: number;
   continueUrl: string;
   categoryColor: string;
@@ -67,10 +67,11 @@ export interface LearningResourceData {
 
 export interface ScholarshipData {
   name: string;
-  organization: string;
+  provider: string;
   amount: string;
   deadline: string;
-  status: string;
+  eligibility: string;
+  link: string;
 }
 
 export interface TrendingCareerData {

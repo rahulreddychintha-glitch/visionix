@@ -334,28 +334,19 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                         className={styles.dropdownItem} 
                         onClick={() => {
                           setIsProfileDropdownOpen(false);
-                          navigate('/account-settings');
+                          navigate('/profile');
                         }}
                       >
-                        Account Settings
+                        Edit Profile
                       </div>
                       <div 
                         className={styles.dropdownItem} 
                         onClick={() => {
                           setIsProfileDropdownOpen(false);
-                          navigate('/preferences');
+                          navigate('/settings');
                         }}
                       >
-                        Preferences
-                      </div>
-                      <div 
-                        className={styles.dropdownItem} 
-                        onClick={() => {
-                          setIsProfileDropdownOpen(false);
-                          navigate('/appearance');
-                        }}
-                      >
-                        Appearance
+                        Settings
                       </div>
                       <div 
                         className={styles.dropdownItem} 
@@ -370,10 +361,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                         className={styles.dropdownItem} 
                         onClick={() => {
                           setIsProfileDropdownOpen(false);
-                          navigate('/security');
+                          navigate('/subscription');
                         }}
                       >
-                        Security
+                        Subscription
                       </div>
                     </div>
                     <div className={styles.dropdownSection} style={{ borderTop: '1px solid rgba(255, 255, 255, 0.04)', paddingTop: '8px' }}>

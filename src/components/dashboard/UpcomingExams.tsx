@@ -9,6 +9,7 @@ interface Exam {
   daysRemaining: number;
   status: string;
   statusColor: string;
+  link: string;
 }
 
 interface UpcomingExamsProps {
@@ -21,14 +22,16 @@ const DEFAULT_EXAMS: Exam[] = [
     date: 'Oct 12, 2026',
     daysRemaining: 3,
     status: 'Registered',
-    statusColor: 'var(--color-primary)'
+    statusColor: 'var(--color-primary)',
+    link: 'https://aws.amazon.com/certification/certified-machine-learning-specialty/'
   },
   {
     name: 'Python Advanced Coding Challenge',
     date: 'Nov 02, 2026',
     daysRemaining: 24,
     status: 'Scheduled',
-    statusColor: 'var(--color-accent)'
+    statusColor: 'var(--color-accent)',
+    link: 'https://pythoninstitute.org/pcep'
   }
 ];
 
@@ -52,8 +55,11 @@ export const UpcomingExams: React.FC<UpcomingExamsProps> = ({
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
         {exams.map((exam) => (
-          <div 
+          <a 
             key={exam.name}
+            href={exam.link}
+            target="_blank"
+            rel="noopener noreferrer"
             className={styles.interactiveListItem}
             style={{
               display: 'flex',
@@ -62,7 +68,10 @@ export const UpcomingExams: React.FC<UpcomingExamsProps> = ({
               padding: '12px',
               borderRadius: '12px',
               background: 'rgba(255,255,255,0.01)',
-              border: '1px solid rgba(255,255,255,0.03)'
+              border: '1px solid rgba(255,255,255,0.03)',
+              textDecoration: 'none',
+              color: 'inherit',
+              cursor: 'pointer'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
@@ -94,7 +103,7 @@ export const UpcomingExams: React.FC<UpcomingExamsProps> = ({
                 {exam.daysRemaining} days left
               </span>
             </div>
-          </div>
+          </a>
         ))}
       </div>
     </motion.div>

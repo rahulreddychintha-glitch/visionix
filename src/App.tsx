@@ -82,7 +82,7 @@ function App() {
             />
 
             {/* Under Development Routes */}
-            {['/ai-assistant', '/roadmap', '/explore', '/courses', '/youtube', '/interview', '/certifications', '/exams', '/scholarships', '/resume', '/saved', '/business', '/progress', '/settings', '/account-settings', '/preferences', '/appearance', '/notifications', '/security'].map((path) => (
+            {['/ai-assistant', '/roadmap', '/explore', '/courses', '/youtube', '/interview', '/certifications', '/exams', '/scholarships', '/resume', '/saved', '/business', '/progress', '/settings', '/account-settings', '/preferences', '/appearance', '/notifications', '/security', '/subscription'].map((path) => (
               <Route 
                 key={path}
                 path={path} 

@@ -3,29 +3,28 @@ import { motion } from 'framer-motion';
 import { Landmark, ArrowUpRight } from 'lucide-react';
 import styles from './DashboardWidgets.module.css';
 
-interface Scholarship {
-  name: string;
-  organization: string;
-  amount: string;
-  deadline: string;
-}
+import type { ScholarshipData } from '../../types/dashboard.types';
 
 interface ScholarshipsProps {
-  scholarships?: Scholarship[];
+  scholarships?: ScholarshipData[];
 }
 
-const DEFAULT_SCHOLARSHIPS: Scholarship[] = [
+const DEFAULT_SCHOLARSHIPS: ScholarshipData[] = [
   {
     name: 'Google AI Research Fellowship',
-    organization: 'Google Research',
+    provider: 'Google Research',
     amount: '$15,000 Award',
-    deadline: 'Apply by Aug 30'
+    deadline: 'Apply by Aug 30',
+    eligibility: 'Graduate Students in CS/AI',
+    link: 'https://research.google/outreach/fellowship/'
   },
   {
     name: 'Figma Design Creator Grant',
-    organization: 'Figma Community',
+    provider: 'Figma Community',
     amount: '$8,000 Award',
-    deadline: 'Apply by Sep 15'
+    deadline: 'Apply by Sep 15',
+    eligibility: 'Undergraduate Design Students',
+    link: 'https://www.figma.com/grants/'
   }
 ];
 
@@ -49,8 +48,11 @@ export const Scholarships: React.FC<ScholarshipsProps> = ({
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
         {scholarships.map((sch) => (
-          <div 
+          <a 
             key={sch.name}
+            href={sch.link}
+            target="_blank"
+            rel="noopener noreferrer"
             className={styles.interactiveListItem}
             style={{
               display: 'flex',
@@ -61,7 +63,9 @@ export const Scholarships: React.FC<ScholarshipsProps> = ({
               background: 'rgba(255,255,255,0.01)',
               border: '1px solid rgba(255,255,255,0.03)',
               transition: 'all 0.2s ease',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              textDecoration: 'none',
+              color: 'inherit'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
@@ -72,14 +76,15 @@ export const Scholarships: React.FC<ScholarshipsProps> = ({
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.675rem', color: 'var(--text-muted)' }}>
-              <span>{sch.organization}</span>
+              <span>{sch.provider}</span>
               <span style={{ color: 'var(--color-accent)', fontWeight: 700 }}>{sch.amount}</span>
             </div>
 
-            <span className="text-caption" style={{ fontSize: '0.65rem', marginTop: '2px' }}>
-              {sch.deadline}
-            </span>
-          </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+              <span>Eligible: {sch.eligibility}</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{sch.deadline}</span>
+            </div>
+          </a>
         ))}
       </div>
     </motion.div>

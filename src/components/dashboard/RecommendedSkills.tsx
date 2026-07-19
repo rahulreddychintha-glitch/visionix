@@ -53,7 +53,7 @@ export const RecommendedSkills: React.FC<RecommendedSkillsProps> = ({
         <Award size={16} style={{ color: 'var(--color-primary)' }} />
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, justifyContent: 'center' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
         {skills.map((skill) => {
           const Icon = skill.icon;
           return (

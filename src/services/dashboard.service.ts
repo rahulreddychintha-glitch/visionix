@@ -1,4 +1,5 @@
 import type { DashboardData } from '../types/dashboard.types';
+import { UserService } from './user.service';
 
 // Seeded/Demo data for the student "Rahul"
 const SEEDED_DASHBOARD_DATA: DashboardData = {
@@ -127,17 +128,19 @@ const SEEDED_DASHBOARD_DATA: DashboardData = {
   scholarships: [
     {
       name: 'Google AI Research Fellowship',
-      organization: 'Google Research',
+      provider: 'Google Research',
       amount: '$15,000 Award',
       deadline: 'Apply by Aug 30',
-      status: 'Apply by Aug 30'
+      eligibility: 'Graduate Students in CS/AI',
+      link: 'https://research.google/outreach/fellowship/'
     },
     {
       name: 'Figma Design Creator Grant',
-      organization: 'Figma Community',
+      provider: 'Figma Community',
       amount: '$8,000 Award',
       deadline: 'Apply by Sep 15',
-      status: 'Apply by Sep 15'
+      eligibility: 'Undergraduate Design Students',
+      link: 'https://www.figma.com/grants/'
     }
   ],
   trendingCareers: [
@@ -165,8 +168,164 @@ export class DashboardService {
       return Promise.resolve(SEEDED_DASHBOARD_DATA);
     }
     
-    // Fallback or future API call placeholder
-    // return api.get<DashboardData>(`/dashboard/${userId}`).then(res => res.data);
-    return Promise.resolve(SEEDED_DASHBOARD_DATA);
+    try {
+      // Fetch user profile from MongoDB via API
+      const profile = await UserService.getProfile();
+      
+      const dreamCareer = profile?.careerGoals?.dreamCareer || 'Software Engineer';
+      const objectives = profile?.careerGoals?.careerObjectives || 'Build a solid foundation in software development, mastering core algorithms and database systems.';
+      const techSkills = profile?.skills?.technicalSkills || [];
+      const salaryGoal = profile?.careerGoals?.salaryGoal || '$95,000/yr';
+      
+      // Calculate dynamic Stats
+      const skillsCount = techSkills.length;
+      const skillsLearnedText = `${skillsCount} / 24`;
+      const skillsProgressPercent = Math.min(Math.round((skillsCount / 24) * 100), 100);
+      
+      const stats = [
+        {
+          title: 'AI Career Match',
+          value: '95%',
+          trend: '↑ 1.8% match fit',
+          trendPositive: true,
+          subtext: 'Matching target skills progress',
+          color: 'var(--color-primary)',
+          sparklinePoints: [70, 75, 80, 85, 90, 95],
+          hasProgress: true,
+          progress: 95
+        },
+        {
+          title: 'Current Progress',
+          value: '10%',
+          trend: '↑ 2% this week',
+          trendPositive: true,
+          subtext: 'Of total curriculum completed',
+          color: 'var(--color-secondary)',
+          sparklinePoints: [0, 2, 5, 8, 10],
+          hasProgress: true,
+          progress: 10
+        },
+        {
+          title: 'Skills Learned',
+          value: skillsLearnedText,
+          trend: `+${skillsCount} verified`,
+          trendPositive: true,
+          subtext: 'Core domain skills verified',
+          color: 'var(--color-accent)',
+          sparklinePoints: [0, Math.round(skillsCount / 3), Math.round(skillsCount / 2), skillsCount],
+          hasProgress: true,
+          progress: skillsProgressPercent
+        },
+        {
+          title: 'Certificates',
+          value: '0 Earned',
+          trend: '0 Pending review',
+          trendPositive: false,
+          subtext: 'Credentials verified on-chain',
+          color: '#10b981',
+          sparklinePoints: [0, 0, 0],
+          hasProgress: false,
+          progress: 0
+        }
+      ];
+
+      // Dynamic AI Assistant message
+      const firstName = profile?.personal?.fullName?.split(' ')[0] || 'Student';
+      const assistant = {
+        messages: [
+          {
+            sender: 'ai' as 'ai' | 'user',
+            text: `Welcome to Visionix, ${firstName}! Based on your interest in ${dreamCareer}, I've initialized your personalized Career Roadmap. Let's start with foundational courses next.`,
+            timestamp: new Date()
+          }
+        ],
+        isOnline: true
+      };
+
+      const careerRecommendation = {
+        title: dreamCareer,
+        description: objectives,
+        matchPercentage: 95,
+        salaryRange: salaryGoal,
+        difficulty: 'Beginner',
+        estimatedTime: '6 Months',
+        expectedGrowth: '+28% Growth',
+        learningProgress: 10,
+        topSkills: techSkills.slice(0, 3)
+      };
+
+      // Dynamic Career Roadmap
+      const roadmap = [
+        {
+          title: `Phase 1: Foundations of ${dreamCareer}`,
+          duration: 'Month 1 - 2',
+          description: 'Establish critical baseline competencies, language setups, and core toolchains.',
+          skills: techSkills.slice(0, 2).concat(['Git', 'Foundations']),
+          completed: false,
+          status: 'active' as const
+        },
+        {
+          title: `Phase 2: Core Engineering & Tech Stack`,
+          duration: 'Month 3 - 4',
+          description: 'Develop comprehensive project architectures using primary library frameworks.',
+          skills: techSkills.slice(2, 5).concat(['Frameworks', 'APIs']),
+          completed: false,
+          status: 'locked' as const
+        },
+        {
+          title: `Phase 3: Deployment & Domain Expertise`,
+          duration: 'Month 5 - 6',
+          description: 'Package, deploy, and scale robust real-world production configurations.',
+          skills: techSkills.slice(5).concat(['Deployments', 'Security']),
+          completed: false,
+          status: 'locked' as const
+        }
+      ];
+
+      // Dynamic learning resources (fallbacks)
+      const learningResources = [
+        {
+          provider: 'Visionix Academy',
+          title: `Introductory curriculum for ${dreamCareer}`,
+          duration: '2 Weeks',
+          difficulty: 'Beginner',
+          rating: 4.8,
+          continueUrl: 'https://roadmap.sh',
+          categoryColor: 'linear-gradient(135deg, #1e40af, #3b82f6)'
+        }
+      ];
+
+      const scholarships = [
+        {
+          name: `${dreamCareer} Future Leaders Fellowship`,
+          provider: 'Visionix Grant Foundation',
+          amount: '$5,000 Award',
+          deadline: 'Apply by Sep 30',
+          eligibility: 'New Platform Enrollees',
+          link: 'https://research.google/outreach/fellowship/'
+        }
+      ];
+
+      const trendingCareers = [
+        {
+          title: dreamCareer,
+          growth: '+28% Growth',
+          matchScore: 95
+        }
+      ];
+
+      return {
+        stats,
+        assistant,
+        careerRecommendation,
+        roadmap,
+        learningResources,
+        scholarships,
+        trendingCareers
+      };
+    } catch (err) {
+      console.error('Error fetching dynamic profile for dashboard:', err);
+      return SEEDED_DASHBOARD_DATA;
+    }
   }
 }
