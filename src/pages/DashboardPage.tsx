@@ -12,6 +12,7 @@ import { ContinueLearning } from '../components/dashboard/ContinueLearning';
 import { UpcomingExams } from '../components/dashboard/UpcomingExams';
 import { RecommendedSkills } from '../components/dashboard/RecommendedSkills';
 import { LearningResources } from '../components/dashboard/LearningResources';
+import { YouTubeLearning } from '../components/dashboard/YouTubeLearning';
 import { Scholarships } from '../components/dashboard/Scholarships';
 import { TrendingCareers } from '../components/dashboard/TrendingCareers';
 import { DashboardService } from '../services/dashboard.service';
@@ -80,12 +81,11 @@ export const DashboardPage: React.FC = () => {
       <div className="glow-accent-secondary" style={{ width: '500px', height: '500px', bottom: '15%', right: '10%', opacity: 0.4 }}></div>
       <div className="glow-accent-tertiary" style={{ width: '400px', height: '400px', top: '40%', left: '45%', opacity: 0.3 }}></div>
 
-      {/* Workspace container */}
       <div style={{
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        gap: '32px',
+        gap: '20px',
         position: 'relative',
         zIndex: 1,
       }}>
@@ -132,14 +132,17 @@ export const DashboardPage: React.FC = () => {
             <MemoizedRecommendedSkills />
           </div>
 
-          {/* Row 4: Learning Resources (4) & Scholarships (4) & Trending Careers (4) */}
-          <div className={layoutStyles.colSpan4}>
+          {/* Row 4: Learning Resources (3) & YouTube Learning (3) & Scholarships (3) & Trending Careers (3) */}
+          <div className={layoutStyles.colSpan3}>
             <MemoizedLearningResources resources={dashboardData?.learningResources} />
           </div>
-          <div className={layoutStyles.colSpan4}>
+          <div className={layoutStyles.colSpan3}>
+            <MemoizedYouTubeLearning />
+          </div>
+          <div className={layoutStyles.colSpan3}>
             <MemoizedScholarships scholarships={dashboardData?.scholarships} />
           </div>
-          <div className={layoutStyles.colSpan4}>
+          <div className={layoutStyles.colSpan3}>
             <MemoizedTrendingCareers careers={dashboardData?.trendingCareers} />
           </div>
         </div>
@@ -157,5 +160,6 @@ const MemoizedContinueLearning = React.memo(ContinueLearning);
 const MemoizedUpcomingExams = React.memo(UpcomingExams);
 const MemoizedRecommendedSkills = React.memo(RecommendedSkills);
 const MemoizedLearningResources = React.memo(LearningResources);
+const MemoizedYouTubeLearning = React.memo(YouTubeLearning);
 const MemoizedScholarships = React.memo(Scholarships);
 const MemoizedTrendingCareers = React.memo(TrendingCareers);

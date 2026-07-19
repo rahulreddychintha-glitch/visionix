@@ -68,12 +68,12 @@
 
 .content {
   flex: 1;
-  padding: 24px;
+  padding: 20px 24px;
   width: 100%;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 20px;
 }
 
 /* Navigation Items Scroll Container */
@@ -656,7 +656,7 @@
 .dashboardMasterGrid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 24px;
+  gap: 20px;
   align-items: stretch;
   width: 100%;
 }
