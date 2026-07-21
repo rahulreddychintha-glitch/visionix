@@ -84,7 +84,7 @@ export const DashboardPage: React.FC = () => {
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px',
+        gap: '12px',
         position: 'relative',
         zIndex: 1,
       }}>
@@ -92,7 +92,7 @@ export const DashboardPage: React.FC = () => {
         <WelcomeSection fullName={fullName} />
 
         {/* Master Dashboard Grid (Row 1 and Row 2) */}
-        <div className={layoutStyles.dashboardMasterGrid} style={{ marginBottom: '4px' }}>
+        <div className={layoutStyles.dashboardMasterGrid} style={{ marginBottom: '0px' }}>
           
           {/* Row 1: Stats Grid (spans 9) & AI Assistant (spans 3) */}
           <div className={layoutStyles.colSpan9}>
@@ -124,7 +124,7 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Lower Dashboard Section - Strict 3-Column Grid */}
-        <div className={layoutStyles.dashboardLowerGrid}>
+        <div className={layoutStyles.dashboardLowerGrid} style={{ marginTop: '4px' }}>
           
           {/* ROW 1: Continue Learning, Target Skills, Trending Careers */}
           <MemoizedContinueLearning />

@@ -18,7 +18,7 @@ export const AiAssistantCard: React.FC<AiAssistantCardProps> = ({ assistant }) =
       initial={{ opacity: 0, x: 15 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-      style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', justifyContent: 'space-between', padding: '16px' }}
+      style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', justifyContent: 'space-between', padding: '12px' }}
     >
       {/* Glowing floating particles (limited to 5 for optimal performance) */}
       {[...Array(5)].map((_, i) => (
@@ -61,7 +61,7 @@ export const AiAssistantCard: React.FC<AiAssistantCardProps> = ({ assistant }) =
       </div>
 
       {/* AI Avatar with concentric glowing pulse rings */}
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '6px' }}>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '0px' }}>
         <motion.div
           style={{
             position: 'absolute',
@@ -109,7 +109,7 @@ export const AiAssistantCard: React.FC<AiAssistantCardProps> = ({ assistant }) =
         style={{
           background: 'rgba(255, 255, 255, 0.02)',
           border: '1px solid rgba(255, 255, 255, 0.04)',
-          padding: '10px 14px',
+          padding: '8px 12px',
           borderRadius: '16px 16px 16px 4px',
           fontSize: '0.8rem',
           color: 'var(--text-secondary)',
@@ -118,7 +118,7 @@ export const AiAssistantCard: React.FC<AiAssistantCardProps> = ({ assistant }) =
           position: 'relative',
           width: '100%',
           maxWidth: '280px',
-          margin: '4px auto',
+          margin: '2px auto',
           boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.02)',
           zIndex: 2
         }}
@@ -133,7 +133,7 @@ export const AiAssistantCard: React.FC<AiAssistantCardProps> = ({ assistant }) =
         aria-label="Chat with AI Assistant"
         whileHover={{ scale: 1.02, y: -1 }}
         whileTap={{ scale: 0.98 }}
-        style={{ width: '100%', zIndex: 2, padding: '10px 20px', fontSize: '0.85rem' }}
+        style={{ width: '100%', zIndex: 2, padding: '8px 16px', fontSize: '0.85rem' }}
       >
         <span>Chat with AI</span>
         <Sparkles size={12} />

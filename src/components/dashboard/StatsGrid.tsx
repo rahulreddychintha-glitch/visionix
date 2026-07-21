@@ -93,6 +93,49 @@ const DEFAULT_STATS: StatCardData[] = [
   }
 ];
 
+const QUICK_DETAILS: Record<string, { label: string; value: string }[]> = {
+  'AI Career Match': [
+    { label: 'Confidence', value: 'High' },
+    { label: 'Based On', value: 'Skills + Assessment' },
+    { label: 'Updated', value: 'Today' },
+    { label: 'Rank', value: 'Top 3%' },
+    { label: 'Career Path', value: 'AI Engineer' },
+    { label: 'Industry', value: 'Artificial Intelligence' },
+    { label: 'Recommendation', value: 'Excellent' },
+    { label: 'Experience', value: 'Beginner Friendly' }
+  ],
+  'Current Progress': [
+    { label: 'Modules', value: '6 / 24' },
+    { label: 'Learning Hours', value: '42 hrs' },
+    { label: 'Activity', value: 'Today' },
+    { label: 'Weekly Goal', value: '4 / 5' },
+    { label: 'Completed', value: '24%' },
+    { label: 'Remaining', value: '76%' },
+    { label: 'Next Module', value: 'Neural Networks' },
+    { label: 'Daily Target', value: '2 Lessons' }
+  ],
+  'Skills Learned': [
+    { label: 'Latest Skill', value: 'PyTorch' },
+    { label: 'Level', value: 'Intermediate' },
+    { label: 'Verified', value: '12 Skills' },
+    { label: 'Updated', value: '2 days ago' },
+    { label: 'Practice Hours', value: '48 hrs' },
+    { label: 'Projects', value: '5' },
+    { label: 'Next Skill', value: 'TensorFlow' },
+    { label: 'Skill Score', value: '88%' }
+  ],
+  'Certificates': [
+    { label: 'Verified', value: '3' },
+    { label: 'Pending', value: '1' },
+    { label: 'Latest', value: 'ML Foundations' },
+    { label: 'Issued', value: 'Jul 15, 2026' },
+    { label: 'Total Earned', value: '3' },
+    { label: 'In Review', value: '1' },
+    { label: 'Provider', value: 'Coursera' },
+    { label: 'Next Goal', value: 'AWS ML' }
+  ]
+};
+
 export const StatsGrid: React.FC<StatsGridProps> = ({ stats = DEFAULT_STATS }) => {
   return (
     <div className={styles.statsGridWrapper}>
@@ -108,7 +151,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats = DEFAULT_STATS }) =
             style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
           >
             {/* Header: Title + Icon with soft gradient bg */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <span className="text-label" style={{ fontSize: '0.675rem' }}>{stat.title}</span>
               <div 
                 style={{ 
@@ -128,7 +171,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats = DEFAULT_STATS }) =
             </div>
 
             {/* Content: Value, Trend, Sparkline (side-by-side) */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '6px' }}>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span className="text-value" style={{ fontSize: '2rem' }}>{stat.value}</span>
                 {stat.trend && (
@@ -152,12 +195,41 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats = DEFAULT_STATS }) =
             </div>
 
             {/* Bottom Divider */}
-            <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.04)', margin: '8px 0' }} />
+            <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.04)', margin: '4px 0' }} />
 
-            {/* Footer: Subtext / Progress Bar */}
-            <div style={{ marginTop: '4px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+            {/* Quick Details Section */}
+            {QUICK_DETAILS[stat.title] && (
+              <div 
+                style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '8px', 
+                  paddingTop: '6px',
+                  paddingBottom: '8px',
+                  fontSize: '11px',
+                  fontFamily: 'inherit'
+                }}
+              >
+                {QUICK_DETAILS[stat.title].map((item) => (
+                  <div 
+                    key={item.label} 
+                    style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center' 
+                    }}
+                  >
+                    <span style={{ color: 'var(--text-muted)' }}>{item.label}</span>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 550 }}>{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Footer: Progress Bar and Subtext */}
+            <div style={{ marginTop: 'auto', paddingTop: '4px' }}>
               {stat.hasProgress && stat.progress && (
-                <div style={{ marginBottom: '8px' }}>
+                <div style={{ marginBottom: '4px' }}>
                   <div className={styles.progressBarContainerRefined}>
                     <motion.div 
                       className={styles.progressBarActiveRefined} 
