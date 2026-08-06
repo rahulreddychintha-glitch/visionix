@@ -66,9 +66,17 @@ export class ProfileController {
           },
           education: {
             level: '',
+            studentStatus: '',
             institution: '',
             stream: '',
+            branchSpecialization: '',
+            currentOccupation: '',
             graduationYear: null,
+            higherEducationPlans: '',
+          },
+          experience: {
+            yearsOfExperience: '',
+            currentRole: '',
           },
           interests: {
             careerInterests: [],
@@ -80,6 +88,8 @@ export class ProfileController {
             technicalSkills: [],
             softSkills: [],
             languages: [],
+            certifications: [],
+            portfolioLinks: { github: '', linkedin: '', portfolio: '', other: '' },
             skillLevels: {},
           },
           careerGoals: {
@@ -87,6 +97,9 @@ export class ProfileController {
             preferredIndustries: [],
             salaryGoal: '',
             careerObjectives: '',
+            preferredJobType: '',
+            preferredLocation: '',
+            longTermAspirations: '',
           },
           learningPreferences: {
             learningStyle: '',
@@ -164,6 +177,12 @@ export class ProfileController {
           ...body.education,
         };
       }
+      if (body.experience) {
+        profile.experience = {
+          ...profile.experience,
+          ...body.experience,
+        };
+      }
       if (body.interests) {
         profile.interests = {
           ...profile.interests,
@@ -171,11 +190,16 @@ export class ProfileController {
         };
       }
       if (body.skills) {
-        const currentSkills = profile.skills || { technicalSkills: [], softSkills: [], languages: [], skillLevels: new Map() };
+        const currentSkills = profile.skills || { technicalSkills: [], softSkills: [], languages: [], certifications: [], portfolioLinks: {}, skillLevels: new Map() };
         profile.skills = {
           technicalSkills: body.skills.technicalSkills ?? currentSkills.technicalSkills,
           softSkills: body.skills.softSkills ?? currentSkills.softSkills,
           languages: body.skills.languages ?? currentSkills.languages,
+          certifications: body.skills.certifications ?? currentSkills.certifications ?? [],
+          portfolioLinks: {
+            ...(currentSkills.portfolioLinks || {}),
+            ...(body.skills.portfolioLinks || {}),
+          },
           skillLevels: body.skills.skillLevels 
             ? new Map(Object.entries(body.skills.skillLevels))
             : currentSkills.skillLevels,

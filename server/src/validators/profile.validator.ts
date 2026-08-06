@@ -2,8 +2,16 @@ import { body } from 'express-validator';
 
 /**
  * Validator for onboarding profile data upsert.
- * Required fields are strictly checked only when completing onboarding (onboarding.completed is true).
- * Otherwise, partial data is allowed for draft/autosave.
+ * Required fields are strictly checked ONLY when completing onboarding (onboarding.completed is true).
+ * Exactly 7 fields are required:
+ * - personal.fullName
+ * - education.level
+ * - education.studentStatus
+ * - education.stream
+ * - careerGoals.dreamCareer
+ * - careerGoals.preferredIndustries
+ * - careerGoals.careerObjectives
+ * All other fields are optional.
  */
 export const saveProfileValidator = [
   // ─── Personal ───────────────────────────────────────────────────────────────
@@ -15,12 +23,7 @@ export const saveProfileValidator = [
     .withMessage('Full name must be at least 2 characters'),
 
   body('personal.dateOfBirth')
-    .optional({ checkFalsy: true })
-    .isISO8601()
-    .withMessage('Date of birth must be a valid ISO date string')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
-    .notEmpty()
-    .withMessage('Date of birth is required'),
+    .optional({ checkFalsy: true }),
 
   body('personal.gender')
     .optional({ checkFalsy: true })
@@ -28,19 +31,16 @@ export const saveProfileValidator = [
     .withMessage('Gender must be a string'),
 
   body('personal.country')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
-    .notEmpty()
-    .withMessage('Country is required'),
+    .optional({ checkFalsy: true })
+    .isString(),
 
   body('personal.state')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
-    .notEmpty()
-    .withMessage('State is required'),
+    .optional({ checkFalsy: true })
+    .isString(),
 
   body('personal.city')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
-    .notEmpty()
-    .withMessage('City is required'),
+    .optional({ checkFalsy: true })
+    .isString(),
 
   // ─── Education ─────────────────────────────────────────────────────────────
   body('education.level')
@@ -48,23 +48,37 @@ export const saveProfileValidator = [
     .notEmpty()
     .withMessage('Education level is required'),
 
-  body('education.institution')
+  body('education.studentStatus')
     .if((value, { req }) => req.body.onboarding?.completed === true)
     .notEmpty()
-    .withMessage('Institution name is required'),
+    .withMessage('Student status / user role is required'),
+
+  body('education.institution')
+    .optional({ checkFalsy: true })
+    .isString(),
 
   body('education.stream')
     .if((value, { req }) => req.body.onboarding?.completed === true)
     .notEmpty()
-    .withMessage('Stream/major is required'),
+    .withMessage('Academic stream / field is required'),
+
+  body('education.branchSpecialization')
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage('Branch specialization must be a string'),
+
+  body('education.currentOccupation')
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage('Current occupation must be a string'),
+
+  body('education.higherEducationPlans')
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage('Higher education plans must be a string'),
 
   body('education.graduationYear')
-    .optional({ checkFalsy: true })
-    .isInt({ min: 1900, max: 2100 })
-    .withMessage('Graduation year must be a valid year')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
-    .notEmpty()
-    .withMessage('Graduation year is required'),
+    .optional({ checkFalsy: true }),
 
   // ─── Interests ─────────────────────────────────────────────────────────────
   body('interests.careerInterests')
@@ -108,6 +122,26 @@ export const saveProfileValidator = [
     .isObject()
     .withMessage('Skill levels must be a map/object of skill names to ratings'),
 
+  body('skills.certifications')
+    .optional()
+    .isArray()
+    .withMessage('Certifications must be an array of strings'),
+
+  body('skills.portfolioLinks')
+    .optional()
+    .isObject()
+    .withMessage('Portfolio links must be an object'),
+
+  body('experience.yearsOfExperience')
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage('Years of experience must be a string'),
+
+  body('experience.currentRole')
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage('Current role must be a string'),
+
   // ─── Career Goals ──────────────────────────────────────────────────────────
   body('careerGoals.dreamCareer')
     .if((value, { req }) => req.body.onboarding?.completed === true)
@@ -115,33 +149,39 @@ export const saveProfileValidator = [
     .withMessage('Dream career is required'),
 
   body('careerGoals.preferredIndustries')
-    .optional()
-    .isArray()
-    .withMessage('Preferred industries must be an array of strings'),
+    .if((value, { req }) => req.body.onboarding?.completed === true)
+    .isArray({ min: 1 })
+    .withMessage('Target industry is required'),
 
   body('careerGoals.salaryGoal')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
-    .notEmpty()
-    .withMessage('Salary goal is required'),
+    .optional({ checkFalsy: true }),
 
   body('careerGoals.careerObjectives')
-    .optional()
+    .if((value, { req }) => req.body.onboarding?.completed === true)
+    .notEmpty()
+    .withMessage('Primary goal is required'),
+
+  body('careerGoals.preferredJobType')
+    .optional({ checkFalsy: true })
     .isString()
-    .withMessage('Career objectives must be a string'),
+    .withMessage('Preferred job type must be a string'),
+
+  body('careerGoals.preferredLocation')
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage('Preferred location must be a string'),
+
+  body('careerGoals.longTermAspirations')
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage('Long term aspirations must be a string'),
 
   // ─── Learning Preferences ──────────────────────────────────────────────────
   body('learningPreferences.learningStyle')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
-    .notEmpty()
-    .withMessage('Learning style is required'),
+    .optional({ checkFalsy: true }),
 
   body('learningPreferences.weeklyStudyTime')
-    .optional({ checkFalsy: true })
-    .isInt({ min: 0, max: 168 })
-    .withMessage('Weekly study time must be between 0 and 168 hours')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
-    .notEmpty()
-    .withMessage('Weekly study time is required'),
+    .optional({ checkFalsy: true }),
 
   body('learningPreferences.preferredResources')
     .optional()
@@ -150,19 +190,13 @@ export const saveProfileValidator = [
 
   // ─── Work Preferences ──────────────────────────────────────────────────────
   body('workPreferences.remoteHybridOffice')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
-    .notEmpty()
-    .withMessage('Work mode preference (Remote/Hybrid/Office) is required'),
+    .optional({ checkFalsy: true }),
 
   body('workPreferences.startupEnterprise')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
-    .notEmpty()
-    .withMessage('Company preference (Startup/Enterprise) is required'),
+    .optional({ checkFalsy: true }),
 
   body('workPreferences.teamSize')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
-    .notEmpty()
-    .withMessage('Team size preference is required'),
+    .optional({ checkFalsy: true }),
 
   // ─── Onboarding Metadata ────────────────────────────────────────────────────
   body('onboarding.currentStep')

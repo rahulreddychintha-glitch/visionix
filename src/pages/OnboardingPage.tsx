@@ -3,9 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useProfile } from '../hooks/useProfile';
 import { ProgressBar } from '../components/onboarding/ProgressBar';
 import { WelcomeStep } from '../components/onboarding/WelcomeStep';
-import { EducationStep } from '../components/onboarding/EducationStep';
-import { InterestsStep } from '../components/onboarding/InterestsStep';
-import { CareerGoalsStep } from '../components/onboarding/CareerGoalsStep';
+// import { EducationStep } from '../components/onboarding/EducationStep';
+import { AboutYouStep } from '../components/onboarding/AboutYouStep';
+import { AboutEducationStep } from '../components/onboarding/AboutEducationStep';
+// import { InterestsStep } from '../components/onboarding/InterestsStep';
+import { AboutCareerStep } from '../components/onboarding/AboutCareerStep';
+// import { CareerGoalsStep } from '../components/onboarding/CareerGoalsStep';
+import { AIAssistantStep } from '../components/onboarding/AIAssistantStep';
 import { FinishStep } from '../components/onboarding/FinishStep';
 import { UserService } from '../services/user.service';
 import { Check, AlertCircle } from 'lucide-react';
@@ -19,12 +23,22 @@ const initialState = {
     country: '',
     state: '',
     city: '',
+    age: '',
+    preferredLanguage: '',
   },
   education: {
     level: '',
-    institution: '', // Maps to Current Class / Year
+    studentStatus: '',
+    institution: '',
     stream: '',
+    branchSpecialization: '',
+    currentOccupation: '',
     graduationYear: '',
+    higherEducationPlans: '',
+  },
+  experience: {
+    yearsOfExperience: '',
+    currentRole: '',
   },
   interests: {
     careerInterests: [],
@@ -36,16 +50,23 @@ const initialState = {
     technicalSkills: [],
     softSkills: [],
     languages: [],
+    certifications: [],
+    portfolioLinks: { github: '', linkedin: '', portfolio: '', other: '' },
     skillLevels: {},
   },
   careerGoals: {
     dreamCareer: '',
-    preferredIndustries: [], // Target Industry select
+    preferredIndustries: [],
     salaryGoal: '',
-    careerObjectives: '', // Primary Goal select
+    careerObjectives: '',
+    preferredJobType: '',
+    preferredLocation: '',
+    longTermAspirations: '',
+    careerConfidence: 80,
   },
   learningPreferences: {
     learningStyle: '',
+    learningPace: '',
     weeklyStudyTime: '',
     preferredResources: [],
   },
@@ -92,10 +113,21 @@ export const OnboardingPage: React.FC = () => {
   // Sync profile values into local form state when loaded
   useEffect(() => {
     if (profile) {
+      const calculatedAge = profile.personal?.dateOfBirth && profile.personal?.dateOfBirth !== '2000-01-01T00:00:00.000Z'
+        ? String(new Date().getFullYear() - new Date(profile.personal.dateOfBirth).getFullYear())
+        : '';
+
       setFormData((prev: any) => ({
         ...prev,
-        personal: { ...prev.personal, ...(profile.personal || {}) },
+        personal: { 
+          ...prev.personal, 
+          ...(profile.personal || {}),
+          country: profile.personal?.country === 'Not Specified' ? '' : (profile.personal?.country || ''),
+          age: profile.personal?.age !== undefined ? profile.personal.age : calculatedAge,
+          preferredLanguage: profile.personal?.preferredLanguage || ''
+        },
         education: { ...prev.education, ...(profile.education || {}) },
+        experience: { ...prev.experience, ...(profile.experience || {}) },
         interests: {
           careerInterests: profile.interests?.careerInterests || [],
           favouriteSubjects: profile.interests?.favouriteSubjects || [],
@@ -106,6 +138,8 @@ export const OnboardingPage: React.FC = () => {
           technicalSkills: profile.skills?.technicalSkills || [],
           softSkills: profile.skills?.softSkills || [],
           languages: profile.skills?.languages || [],
+          certifications: profile.skills?.certifications || [],
+          portfolioLinks: { ...(prev.skills?.portfolioLinks || {}), ...(profile.skills?.portfolioLinks || {}) },
           skillLevels: profile.skills?.skillLevels || {},
         },
         careerGoals: { ...prev.careerGoals, ...(profile.careerGoals || {}) },
@@ -134,6 +168,70 @@ export const OnboardingPage: React.FC = () => {
   // Silently pre-populate database-required fields for final submission API validators
   const prefillRequiredDatabaseFields = (data: any) => {
     const currentYear = new Date().getFullYear();
+    const parseWeeklyStudyTime = (val: any): number => {
+      if (typeof val === 'number') return val;
+      if (!val) return 5;
+      if (String(val).includes('<5')) return 4;
+      if (String(val).includes('5–10') || String(val).includes('5-10')) return 8;
+      if (String(val).includes('10–20') || String(val).includes('10-20')) return 15;
+      if (String(val).includes('20+')) return 25;
+      const num = parseInt(val, 10);
+      return isNaN(num) ? 5 : num;
+    };
+
+    const getPreferredIndustries = (): string[] => {
+      const selected = data.careerGoals?.preferredIndustries || [];
+      if (selected.length > 0) return selected;
+      
+      const ints = data.interests?.careerInterests || [];
+      const mapped: string[] = [];
+      ints.forEach((interestId: string) => {
+        const norm = String(interestId).toLowerCase();
+        if (
+          norm === 'software_development' || norm === 'artificial_intelligence' || 
+          norm === 'machine_learning' || norm === 'data_science' || 
+          norm === 'cybersecurity' || norm === 'cloud_computing' || 
+          norm === 'devops' || norm === 'blockchain' || norm === 'game_development' || 
+          norm === 'robotics'
+        ) {
+          if (!mapped.includes('technology')) mapped.push('technology');
+        } else if (
+          norm === 'medicine' || norm === 'surgery' || norm === 'nursing' || 
+          norm === 'pharmacy' || norm === 'dentistry' || norm === 'public_health' || 
+          norm === 'psychology' || norm === 'psychiatry'
+        ) {
+          if (!mapped.includes('healthcare')) mapped.push('healthcare');
+        } else if (
+          norm === 'finance' || norm === 'accounting' || norm === 'banking' || 
+          norm === 'investment' || norm === 'economics'
+        ) {
+          if (!mapped.includes('finance')) mapped.push('finance');
+        } else if (
+          norm === 'agriculture' || norm === 'horticulture' || 
+          norm === 'forestry' || norm === 'fisheries'
+        ) {
+          if (!mapped.includes('agriculture')) mapped.push('agriculture');
+        } else if (norm === 'teaching' || norm === 'education_technology') {
+          if (!mapped.includes('education')) mapped.push('education');
+        } else if (norm === 'law' || norm === 'judiciary') {
+          if (!mapped.includes('government')) mapped.push('government');
+        }
+      });
+      
+      return mapped.length > 0 ? mapped : ['technology'];
+    };
+
+    const getCareerObjectives = (): string => {
+      if (data.careerGoals?.careerObjectives && data.careerGoals.careerObjectives.trim() !== '') {
+        return data.careerGoals.careerObjectives;
+      }
+      const dream = data.careerGoals?.dreamCareer || '';
+      if (dream) {
+        return `My primary career goal is to become a successful ${dream} and establish a long-term career path in my chosen field.`;
+      }
+      return 'Build a solid foundation and establish a successful career path in my chosen field of study.';
+    };
+
     return {
       ...data,
       personal: {
@@ -145,12 +243,13 @@ export const OnboardingPage: React.FC = () => {
       },
       education: {
         ...data.education,
+        studentStatus: data.education?.studentStatus || 'College / University Student',
         graduationYear: data.education?.graduationYear || currentYear,
       },
       learningPreferences: {
         ...data.learningPreferences,
         learningStyle: data.learningPreferences?.learningStyle || 'Practical',
-        weeklyStudyTime: data.learningPreferences?.weeklyStudyTime ?? 0,
+        weeklyStudyTime: parseWeeklyStudyTime(data.learningPreferences?.weeklyStudyTime),
       },
       workPreferences: {
         ...data.workPreferences,
@@ -160,6 +259,8 @@ export const OnboardingPage: React.FC = () => {
       careerGoals: {
         ...data.careerGoals,
         salaryGoal: data.careerGoals?.salaryGoal || 'Not Specified',
+        careerObjectives: getCareerObjectives(),
+        preferredIndustries: getPreferredIndustries(),
       }
     };
   };
@@ -224,9 +325,27 @@ export const OnboardingPage: React.FC = () => {
   }, []);
 
   const handleStateChange = (section: string, fields: any) => {
+    let updatedFields = { ...fields };
+    if (section === 'personal') {
+      const ageVal = fields.age;
+      if (ageVal !== undefined) {
+        if (ageVal !== '') {
+          const ageNum = parseInt(ageVal, 10);
+          if (!isNaN(ageNum) && ageNum > 0) {
+            const dob = new Date(new Date().getFullYear() - ageNum, 0, 1);
+            updatedFields.dateOfBirth = dob.toISOString();
+          } else {
+            updatedFields.dateOfBirth = '';
+          }
+        } else {
+          updatedFields.dateOfBirth = '';
+        }
+      }
+    }
+
     setFormData((prev: any) => ({
       ...prev,
-      [section]: fields,
+      [section]: updatedFields,
     }));
     
     isDirtyRef.current = true;
@@ -248,32 +367,37 @@ export const OnboardingPage: React.FC = () => {
         errors.fullName = 'Full name must be at least 2 characters';
         isValid = false;
       }
-      if (!e.level) {
-        errors.level = 'Education level is required';
+      if (!p.country) {
+        errors.country = 'Country is required';
         isValid = false;
       }
-      if (!e.institution) { // Current Class / Year
-        errors.institution = 'Current Class / Year is required';
+      if (!e.studentStatus) {
+        errors.studentStatus = 'Current Role is required';
+        isValid = false;
+      }
+    }
+
+    if (step === 2) {
+      const e = formData.education || {};
+      if (!e.level) {
+        errors.level = 'Highest Education Level is required';
         isValid = false;
       }
       if (!e.stream) {
-        errors.stream = 'Major / stream is required';
+        errors.stream = 'Course / Degree / Program is required';
         isValid = false;
       }
     }
 
     if (step === 3) {
+      const ints = formData.interests || {};
       const c = formData.careerGoals || {};
+      if (!ints.careerInterests || ints.careerInterests.length === 0) {
+        errors.careerInterests = 'At least one Area of Interest is required';
+        isValid = false;
+      }
       if (!c.dreamCareer || !c.dreamCareer.trim()) {
         errors.dreamCareer = 'Dream career is required';
-        isValid = false;
-      }
-      if (!c.preferredIndustries || c.preferredIndustries.length === 0 || !c.preferredIndustries[0]) {
-        errors.preferredIndustries = 'Target industry is required';
-        isValid = false;
-      }
-      if (!c.careerObjectives) { // Primary Goal
-        errors.careerObjectives = 'Primary goal is required';
         isValid = false;
       }
     }
@@ -292,30 +416,33 @@ export const OnboardingPage: React.FC = () => {
       errors.fullName = 'Full name must be at least 2 characters';
       allValid = false;
     }
-    if (!e.level) {
-      errors.level = 'Education level is required';
+    if (!p.country) {
+      errors.country = 'Country is required';
       allValid = false;
     }
-    if (!e.institution) {
-      errors.institution = 'Class / Year is required';
+    if (!e.studentStatus) {
+      errors.studentStatus = 'Current Role is required';
+      allValid = false;
+    }
+
+    if (!e.level) {
+      errors.level = 'Highest Education Level is required';
       allValid = false;
     }
     if (!e.stream) {
-      errors.stream = 'Stream is required';
+      errors.stream = 'Course / Degree / Program is required';
+      allValid = false;
+    }
+
+    const ints = formData.interests || {};
+    if (!ints.careerInterests || ints.careerInterests.length === 0) {
+      errors.careerInterests = 'At least one Area of Interest is required';
       allValid = false;
     }
 
     const c = formData.careerGoals || {};
     if (!c.dreamCareer || !c.dreamCareer.trim()) {
       errors.dreamCareer = 'Dream career is required';
-      allValid = false;
-    }
-    if (!c.preferredIndustries || c.preferredIndustries.length === 0 || !c.preferredIndustries[0]) {
-      errors.preferredIndustries = 'Target industry is required';
-      allValid = false;
-    }
-    if (!c.careerObjectives) {
-      errors.careerObjectives = 'Primary goal is required';
       allValid = false;
     }
 
@@ -328,7 +455,7 @@ export const OnboardingPage: React.FC = () => {
       return;
     }
 
-    if (currentStep === 4) {
+    if (currentStep === 5) {
       if (!validateAllSteps()) {
         setApiError('Onboarding contains incomplete fields. Please verify all sections.');
         return;
@@ -338,6 +465,7 @@ export const OnboardingPage: React.FC = () => {
       setApiError(null);
       try {
         const finalPayload = prefillRequiredDatabaseFields(formData);
+        console.log('Final Profile Payload:', finalPayload);
         await saveProfile(finalPayload, true);
         isDirtyRef.current = false;
         setIsDirty(false);
@@ -347,7 +475,14 @@ export const OnboardingPage: React.FC = () => {
           navigate('/dashboard');
         }, 1500);
       } catch (err: any) {
-        setApiError(err.response?.data?.message || 'Failed to submit onboarding profile.');
+        console.error('Submission error:', err.response?.data);
+        const validationErrors = err.response?.data?.errors;
+        if (validationErrors && validationErrors.length > 0) {
+          const detail = validationErrors.map((e: any) => `${e.field}: ${e.message}`).join(', ');
+          setApiError(`Validation failed: ${detail}`);
+        } else {
+          setApiError(err.response?.data?.message || 'Failed to submit onboarding profile.');
+        }
       } finally {
         setSubmitLoading(false);
       }
@@ -397,7 +532,7 @@ export const OnboardingPage: React.FC = () => {
         return <WelcomeStep onNext={handleNext} />;
       case 1:
         return (
-          <EducationStep
+          <AboutYouStep
             data={formData}
             onChange={handleStateChange}
             errors={localErrors}
@@ -408,9 +543,10 @@ export const OnboardingPage: React.FC = () => {
         );
       case 2:
         return (
-          <InterestsStep
+          <AboutEducationStep
             data={formData}
             onChange={handleStateChange}
+            errors={localErrors}
             onNext={handleNext}
             onPrev={handlePrev}
             isLoading={submitLoading}
@@ -418,7 +554,7 @@ export const OnboardingPage: React.FC = () => {
         );
       case 3:
         return (
-          <CareerGoalsStep
+          <AboutCareerStep
             data={formData}
             onChange={handleStateChange}
             errors={localErrors}
@@ -428,6 +564,16 @@ export const OnboardingPage: React.FC = () => {
           />
         );
       case 4:
+        return (
+          <AIAssistantStep
+            data={formData}
+            onChange={handleStateChange}
+            onNext={handleNext}
+            onPrev={handlePrev}
+            isLoading={submitLoading}
+          />
+        );
+      case 5:
         return (
           <FinishStep
             data={formData}
@@ -515,7 +661,7 @@ export const OnboardingPage: React.FC = () => {
           </div>
         )}
 
-        {currentStep > 0 && <ProgressBar currentStep={currentStep} totalSteps={4} />}
+        {currentStep > 0 && <ProgressBar currentStep={currentStep} totalSteps={5} formData={formData} />}
         {renderActiveStep()}
       </div>
     </div>

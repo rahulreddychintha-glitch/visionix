@@ -12,9 +12,17 @@ export interface IUserProfile {
   };
   education: {
     level?: string;
+    studentStatus?: string;
     institution?: string;
     stream?: string;
+    branchSpecialization?: string;
+    currentOccupation?: string;
     graduationYear?: number;
+    higherEducationPlans?: string;
+  };
+  experience?: {
+    yearsOfExperience?: string;
+    currentRole?: string;
   };
   interests: {
     careerInterests: string[];
@@ -26,6 +34,13 @@ export interface IUserProfile {
     technicalSkills: string[];
     softSkills: string[];
     languages: string[];
+    certifications?: string[];
+    portfolioLinks?: {
+      github?: string;
+      linkedin?: string;
+      portfolio?: string;
+      other?: string;
+    };
     skillLevels: Map<string, string>;
   };
   careerGoals: {
@@ -33,6 +48,9 @@ export interface IUserProfile {
     preferredIndustries: string[];
     salaryGoal?: string;
     careerObjectives?: string;
+    preferredJobType?: string;
+    preferredLocation?: string;
+    longTermAspirations?: string;
   };
   learningPreferences: {
     learningStyle?: string;
@@ -95,6 +113,11 @@ const UserProfileSchema = new Schema<IUserProfileDocument>(
         type: String,
         trim: true,
       },
+      studentStatus: {
+        type: String,
+        trim: true,
+        default: '',
+      },
       institution: {
         type: String,
         trim: true,
@@ -103,8 +126,35 @@ const UserProfileSchema = new Schema<IUserProfileDocument>(
         type: String,
         trim: true,
       },
+      branchSpecialization: {
+        type: String,
+        trim: true,
+        default: '',
+      },
+      currentOccupation: {
+        type: String,
+        trim: true,
+        default: '',
+      },
       graduationYear: {
         type: Number,
+      },
+      higherEducationPlans: {
+        type: String,
+        trim: true,
+        default: '',
+      },
+    },
+    experience: {
+      yearsOfExperience: {
+        type: String,
+        trim: true,
+        default: '',
+      },
+      currentRole: {
+        type: String,
+        trim: true,
+        default: '',
       },
     },
     interests: {
@@ -138,6 +188,16 @@ const UserProfileSchema = new Schema<IUserProfileDocument>(
         type: [String],
         default: [],
       },
+      certifications: {
+        type: [String],
+        default: [],
+      },
+      portfolioLinks: {
+        github: { type: String, trim: true, default: '' },
+        linkedin: { type: String, trim: true, default: '' },
+        portfolio: { type: String, trim: true, default: '' },
+        other: { type: String, trim: true, default: '' },
+      },
       skillLevels: {
         type: Map,
         of: String,
@@ -158,6 +218,20 @@ const UserProfileSchema = new Schema<IUserProfileDocument>(
         trim: true,
       },
       careerObjectives: {
+        type: String,
+        default: '',
+      },
+      preferredJobType: {
+        type: String,
+        trim: true,
+        default: '',
+      },
+      preferredLocation: {
+        type: String,
+        trim: true,
+        default: '',
+      },
+      longTermAspirations: {
         type: String,
         default: '',
       },

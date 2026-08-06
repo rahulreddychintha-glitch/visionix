@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import styles from '../../pages/OnboardingPage.module.css';
 
@@ -10,6 +11,7 @@ interface NavigationButtonsProps {
   isLoading: boolean;
   nextText?: string;
   prevText?: string;
+  nextDisabled?: boolean;
 }
 
 export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
@@ -19,8 +21,11 @@ export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   isLastStep,
   isLoading,
   nextText = 'Continue',
-  prevText = 'Back'
+  prevText = 'Back',
+  nextDisabled = false
 }) => {
+  const isButtonDisabled = isLoading || nextDisabled;
+
   return (
     <div className={styles.navigation}>
       {!isFirstStep && (
@@ -36,15 +41,21 @@ export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
         </button>
       )}
 
-      <button
+      <motion.button
         type="button"
         className={`btn btn-primary ${isFirstStep ? 'w-full' : ''}`}
         onClick={onNext}
-        disabled={isLoading}
+        disabled={isButtonDisabled}
+        whileHover={isButtonDisabled ? {} : { scale: 1.02, translateY: -1 }}
+        whileTap={isButtonDisabled ? {} : { scale: 0.98 }}
         style={{ 
-          padding: '12px 28px',
+          padding: '14px 36px',
           marginLeft: isFirstStep ? 0 : 'auto',
-          minWidth: '140px'
+          minWidth: '160px',
+          opacity: isButtonDisabled ? 0.4 : 1,
+          cursor: isButtonDisabled ? 'not-allowed' : 'pointer',
+          pointerEvents: isButtonDisabled ? 'none' : 'auto',
+          transition: 'background 0.2s, box-shadow 0.2s, opacity 0.2s'
         }}
       >
         {isLoading ? (
@@ -67,7 +78,7 @@ export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
             {isLastStep ? <Check size={16} /> : <ArrowRight size={16} />}
           </span>
         )}
-      </button>
+      </motion.button>
     </div>
   );
 };
