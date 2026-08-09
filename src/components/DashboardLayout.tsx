@@ -27,6 +27,9 @@ import {
   Mic
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { usePersonalization } from '../hooks/usePersonalization';
+import { useAiModal } from '../contexts/AiModalContext';
+import { AiAssistantModal } from './ai/AiAssistantModal';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import styles from './DashboardLayout.module.css';
 
@@ -69,6 +72,8 @@ const NAV_GROUPS = [
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
+  const { personalizationContext } = usePersonalization();
+  const { isAiModalOpen, openAiModal, closeAiModal } = useAiModal();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -237,8 +242,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   </div>
                   <div className={styles.dropdownSection}>
                     <span className={styles.dropdownSectionTitle}>Quick Actions</span>
-                    <div className={styles.dropdownItem} onClick={() => window.location.hash = '#roadmap'}>Go to Career Roadmap</div>
-                    <div className={styles.dropdownItem} onClick={() => window.location.hash = '#ai-assistant'}>Ask Career Assistant</div>
+                    <div className={styles.dropdownItem} onClick={() => { setIsSearchFocused(false); navigate('/roadmap'); }}>Go to Career Roadmap</div>
+                    <div className={styles.dropdownItem} onClick={() => { setIsSearchFocused(false); openAiModal(); }}>Ask Career Assistant</div>
                   </div>
                 </motion.div>
               )}
@@ -250,6 +255,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             <motion.button 
               className={styles.aiButton} 
               aria-label="Ask AI Assistant"
+              onClick={openAiModal}
               whileHover={{ scale: 1.02, y: -0.5 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -410,6 +416,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           aria-hidden="true"
         />
       )}
+      {/* Single Shared Application-Wide Phase 6 AI Assistant Modal */}
+      <AiAssistantModal
+        isOpen={isAiModalOpen}
+        onClose={closeAiModal}
+        userName={personalizationContext?.name}
+        discipline={personalizationContext?.discipline}
+        dreamCareer={personalizationContext?.dreamCareer}
+      />
     </div>
   );
 };

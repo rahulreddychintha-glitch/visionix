@@ -385,3 +385,36 @@ p {
 .btn-secondary:active {
   transform: translateY(0) scale(0.98) !important;
 }
+
+/* Typing Dots Animation for AI thinking states */
+@keyframes typingBounce {
+  0%, 80%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  background-color: currentColor;
+  border-radius: 50%;
+  display: inline-block;
+  animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+.typing-dot-1 {
+  animation-delay: -0.32s;
+}
+
+.typing-dot-2 {
+  animation-delay: -0.16s;
+}
+
+.typing-dot-3 {
+  animation-delay: 0s;
+}

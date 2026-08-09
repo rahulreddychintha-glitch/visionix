@@ -11,6 +11,7 @@ interface ServerConfig {
   JWT_SECRET: string;
   JWT_EXPIRY: string;
   CLIENT_URL: string;
+  GEMINI_API_KEY?: string;
 }
 
 /**
@@ -34,6 +35,9 @@ const config: ServerConfig = {
   JWT_SECRET: requireEnv('JWT_SECRET'),
   JWT_EXPIRY: process.env['JWT_EXPIRY'] ?? '7d',
   CLIENT_URL: process.env['CLIENT_URL'] ?? 'http://localhost:5173',
+  GEMINI_API_KEY: process.env['GEMINI_API_KEY'] || '',
 };
+
+console.log(`[Visionix] GEMINI_API_KEY loaded: ${!!config.GEMINI_API_KEY && config.GEMINI_API_KEY.trim().length > 0}`);
 
 export default config;

@@ -76,7 +76,7 @@ export function getSmartSuggestions(profile: any): SmartSuggestionItem[] {
     ];
   }
 
-  if (stream.includes('medicine') || stream.includes('healthcare')) {
+  if (stream.includes('medicine') || stream.includes('healthcare') || stream.includes('nursing') || stream.includes('pharmacy')) {
     return [
       { id: 'doctor', label: 'Doctor', category: 'Healthcare' },
       { id: 'dentist', label: 'Dentist', category: 'Healthcare' },
@@ -85,7 +85,7 @@ export function getSmartSuggestions(profile: any): SmartSuggestionItem[] {
     ];
   }
 
-  if (stream.includes('commerce') || stream.includes('finance')) {
+  if (stream.includes('commerce') || stream.includes('finance') || stream.includes('business')) {
     return [
       { id: 'accounting_audit', label: 'Accounting', category: 'Finance' },
       { id: 'corporate_finance', label: 'Finance', category: 'Finance' },
@@ -94,12 +94,27 @@ export function getSmartSuggestions(profile: any): SmartSuggestionItem[] {
     ];
   }
 
+  if (stream.includes('law') || stream.includes('legal')) {
+    return [
+      { id: 'corporate_law', label: 'Corporate Law', category: 'Legal' },
+      { id: 'ip_law', label: 'Intellectual Property', category: 'Legal' },
+      { id: 'cyber_law', label: 'Cyber Law', category: 'Legal' },
+    ];
+  }
+
+  if (stream.includes('design') || stream.includes('arts') || stream.includes('architecture') || stream.includes('fashion')) {
+    return [
+      { id: 'ui_ux', label: 'UI/UX Design', category: 'Design' },
+      { id: 'brand_strategy', label: 'Brand Strategy', category: 'Media' },
+      { id: 'creative_direction', label: 'Creative Direction', category: 'Arts' },
+    ];
+  }
+
   // Default suggestions for general profile
   return [
-    { id: 'software_engineering', label: 'Software Engineering', category: 'Technology' },
-    { id: 'artificial_intelligence', label: 'Artificial Intelligence', category: 'AI' },
-    { id: 'data_science', label: 'Data Analytics', category: 'Data' },
-    { id: 'product_management', label: 'Product Strategy', category: 'Management' },
+    { id: 'career_mastery', label: 'Professional Development', category: 'Career' },
+    { id: 'product_strategy', label: 'Product Strategy', category: 'Management' },
+    { id: 'digital_skills', label: 'Digital Tools & Skills', category: 'Skills' },
   ];
 }
 
@@ -137,8 +152,6 @@ export function getSkillGap(profile: any): SkillGapResult {
     expectedRaw = DOMAIN_EXPECTED_SKILLS[stream] || [
       'problem_solving',
       'critical_thinking',
-      'python',
-      'sql',
       'communication',
     ];
   }
@@ -198,7 +211,7 @@ export function getRecommendedCareers(profile: any): CareerRecommendation[] {
         category: 'Software Development',
       },
     ];
-  } else if (stream.includes('medicine') || stream.includes('healthcare')) {
+  } else if (stream.includes('medicine') || stream.includes('healthcare') || stream.includes('nursing') || stream.includes('pharmacy')) {
     recs = [
       {
         id: dreamCareerId || 'doctor',
@@ -225,7 +238,7 @@ export function getRecommendedCareers(profile: any): CareerRecommendation[] {
         category: 'HealthTech',
       },
     ];
-  } else if (stream.includes('commerce') || stream.includes('finance')) {
+  } else if (stream.includes('commerce') || stream.includes('finance') || stream.includes('business')) {
     recs = [
       {
         id: dreamCareerId || 'financial_analyst',
@@ -252,31 +265,61 @@ export function getRecommendedCareers(profile: any): CareerRecommendation[] {
         category: 'Accounting & Audit',
       },
     ];
+  } else if (stream.includes('law') || stream.includes('legal')) {
+    recs = [
+      {
+        id: dreamCareerId || 'corporate_lawyer',
+        title: dreamCareerObj?.label || 'Corporate Counsel',
+        matchScore: 95,
+        stars: '★★★★★',
+        reason: 'Strong fit for corporate legal compliance, contracts, and governance.',
+        category: 'Law & Governance',
+      },
+      {
+        id: 'ip_lawyer',
+        title: 'IP & Patent Attorney',
+        matchScore: 90,
+        stars: '★★★★☆',
+        reason: 'High demand match for intellectual property and technology law.',
+        category: 'Legal',
+      },
+    ];
+  } else if (stream.includes('design') || stream.includes('arts') || stream.includes('architecture') || stream.includes('fashion')) {
+    recs = [
+      {
+        id: dreamCareerId || 'ui_ux_designer',
+        title: dreamCareerObj?.label || 'UI/UX & Product Designer',
+        matchScore: 95,
+        stars: '★★★★★',
+        reason: 'Strong alignment with user experience, visual hierarchy, and creative design.',
+        category: 'Design & Media',
+      },
+      {
+        id: 'creative_director',
+        title: 'Creative Director',
+        matchScore: 89,
+        stars: '★★★★☆',
+        reason: 'Great fit for spatial aesthetics, design strategy, and storytelling.',
+        category: 'Arts & Media',
+      },
+    ];
   } else {
     recs = [
       {
-        id: dreamCareerId || 'software_engineer',
-        title: dreamCareerObj?.label || 'Software Engineer',
+        id: dreamCareerId || 'career_professional',
+        title: dreamCareerObj?.label || dreamCareerId || 'Career Professional',
         matchScore: 92,
         stars: '★★★★★',
-        reason: 'Versatile tech path matching career exploration preferences.',
-        category: 'Technology',
+        reason: 'Versatile path matching your career goals and profile background.',
+        category: 'Professional Excellence',
       },
       {
         id: 'product_manager',
         title: 'Product Manager',
         matchScore: 88,
         stars: '★★★★☆',
-        reason: 'Great match for cross-functional strategy & roadmap execution.',
+        reason: 'Great match for cross-functional strategy & execution.',
         category: 'Management',
-      },
-      {
-        id: 'ui_ux_designer',
-        title: 'UI/UX Designer',
-        matchScore: 85,
-        stars: '★★★★☆',
-        reason: 'Excellent alignment with user experience & design focus.',
-        category: 'Design',
       },
     ];
   }

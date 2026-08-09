@@ -6,11 +6,6 @@ interface SuccessPayload<T = unknown> {
   data: T;
 }
 
-interface ErrorPayload {
-  success: false;
-  message: string;
-  errors: Array<{ field?: string; message: string }>;
-}
 
 /**
  * Sends a standardised success response.
@@ -37,11 +32,16 @@ export const sendError = (
   res: Response,
   message: string,
   errors: Array<{ field?: string; message: string }> = [],
-  statusCode = 400
-): Response<ErrorPayload> => {
-  return res.status(statusCode).json({
+  statusCode = 400,
+  errorDetail?: { code: string; status: number; message: string }
+): Response => {
+  const payload: any = {
     success: false,
     message,
     errors,
-  });
+  };
+  if (errorDetail) {
+    payload.error = errorDetail;
+  }
+  return res.status(statusCode).json(payload);
 };

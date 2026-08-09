@@ -3,6 +3,7 @@ import { sendError } from '../utils/response';
 
 interface AppError extends Error {
   statusCode?: number;
+  status?: number;
   code?: number | string;
 }
 
@@ -33,6 +34,26 @@ export const errorMiddleware = (
   // Log only unexpected server failures (500+)
   if (statusCode >= 500) {
     console.error(`[Visionix] [ERROR] Server Error (${statusCode}):`, err.stack || err.message);
+  }
+
+  // Handle custom Gemini API errors
+  if (err.code === 'GEMINI_API_ERROR') {
+    const errorStatus = err.statusCode ?? err.status ?? 500;
+    let friendlyMessage = 'Gemini service temporarily unavailable.';
+    if (errorStatus === 429) {
+      friendlyMessage = 'Visionix AI is temporarily busy. Please try again shortly.';
+    } else if (errorStatus === 403) {
+      friendlyMessage = "Visionix couldn't access the Gemini service. Please check the API configuration.";
+    } else if (errorStatus === 400) {
+      friendlyMessage = "Visionix couldn't process this request. Please try again.";
+    }
+
+    sendError(res, friendlyMessage, [], errorStatus, {
+      code: 'GEMINI_API_ERROR',
+      status: errorStatus,
+      message: friendlyMessage,
+    });
+    return;
   }
 
   // Mongoose duplicate key (e.g. unique email constraint)
