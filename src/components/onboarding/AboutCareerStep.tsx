@@ -4,7 +4,6 @@ import { Sparkles, ShieldCheck, Check } from 'lucide-react';
 import {
   STEP3_INTERESTS,
   STEP3_TECHNICAL_SKILLS,
-  STEP3_EXPERIENCES,
   STEP3_DREAM_CAREERS,
   getTypicalSkills
 } from '../../constants/onboarding.constants';
@@ -32,7 +31,6 @@ export const AboutCareerStep: React.FC<AboutCareerStepProps> = ({
 }) => {
   const interests = data.interests || {};
   const skills = data.skills || {};
-  const experience = data.experience || {};
   const careerGoals = data.careerGoals || {};
 
   const handleStateChange = (section: string, field: string, value: any) => {
@@ -68,6 +66,199 @@ export const AboutCareerStep: React.FC<AboutCareerStepProps> = ({
   const isStepValid =
     (interests.careerInterests || []).length > 0 &&
     !!careerGoals.dreamCareer;
+
+  const filteredInterests = useMemo(() => {
+    const stream = data.education?.stream || '';
+    const normStream = stream.toLowerCase();
+
+    // Determine matching categories/keywords
+    let allowedCategories: string[] = ['General'];
+    let allowedKeywords: string[] = [];
+
+    if (normStream.includes('civil')) {
+      allowedCategories = ['General', 'Construction', 'Design', 'Industrial'];
+      allowedKeywords = ['civil', 'construction', 'structural', 'infrastructure', 'architect', 'interior'];
+    } else if (
+      normStream.includes('engineering') ||
+      normStream.includes('computer') ||
+      normStream.includes('software') ||
+      normStream.includes('information') ||
+      normStream.includes('statistics') ||
+      normStream.includes('mathematics')
+    ) {
+      allowedCategories = ['General', 'Technology', 'Industrial', 'Tech'];
+      allowedKeywords = ['software', 'ai', 'data', 'cloud', 'security', 'tech', 'coding', 'dev', 'programming'];
+    } else if (
+      normStream.includes('medicine') ||
+      normStream.includes('health') ||
+      normStream.includes('nursing') ||
+      normStream.includes('pharmacy') ||
+      normStream.includes('dentistry') ||
+      normStream.includes('biology') ||
+      normStream.includes('biotechnology') ||
+      normStream.includes('psychology')
+    ) {
+      allowedCategories = ['General', 'Healthcare', 'Science'];
+      allowedKeywords = ['medicine', 'health', 'clinical', 'nursing', 'pharmacy', 'dentist', 'doctor', 'brain', 'biology', 'biotech', 'psychology'];
+    } else if (
+      normStream.includes('business') ||
+      normStream.includes('management') ||
+      normStream.includes('commerce') ||
+      normStream.includes('finance') ||
+      normStream.includes('accounting') ||
+      normStream.includes('economics') ||
+      normStream.includes('marketing')
+    ) {
+      allowedCategories = ['General', 'Finance', 'Management'];
+      allowedKeywords = ['finance', 'business', 'management', 'marketing', 'accounting', 'audit', 'tax', 'entrepreneur', 'consultant', 'banking'];
+    } else if (
+      normStream.includes('arts') ||
+      normStream.includes('fine_arts') ||
+      normStream.includes('design') ||
+      normStream.includes('fashion') ||
+      normStream.includes('architecture') ||
+      normStream.includes('animation')
+    ) {
+      allowedCategories = ['General', 'Design', 'Media', 'Arts'];
+      allowedKeywords = ['design', 'art', 'graphic', 'fashion', 'ui', 'ux', 'interior', 'animation', 'media', 'creative'];
+    } else {
+      return STEP3_INTERESTS;
+    }
+
+    return STEP3_INTERESTS.filter((item) => {
+      if (item.id === 'other') return true;
+      if (allowedCategories.includes(item.category)) return true;
+      const itemKeywords = item.keywords || [];
+      return itemKeywords.some((kw) => allowedKeywords.includes(kw.toLowerCase()));
+    });
+  }, [data.education?.stream]);
+
+  // Filter Dream Careers based on Degree Program, Specialization, and selected Interests
+  const filteredDreamCareers = useMemo(() => {
+    const stream = data.education?.stream || '';
+    const specialization = data.education?.branchSpecialization || '';
+    const selectedInterests = interests.careerInterests || [];
+    const normStream = stream.toLowerCase();
+    const normSpec = specialization.toLowerCase();
+
+    let matchedKeywords: string[] = [];
+
+    // Match based on Degree Program / Stream
+    if (normStream.includes('civil')) {
+      matchedKeywords.push('civil', 'construction', 'structural', 'architect', 'interior', 'project manager');
+    } else if (
+      normStream.includes('engineering') ||
+      normStream.includes('computer') ||
+      normStream.includes('software') ||
+      normStream.includes('information') ||
+      normStream.includes('statistics') ||
+      normStream.includes('mathematics')
+    ) {
+      matchedKeywords.push(
+        'software', 'ai', 'ml', 'data', 'cybersecurity', 'ui', 'ux', 'product manager',
+        'game developer', 'robotics', 'cloud', 'blockchain', 'scientist', 'researcher', 'engineer'
+      );
+    } else if (
+      normStream.includes('medicine') ||
+      normStream.includes('health') ||
+      normStream.includes('nursing') ||
+      normStream.includes('pharmacy') ||
+      normStream.includes('dentistry') ||
+      normStream.includes('biology') ||
+      normStream.includes('biotechnology') ||
+      normStream.includes('psychology')
+    ) {
+      matchedKeywords.push(
+        'doctor', 'surgeon', 'dentist', 'nurse', 'pharmacist', 'psychologist', 'veterinarian',
+        'scientist', 'researcher', 'clinical'
+      );
+    } else if (
+      normStream.includes('business') ||
+      normStream.includes('management') ||
+      normStream.includes('commerce') ||
+      normStream.includes('finance') ||
+      normStream.includes('accounting') ||
+      normStream.includes('economics') ||
+      normStream.includes('marketing')
+    ) {
+      matchedKeywords.push(
+        'chartered accountant', 'financial analyst', 'investment banker', 'product manager',
+        'marketing manager', 'sales manager', 'supply chain manager', 'entrepreneur', 'business owner'
+      );
+    } else if (
+      normStream.includes('arts') ||
+      normStream.includes('fine_arts') ||
+      normStream.includes('design') ||
+      normStream.includes('fashion') ||
+      normStream.includes('architecture') ||
+      normStream.includes('animation')
+    ) {
+      matchedKeywords.push(
+        'designer', 'ui', 'ux', 'fashion', 'interior', 'animator', 'director', 'actor',
+        'musician', 'artist', 'architect'
+      );
+    }
+
+    // Match based on Specialization
+    if (normSpec) {
+      if (normSpec.includes('ai') || normSpec.includes('machine learning')) {
+        matchedKeywords.push('ai', 'ml', 'data scientist');
+      } else if (normSpec.includes('data')) {
+        matchedKeywords.push('data scientist', 'analyst');
+      } else if (normSpec.includes('cyber') || normSpec.includes('security')) {
+        matchedKeywords.push('cybersecurity');
+      } else if (normSpec.includes('software') || normSpec.includes('dev')) {
+        matchedKeywords.push('software engineer', 'developer', 'game developer');
+      } else if (normSpec.includes('cloud') || normSpec.includes('devops')) {
+        matchedKeywords.push('cloud engineer', 'software');
+      } else if (normSpec.includes('structural')) {
+        matchedKeywords.push('structural', 'civil engineer', 'architect');
+      } else if (normSpec.includes('finance') || normSpec.includes('banking')) {
+        matchedKeywords.push('financial analyst', 'investment banker');
+      } else if (normSpec.includes('accounting') || normSpec.includes('audit')) {
+        matchedKeywords.push('chartered accountant', 'auditor');
+      } else if (normSpec.includes('design')) {
+        matchedKeywords.push('designer', 'ui', 'ux');
+      }
+    }
+
+    // Match based on selected Interests
+    selectedInterests.forEach((interestId: string) => {
+      const normInterest = interestId.toLowerCase();
+      if (normInterest.includes('ai') || normInterest.includes('machine')) {
+        matchedKeywords.push('ai', 'ml');
+      } else if (normInterest.includes('software') || normInterest.includes('web')) {
+        matchedKeywords.push('software', 'developer', 'game');
+      } else if (normInterest.includes('data') || normInterest.includes('analytics')) {
+        matchedKeywords.push('data', 'analyst');
+      } else if (normInterest.includes('security') || normInterest.includes('cyber')) {
+        matchedKeywords.push('cybersecurity');
+      } else if (normInterest.includes('design') || normInterest.includes('ui')) {
+        matchedKeywords.push('designer', 'ui', 'ux', 'fashion', 'interior');
+      } else if (normInterest.includes('medicine') || normInterest.includes('healthcare') || normInterest.includes('clinical')) {
+        matchedKeywords.push('doctor', 'surgeon', 'nurse', 'dentist', 'pharmacist');
+      } else if (normInterest.includes('finance') || normInterest.includes('business')) {
+        matchedKeywords.push('financial', 'banker', 'accountant', 'entrepreneur', 'manager');
+      } else if (normInterest.includes('civil') || normInterest.includes('construction') || normInterest.includes('infrastructure')) {
+        matchedKeywords.push('civil', 'architect', 'project manager');
+      }
+    });
+
+    if (matchedKeywords.length === 0) {
+      return STEP3_DREAM_CAREERS;
+    }
+
+    const filtered = STEP3_DREAM_CAREERS.filter((career) => {
+      if (career === 'Other (Specify)') return true;
+      const lowerCareer = career.toLowerCase();
+      return matchedKeywords.some((keyword) => lowerCareer.includes(keyword));
+    });
+
+    if (filtered.length <= 1) {
+      return STEP3_DREAM_CAREERS;
+    }
+    return filtered;
+  }, [data.education?.stream, data.education?.branchSpecialization, interests.careerInterests]);
 
   // Custom AI Dynamic Content Generator
   const aiCareerInsightText = useMemo(() => {
@@ -113,7 +304,7 @@ export const AboutCareerStep: React.FC<AboutCareerStepProps> = ({
       <div className={styles.formGroupFull}>
         <SearchableChipGroup
           title="Areas of Interest *"
-          options={STEP3_INTERESTS}
+          options={filteredInterests}
           selectedValues={interests.careerInterests || []}
           onToggle={handleToggleInterest}
           placeholder="Search interests (e.g. Technology, Medicine)..."
@@ -126,13 +317,13 @@ export const AboutCareerStep: React.FC<AboutCareerStepProps> = ({
         )}
       </div>
 
-      {/* 2. Dream Career & Experience */}
+      {/* 2. Dream Career */}
       <div className={styles.formGrid}>
-        <div className={styles.formGroup}>
+        <div className={styles.formGroupFull}>
           <SearchableSelect
             id="dreamCareer"
             label="Dream Career *"
-            options={STEP3_DREAM_CAREERS}
+            options={filteredDreamCareers}
             value={careerGoals.dreamCareer || ''}
             onChange={(val) => handleStateChange('careerGoals', 'dreamCareer', val)}
             placeholder="Search or type dream career..."
@@ -140,20 +331,6 @@ export const AboutCareerStep: React.FC<AboutCareerStepProps> = ({
             disabled={isLoading}
             error={errors.dreamCareer}
             allowOther={true}
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <SearchableSelect
-            id="experienceLevel"
-            label="Experience Level (Optional)"
-            options={STEP3_EXPERIENCES}
-            value={experience.yearsOfExperience || ''}
-            onChange={(val) => handleStateChange('experience', 'yearsOfExperience', val)}
-            placeholder="Select experience level..."
-            required={false}
-            disabled={isLoading}
-            allowOther={false}
           />
         </div>
       </div>

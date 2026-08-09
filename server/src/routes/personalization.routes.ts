@@ -12,6 +12,7 @@ router.use(authenticate);
  * Get full normalized context & recommendation engine insights.
  */
 router.get('/', PersonalizationController.getPersonalizationData);
+router.get('/youtube', PersonalizationController.getPersonalizedVideos);
 
 /**
  * GET /api/personalization/preferences

@@ -25,4 +25,12 @@ export class PersonalizationApiService {
     const response = await api.put<{ success: boolean; data: PersonalizationContextData['userPreferences'] }>('/personalization/preferences', prefs);
     return response.data.data;
   }
+
+  /**
+   * Fetch personalized YouTube learning videos.
+   */
+  public static async getPersonalizedVideos(): Promise<any[]> {
+    const response = await api.get<{ success: boolean; data: any[] }>('/personalization/youtube');
+    return response.data.data;
+  }
 }

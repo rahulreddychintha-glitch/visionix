@@ -362,27 +362,14 @@ export const OnboardingPage: React.FC = () => {
 
     if (step === 1) {
       const p = formData.personal || {};
-      const e = formData.education || {};
       if (!p.fullName || p.fullName.trim().length < 2) {
         errors.fullName = 'Full name must be at least 2 characters';
-        isValid = false;
-      }
-      if (!p.country) {
-        errors.country = 'Country is required';
-        isValid = false;
-      }
-      if (!e.studentStatus) {
-        errors.studentStatus = 'Current Role is required';
         isValid = false;
       }
     }
 
     if (step === 2) {
       const e = formData.education || {};
-      if (!e.level) {
-        errors.level = 'Highest Education Level is required';
-        isValid = false;
-      }
       if (!e.stream) {
         errors.stream = 'Course / Degree / Program is required';
         isValid = false;
@@ -390,12 +377,7 @@ export const OnboardingPage: React.FC = () => {
     }
 
     if (step === 3) {
-      const ints = formData.interests || {};
       const c = formData.careerGoals || {};
-      if (!ints.careerInterests || ints.careerInterests.length === 0) {
-        errors.careerInterests = 'At least one Area of Interest is required';
-        isValid = false;
-      }
       if (!c.dreamCareer || !c.dreamCareer.trim()) {
         errors.dreamCareer = 'Dream career is required';
         isValid = false;
@@ -416,27 +398,9 @@ export const OnboardingPage: React.FC = () => {
       errors.fullName = 'Full name must be at least 2 characters';
       allValid = false;
     }
-    if (!p.country) {
-      errors.country = 'Country is required';
-      allValid = false;
-    }
-    if (!e.studentStatus) {
-      errors.studentStatus = 'Current Role is required';
-      allValid = false;
-    }
 
-    if (!e.level) {
-      errors.level = 'Highest Education Level is required';
-      allValid = false;
-    }
     if (!e.stream) {
       errors.stream = 'Course / Degree / Program is required';
-      allValid = false;
-    }
-
-    const ints = formData.interests || {};
-    if (!ints.careerInterests || ints.careerInterests.length === 0) {
-      errors.careerInterests = 'At least one Area of Interest is required';
       allValid = false;
     }
 
@@ -451,6 +415,8 @@ export const OnboardingPage: React.FC = () => {
   };
 
   const handleNext = async () => {
+    if (submitLoading) return;
+
     if (currentStep > 0 && !validateStep(currentStep)) {
       return;
     }

@@ -22,7 +22,7 @@ export const PersonalizationProvider: React.FC<{ children: React.ReactNode }> = 
   const [error, setError] = useState<string | null>(null);
 
   const refreshPersonalization = useCallback(async () => {
-    if (!user) {
+    if (!user || !user.isOnboarded) {
       setPersonalizationContext(null);
       setRecommendations(null);
       return;

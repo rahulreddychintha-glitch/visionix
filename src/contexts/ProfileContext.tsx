@@ -57,7 +57,7 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({ children }) =>
         ...data,
         onboarding: {
           ...data.onboarding,
-          currentStep,
+          currentStep: data.onboarding?.currentStep ?? currentStep,
           completed: isFinal,
         },
       };

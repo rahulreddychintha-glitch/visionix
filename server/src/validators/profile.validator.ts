@@ -44,14 +44,14 @@ export const saveProfileValidator = [
 
   // ─── Education ─────────────────────────────────────────────────────────────
   body('education.level')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
-    .notEmpty()
-    .withMessage('Education level is required'),
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage('Education level must be a string'),
 
   body('education.studentStatus')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
-    .notEmpty()
-    .withMessage('Student status / user role is required'),
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage('Student status must be a string'),
 
   body('education.institution')
     .optional({ checkFalsy: true })

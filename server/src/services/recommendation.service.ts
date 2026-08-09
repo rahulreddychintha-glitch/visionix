@@ -38,10 +38,60 @@ export class RecommendationService {
     let smartSuggestions: IRecommendationResult['smartSuggestions'] = [];
     let expectedSkills: string[] = [];
 
-    if (discipline.includes('engineering') || discipline.includes('stem') || discipline.includes('computer')) {
+    // Normalize discipline & dream career
+    const lowerDiscipline = discipline.toLowerCase();
+    const lowerDreamCareer = dreamCareer.toLowerCase();
+
+    // 1. Civil Engineering
+    if (lowerDiscipline.includes('civil')) {
       topCareers = [
         {
-          id: dreamCareer.toLowerCase().replace(/\s+/g, '_') || 'software_engineer',
+          id: lowerDreamCareer.replace(/\s+/g, '_') || 'civil_engineer',
+          title: dreamCareer || 'Civil Engineer',
+          matchScore: allUserSkills.length >= 3 ? 95 : 88,
+          stars: '★★★★★',
+          reason: `Strong alignment with your civil engineering background and selected targets.`,
+          category: 'Civil & Structural',
+        },
+        {
+          id: 'structural_engineer',
+          title: 'Structural Engineer',
+          matchScore: 91,
+          stars: '★★★★★',
+          reason: 'High demand match for structural design, concrete structures, and load calculation.',
+          category: 'Civil Engineering',
+        },
+        {
+          id: 'construction_manager',
+          title: 'Construction Manager',
+          matchScore: 86,
+          stars: '★★★★☆',
+          reason: 'Focuses on site execution, scheduling, project budgeting, and construction safety.',
+          category: 'Construction & Management',
+        },
+      ];
+      expectedSkills = ['Civil Engineering', 'CAD', 'AutoCAD', 'Project Management', 'Structural Design'];
+      smartSuggestions = [
+        { id: 'structural_design', label: 'Structural Design & Analysis', category: 'Civil' },
+        { id: 'project_mgmt', label: 'Construction Project Management', category: 'Management' },
+        { id: 'environmental_civil', label: 'Environmental Engineering', category: 'Environmental' },
+      ];
+    }
+    // 2. Computer Science / Technology / Software
+    else if (
+      lowerDiscipline.includes('computer') ||
+      lowerDiscipline.includes('software') ||
+      lowerDiscipline.includes('information') ||
+      lowerDiscipline.includes('artificial') ||
+      lowerDiscipline.includes('data science') ||
+      lowerDiscipline.includes('cyber') ||
+      lowerDiscipline.includes('cloud') ||
+      lowerDiscipline.includes('blockchain') ||
+      lowerDiscipline.includes('game')
+    ) {
+      topCareers = [
+        {
+          id: lowerDreamCareer.replace(/\s+/g, '_') || 'software_engineer',
           title: dreamCareer || 'Software Engineer',
           matchScore: allUserSkills.length >= 3 ? 95 : 88,
           stars: '★★★★★',
@@ -71,10 +121,19 @@ export class RecommendationService {
         { id: 'cloud_devops', label: 'Cloud & DevOps Engineering', category: 'Infrastructure' },
         { id: 'cyber_sec', label: 'Cybersecurity Analyst', category: 'Security' },
       ];
-    } else if (discipline.includes('medicine') || discipline.includes('health') || discipline.includes('nursing') || discipline.includes('pharmacy')) {
+    }
+    // 3. Medicine / Healthcare
+    else if (
+      lowerDiscipline.includes('medicine') ||
+      lowerDiscipline.includes('health') ||
+      lowerDiscipline.includes('nursing') ||
+      lowerDiscipline.includes('pharmacy') ||
+      lowerDiscipline.includes('dentistry') ||
+      lowerDiscipline.includes('surgery')
+    ) {
       topCareers = [
         {
-          id: dreamCareer.toLowerCase().replace(/\s+/g, '_') || 'medical_practitioner',
+          id: lowerDreamCareer.replace(/\s+/g, '_') || 'medical_practitioner',
           title: dreamCareer || 'Medical Practitioner / Doctor',
           matchScore: 96,
           stars: '★★★★★',
@@ -104,12 +163,22 @@ export class RecommendationService {
         { id: 'pharmacology', label: 'Pharmacology & Therapeutics', category: 'Pharma' },
         { id: 'public_health', label: 'Public Health Administration', category: 'Healthcare' },
       ];
-    } else if (discipline.includes('commerce') || discipline.includes('finance') || discipline.includes('business') || discipline.includes('economics')) {
+    }
+    // 4. Business / Finance / Commerce
+    else if (
+      lowerDiscipline.includes('commerce') ||
+      lowerDiscipline.includes('finance') ||
+      lowerDiscipline.includes('business') ||
+      lowerDiscipline.includes('economics') ||
+      lowerDiscipline.includes('accounting') ||
+      lowerDiscipline.includes('management') ||
+      lowerDiscipline.includes('marketing')
+    ) {
       topCareers = [
         {
-          id: dreamCareer.toLowerCase().replace(/\s+/g, '_') || 'financial_analyst',
+          id: lowerDreamCareer.replace(/\s+/g, '_') || 'financial_analyst',
           title: dreamCareer || 'Financial Analyst',
-          matchScore: 94,
+          matchScore: allUserSkills.length >= 3 ? 95 : 88,
           stars: '★★★★★',
           reason: 'Strong alignment with financial modeling, valuation, and capital markets.',
           category: 'Finance',
@@ -137,34 +206,19 @@ export class RecommendationService {
         { id: 'business_analytics', label: 'Business & Financial Analytics', category: 'Data' },
         { id: 'wealth_mgmt', label: 'Wealth & Asset Management', category: 'Investment' },
       ];
-    } else if (discipline.includes('law') || discipline.includes('legal')) {
+    }
+    // 5. Arts / Design / Architecture
+    else if (
+      lowerDiscipline.includes('design') ||
+      lowerDiscipline.includes('art') ||
+      lowerDiscipline.includes('fashion') ||
+      lowerDiscipline.includes('animation') ||
+      lowerDiscipline.includes('interior') ||
+      lowerDiscipline.includes('architecture')
+    ) {
       topCareers = [
         {
-          id: dreamCareer.toLowerCase().replace(/\s+/g, '_') || 'corporate_lawyer',
-          title: dreamCareer || 'Corporate Legal Counsel',
-          matchScore: 95,
-          stars: '★★★★★',
-          reason: 'Strong alignment with corporate legal frameworks, compliance, and drafting.',
-          category: 'Law & Governance',
-        },
-        {
-          id: 'ip_attorney',
-          title: 'Intellectual Property Attorney',
-          matchScore: 89,
-          stars: '★★★★☆',
-          reason: 'High demand match for technology patents, copyright, and trademarks.',
-          category: 'Legal',
-        },
-      ];
-      expectedSkills = ['Legal Research', 'Contract Drafting', 'Negotiation', 'Critical Reasoning'];
-      smartSuggestions = [
-        { id: 'corp_law', label: 'Corporate Law & M&A', category: 'Legal' },
-        { id: 'cyber_law', label: 'Cyber Law & IP Protection', category: 'Legal' },
-      ];
-    } else if (discipline.includes('design') || discipline.includes('arts') || discipline.includes('architecture') || discipline.includes('fashion')) {
-      topCareers = [
-        {
-          id: dreamCareer.toLowerCase().replace(/\s+/g, '_') || 'product_designer',
+          id: lowerDreamCareer.replace(/\s+/g, '_') || 'product_designer',
           title: dreamCareer || 'UI/UX & Product Designer',
           matchScore: 95,
           stars: '★★★★★',
@@ -185,11 +239,38 @@ export class RecommendationService {
         { id: 'ui_ux', label: 'UI/UX Product Design', category: 'Design' },
         { id: 'brand_design', label: 'Brand Strategy & Media', category: 'Creative' },
       ];
-    } else {
-      // General / Multidisciplinary fallback
+    }
+    // 6. Law
+    else if (lowerDiscipline.includes('law') || lowerDiscipline.includes('legal')) {
       topCareers = [
         {
-          id: dreamCareer.toLowerCase().replace(/\s+/g, '_') || 'career_specialist',
+          id: lowerDreamCareer.replace(/\s+/g, '_') || 'corporate_lawyer',
+          title: dreamCareer || 'Corporate Legal Counsel',
+          matchScore: 95,
+          stars: '★★★★★',
+          reason: 'Strong alignment with corporate legal frameworks, compliance, and drafting.',
+          category: 'Law & Governance',
+        },
+        {
+          id: 'ip_attorney',
+          title: 'Intellectual Property Attorney',
+          matchScore: 89,
+          stars: '★★★★☆',
+          reason: 'High demand match for technology patents, copyright, and trademarks.',
+          category: 'Legal',
+        },
+      ];
+      expectedSkills = ['Legal Research', 'Contract Drafting', 'Negotiation', 'Critical Reasoning'];
+      smartSuggestions = [
+        { id: 'corp_law', label: 'Corporate Law & M&A', category: 'Legal' },
+        { id: 'cyber_law', label: 'Cyber Law & IP Protection', category: 'Legal' },
+      ];
+    }
+    // 7. General Fallback & Custom Others
+    else {
+      topCareers = [
+        {
+          id: lowerDreamCareer.replace(/\s+/g, '_') || 'career_specialist',
           title: dreamCareer || 'Career Specialist',
           matchScore: 92,
           stars: '★★★★★',
@@ -212,12 +293,25 @@ export class RecommendationService {
       ];
     }
 
+    // Deduplicate topCareers if dream career title matches other items
+    topCareers = topCareers.filter((item, idx) => {
+      if (idx === 0) return true;
+      return item.title.toLowerCase() !== lowerDreamCareer;
+    });
+
     const missingSkills = expectedSkills.filter(
       (s) => !allUserSkills.some((us) => us.includes(s.toLowerCase()) || s.toLowerCase().includes(us))
     );
 
+    const statusText = ctx.studentStatus && ctx.studentStatus !== 'Not Specified' && ctx.studentStatus !== 'Student'
+      ? ctx.studentStatus.toLowerCase()
+      : 'learner';
+    const instText = ctx.institution && ctx.institution !== 'Not Specified'
+      ? ` at ${ctx.institution}`
+      : '';
+
     const summarySentences = [
-      `${ctx.name} is a ${ctx.studentStatus.toLowerCase()} pursuing ${ctx.discipline}${ctx.institution ? ` at ${ctx.institution}` : ''}.`,
+      `${ctx.name} is a ${statusText} pursuing ${ctx.discipline}${instText}.`,
       techSkills.length > 0
         ? `They demonstrate competence in ${techSkills.slice(0, 3).join(', ')}.`
         : 'They are actively building foundational skills in their chosen discipline.',

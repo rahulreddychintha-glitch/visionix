@@ -7,6 +7,11 @@ import styles from './DashboardWidgets.module.css';
 interface RoadmapProgressProps {
   milestones?: RoadmapMilestone[];
   trackName?: string;
+  currentPhaseName?: string;
+  overallProgressPercent?: number;
+  estimatedCompletion?: string;
+  nextGoalName?: string;
+  hoursRemaining?: number | string;
 }
 
 const DEFAULT_MILESTONES: RoadmapMilestone[] = [
@@ -38,7 +43,12 @@ const DEFAULT_MILESTONES: RoadmapMilestone[] = [
 
 export const RoadmapProgress: React.FC<RoadmapProgressProps> = ({
   milestones = DEFAULT_MILESTONES,
-  trackName = 'AI & Machine Learning Engineer'
+  trackName = 'AI & Machine Learning Engineer',
+  currentPhaseName = 'Phase 1 - Basics',
+  overallProgressPercent = 0,
+  estimatedCompletion = 'Not Specified',
+  nextGoalName = 'None',
+  hoursRemaining = '0 Hours'
 }) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
@@ -234,23 +244,23 @@ export const RoadmapProgress: React.FC<RoadmapProgressProps> = ({
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ color: 'var(--text-muted)' }}>Current Phase</span>
-            <span style={{ color: 'var(--text-primary)', fontWeight: 550 }}>Phase 2 – Deep Learning</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 550 }}>{currentPhaseName}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ color: 'var(--text-muted)' }}>Overall Progress</span>
-            <span style={{ color: 'var(--text-primary)', fontWeight: 550 }}>33%</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 550 }}>{overallProgressPercent}%</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ color: 'var(--text-muted)' }}>Estimated Completion</span>
-            <span style={{ color: 'var(--text-primary)', fontWeight: 550 }}>Nov 2026</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 550 }}>{estimatedCompletion}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ color: 'var(--text-muted)' }}>Next Goal</span>
-            <span style={{ color: 'var(--text-primary)', fontWeight: 550 }}>Production ML</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 550 }}>{nextGoalName}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ color: 'var(--text-muted)' }}>Learning Remaining</span>
-            <span style={{ color: 'var(--text-primary)', fontWeight: 550 }}>128 Hours</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 550 }}>{hoursRemaining}</span>
           </div>
         </div>
       </div>

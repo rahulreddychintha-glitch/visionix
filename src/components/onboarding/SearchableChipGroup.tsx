@@ -247,7 +247,7 @@ export const SearchableChipGroup: React.FC<SearchableChipGroupProps> = ({
         const match = normalizedOptions.find(
           (opt) => opt.label.toLowerCase() === query.trim().toLowerCase() || opt.id === query.trim().toLowerCase()
         );
-        const itemToAdd = match ? match.id : query.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+        const itemToAdd = match ? match.id : query.trim();
         if (!selectedValues.includes(itemToAdd)) {
           onToggle(itemToAdd);
         }

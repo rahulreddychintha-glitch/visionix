@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Award, Terminal, Cpu, Database } from 'lucide-react';
+import { Award } from 'lucide-react';
 import styles from './DashboardWidgets.module.css';
 
 interface Skill {
@@ -14,29 +14,10 @@ interface RecommendedSkillsProps {
   skills?: Skill[];
 }
 
-const DEFAULT_SKILLS: Skill[] = [
-  {
-    name: 'Python & Analytics',
-    progress: 85,
-    icon: Terminal,
-    color: 'var(--color-primary)'
-  },
-  {
-    name: 'PyTorch Framework',
-    progress: 60,
-    icon: Cpu,
-    color: 'var(--color-secondary)'
-  },
-  {
-    name: 'SQL & Vector DBs',
-    progress: 40,
-    icon: Database,
-    color: 'var(--color-accent)'
-  }
-];
+
 
 export const RecommendedSkills: React.FC<RecommendedSkillsProps> = ({
-  skills = DEFAULT_SKILLS
+  skills = []
 }) => {
   return (
     <motion.div
@@ -54,33 +35,39 @@ export const RecommendedSkills: React.FC<RecommendedSkillsProps> = ({
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, justifyContent: 'center' }}>
-        {skills.map((skill) => {
-          const Icon = skill.icon;
-          return (
-            <div key={skill.name} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Icon size={14} style={{ color: skill.color }} />
-                  <span className="text-description" style={{ fontSize: '0.775rem', fontWeight: 650, color: 'var(--text-primary)' }}>
-                    {skill.name}
+        {skills.length === 0 ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100px', color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center' }}>
+            No target skills configured.
+          </div>
+        ) : (
+          skills.map((skill) => {
+            const Icon = skill.icon;
+            return (
+              <div key={skill.name} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Icon size={14} style={{ color: skill.color }} />
+                    <span className="text-description" style={{ fontSize: '0.775rem', fontWeight: 650, color: 'var(--text-primary)' }}>
+                      {skill.name}
+                    </span>
+                  </div>
+                  <span className="text-caption" style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+                    {skill.progress}%
                   </span>
                 </div>
-                <span className="text-caption" style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
-                  {skill.progress}%
-                </span>
+                <div className={styles.progressBarContainerRefined} style={{ height: '5px' }}>
+                  <div 
+                    className={styles.progressBarActiveRefined} 
+                    style={{ 
+                      width: `${skill.progress}%`, 
+                      background: `linear-gradient(90deg, ${skill.color}, var(--color-secondary))` 
+                    }} 
+                  />
+                </div>
               </div>
-              <div className={styles.progressBarContainerRefined} style={{ height: '5px' }}>
-                <div 
-                  className={styles.progressBarActiveRefined} 
-                  style={{ 
-                    width: `${skill.progress}%`, 
-                    background: `linear-gradient(90deg, ${skill.color}, var(--color-secondary))` 
-                  }} 
-                />
-              </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </motion.div>
   );

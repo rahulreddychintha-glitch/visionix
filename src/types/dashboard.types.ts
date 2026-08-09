@@ -21,6 +21,7 @@ export interface StatCardData {
   sparklinePoints: number[];
   hasProgress?: boolean;
   progress?: number;
+  details?: Array<{ label: string; value: string }>;
 }
 
 export interface AssistantMessage {
@@ -80,6 +81,40 @@ export interface TrendingCareerData {
   matchScore: number;
 }
 
+export interface ContinueLearningCourse {
+  title: string;
+  difficulty: string;
+  progress: number;
+  provider: string;
+  categoryColor: string;
+}
+
+export interface TargetSkillData {
+  name: string;
+  progress: number;
+  icon: any;
+  color: string;
+}
+
+export interface YouTubeVideoData {
+  id: string;
+  title: string;
+  channel: string;
+  duration: string;
+  views: string;
+  publishedAt: string;
+  thumbnail: string;
+}
+
+export interface UpcomingExamData {
+  name: string;
+  date: string;
+  daysRemaining: number;
+  status: string;
+  statusColor: string;
+  link: string;
+}
+
 export interface DashboardData {
   stats: StatCardData[];
   assistant: AssistantData;
@@ -88,4 +123,8 @@ export interface DashboardData {
   learningResources: LearningResourceData[];
   scholarships: ScholarshipData[];
   trendingCareers: TrendingCareerData[];
+  continueLearning?: ContinueLearningCourse[];
+  targetSkills?: TargetSkillData[];
+  youtubeVideos?: YouTubeVideoData[];
+  upcomingExams?: UpcomingExamData[];
 }

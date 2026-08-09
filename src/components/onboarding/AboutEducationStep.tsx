@@ -3,14 +3,70 @@ import { motion } from 'framer-motion';
 import { Sparkles, Check } from 'lucide-react';
 import {
   STEP2_EDUCATION_LEVELS,
-  STEP2_ACADEMIC_FIELDS,
-  STEP2_CURRENT_YEARS,
-  SPECIALIZATIONS,
-  INSTITUTIONS
+  STEP2_ACADEMIC_FIELDS
 } from '../../constants/onboarding.constants';
 import { SearchableSelect } from './SearchableSelect';
 import { NavigationButtons } from './NavigationButtons';
 import styles from '../../pages/OnboardingPage.module.css';
+import { OTHER_OPTION } from '../../constants/onboarding.constants';
+
+const DISCIPLINE_SPECIALIZATIONS_MAP: Record<string, { value: string; label: string }[]> = {
+  civil_eng: [
+    { value: 'structural_engineering', label: 'Structural Engineering' },
+    { value: 'transportation_engineering', label: 'Transportation Engineering' },
+    { value: 'geotechnical_engineering', label: 'Geotechnical Engineering' },
+    { value: 'environmental_engineering', label: 'Environmental Engineering' },
+    { value: 'construction_management', label: 'Construction Management' },
+  ],
+  engineering: [
+    { value: 'artificial_intelligence', label: 'Artificial Intelligence & ML' },
+    { value: 'data_science', label: 'Data Science & Analytics' },
+    { value: 'cyber_security', label: 'Cyber Security & Cryptography' },
+    { value: 'software_engineering', label: 'Software Development' },
+    { value: 'cloud_computing', label: 'Cloud Computing & DevOps' },
+  ],
+  medicine: [
+    { value: 'cardiology', label: 'Cardiology' },
+    { value: 'neurology', label: 'Neurology' },
+    { value: 'pediatrics', label: 'Pediatrics' },
+    { value: 'oncology', label: 'Oncology' },
+    { value: 'general_surgery', label: 'General Surgery' },
+  ],
+  business: [
+    { value: 'corporate_finance', label: 'Corporate Finance' },
+    { value: 'investment_banking', label: 'Investment Banking' },
+    { value: 'accounting_audit', label: 'Accounting & Audit' },
+    { value: 'marketing_strategy', label: 'Marketing Strategy' },
+    { value: 'operations_management', label: 'Operations Management' },
+  ],
+  management: [
+    { value: 'corporate_finance', label: 'Corporate Finance' },
+    { value: 'investment_banking', label: 'Investment Banking' },
+    { value: 'marketing_strategy', label: 'Marketing Strategy' },
+    { value: 'human_resources_mgmt', label: 'Human Resources' },
+  ],
+  commerce: [
+    { value: 'accounting_audit', label: 'Accounting & Audit' },
+    { value: 'taxation', label: 'Taxation & Compliance' },
+    { value: 'banking_finance', label: 'Banking & Insurance' },
+  ],
+  finance: [
+    { value: 'corporate_finance', label: 'Corporate Finance' },
+    { value: 'investment_banking', label: 'Investment Banking' },
+    { value: 'portfolio_management', label: 'Portfolio Management' },
+  ],
+  accounting: [
+    { value: 'accounting_audit', label: 'Accounting & Audit' },
+    { value: 'taxation', label: 'Taxation & Compliance' },
+  ],
+  fine_arts: [
+    { value: 'ui_ux_design', label: 'UI/UX Design' },
+    { value: 'graphic_design', label: 'Graphic Design' },
+    { value: 'fashion_design', label: 'Fashion Design' },
+    { value: 'interior_design', label: 'Interior Design' },
+    { value: 'animation_vfx', label: 'Animation & VFX' },
+  ],
+};
 
 interface AboutEducationStepProps {
   data: any;
@@ -38,10 +94,99 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
     });
   };
 
-  // Step 2 Validation: Highest Education (level) and Course/Degree (stream) are required
-  const isStepValid =
-    !!education.level &&
-    !!education.stream;
+  const handleStreamChange = (val: string) => {
+    // Reset specialization
+    onChange('education', {
+      ...education,
+      stream: val,
+      branchSpecialization: '',
+    });
+    // Reset downstream interests and career goals
+    onChange('interests', {
+      careerInterests: [],
+      favouriteSubjects: [],
+      technologies: [],
+      industries: [],
+    });
+    onChange('careerGoals', {
+      dreamCareer: '',
+      preferredIndustries: [],
+      salaryGoal: '',
+      careerObjectives: '',
+      preferredJobType: '',
+      preferredLocation: '',
+      longTermAspirations: '',
+    });
+  };
+
+  const handleSpecializationChange = (val: string) => {
+    onChange('education', {
+      ...education,
+      branchSpecialization: val,
+    });
+    // Reset downstream interests and career goals
+    onChange('interests', {
+      careerInterests: [],
+      favouriteSubjects: [],
+      technologies: [],
+      industries: [],
+    });
+    onChange('careerGoals', {
+      dreamCareer: '',
+      preferredIndustries: [],
+      salaryGoal: '',
+      careerObjectives: '',
+      preferredJobType: '',
+      preferredLocation: '',
+      longTermAspirations: '',
+    });
+  };
+
+  const specializationOptions = useMemo(() => {
+    const stream = education.stream || '';
+    const specs = DISCIPLINE_SPECIALIZATIONS_MAP[stream] || [];
+    
+    if (specs.length === 0) {
+      const allSpecs: { value: string; label: string }[] = [];
+      const seen = new Set<string>();
+      Object.values(DISCIPLINE_SPECIALIZATIONS_MAP).forEach((list) => {
+        list.forEach((item) => {
+          if (!seen.has(item.value)) {
+            seen.add(item.value);
+            allSpecs.push(item);
+          }
+        });
+      });
+      return [
+        ...allSpecs.map(item => ({
+          id: item.value,
+          label: item.label,
+          category: 'General',
+          icon: 'Sparkles',
+          description: `Specialization in ${item.label}`,
+          accentColor: '#8b5cf6',
+          keywords: [item.label.toLowerCase()]
+        })),
+        OTHER_OPTION
+      ];
+    }
+
+    return [
+      ...specs.map(item => ({
+        id: item.value,
+        label: item.label,
+        category: 'General',
+        icon: 'Sparkles',
+        description: `Specialization in ${item.label}`,
+        accentColor: '#8b5cf6',
+        keywords: [item.label.toLowerCase()]
+      })),
+      OTHER_OPTION
+    ];
+  }, [education.stream]);
+
+  // Step 2 Validation: Only Course/Degree/Program (stream) is mandatory
+  const isStepValid = !!education.stream;
 
   // Dynamic AI Insight Text Resolver
   const dynamicInsightText = useMemo(() => {
@@ -154,18 +299,17 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
       </div>
 
       <div className={styles.formGrid}>
-        {/* Highest Education Level (Required) */}
+        {/* Highest Education Level (Optional) */}
         <div className={styles.formGroup}>
           <SearchableSelect
             id="educationLevel"
-            label="Highest Education Level *"
+            label="Highest Education Level (Optional)"
             options={STEP2_EDUCATION_LEVELS}
             value={education.level || ''}
             onChange={(val) => handleEducationChange('level', val)}
             placeholder="Select education level..."
-            required={true}
+            required={false}
             disabled={isLoading}
-            error={errors.level}
             allowOther={false}
           />
         </div>
@@ -177,7 +321,7 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
             label="Course / Degree / Program *"
             options={STEP2_ACADEMIC_FIELDS}
             value={education.stream || ''}
-            onChange={(val) => handleEducationChange('stream', val)}
+            onChange={handleStreamChange}
             placeholder="Select or search course/degree..."
             required={true}
             disabled={isLoading}
@@ -191,43 +335,13 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
           <SearchableSelect
             id="specialization"
             label="Specialization (Optional)"
-            options={SPECIALIZATIONS}
+            options={specializationOptions}
             value={education.branchSpecialization || ''}
-            onChange={(val) => handleEducationChange('branchSpecialization', val)}
+            onChange={handleSpecializationChange}
             placeholder="Select or type specialization..."
             required={false}
             disabled={isLoading}
             allowOther={true}
-          />
-        </div>
-
-        {/* Institution Name (Optional) */}
-        <div className={styles.formGroup}>
-          <SearchableSelect
-            id="institution"
-            label="Institution Name (Optional)"
-            options={INSTITUTIONS}
-            value={education.institution || ''}
-            onChange={(val) => handleEducationChange('institution', val)}
-            placeholder="Search or type institution..."
-            required={false}
-            disabled={isLoading}
-            allowOther={true}
-          />
-        </div>
-
-        {/* Current Year / Semester (Optional) */}
-        <div className={styles.formGroup}>
-          <SearchableSelect
-            id="currentYear"
-            label="Current Year / Semester (Optional)"
-            options={STEP2_CURRENT_YEARS}
-            value={education.currentOccupation || ''}
-            onChange={(val) => handleEducationChange('currentOccupation', val)}
-            placeholder="Select year/semester..."
-            required={false}
-            disabled={isLoading}
-            allowOther={false}
           />
         </div>
 

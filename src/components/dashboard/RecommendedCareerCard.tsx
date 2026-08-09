@@ -36,7 +36,7 @@ export const RecommendedCareerCard: React.FC<RecommendedCareerCardProps> = ({
   // Derive skill tags dynamically
   const skillTags = topSkills.length > 0 
     ? topSkills 
-    : (interests.length > 0 ? interests.slice(0, 3) : ['Python', 'Machine Learning', 'High Demand']);
+    : (interests.length > 0 ? interests.slice(0, 3) : ['Core Foundations']);
 
   return (
     <motion.div 

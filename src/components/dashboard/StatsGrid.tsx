@@ -92,50 +92,6 @@ const DEFAULT_STATS: StatCardData[] = [
     progress: 0
   }
 ];
-
-const QUICK_DETAILS: Record<string, { label: string; value: string }[]> = {
-  'AI Career Match': [
-    { label: 'Confidence', value: 'High' },
-    { label: 'Based On', value: 'Skills + Assessment' },
-    { label: 'Updated', value: 'Today' },
-    { label: 'Rank', value: 'Top 3%' },
-    { label: 'Career Path', value: 'AI Engineer' },
-    { label: 'Industry', value: 'Artificial Intelligence' },
-    { label: 'Recommendation', value: 'Excellent' },
-    { label: 'Experience', value: 'Beginner Friendly' }
-  ],
-  'Current Progress': [
-    { label: 'Modules', value: '6 / 24' },
-    { label: 'Learning Hours', value: '42 hrs' },
-    { label: 'Activity', value: 'Today' },
-    { label: 'Weekly Goal', value: '4 / 5' },
-    { label: 'Completed', value: '24%' },
-    { label: 'Remaining', value: '76%' },
-    { label: 'Next Module', value: 'Neural Networks' },
-    { label: 'Daily Target', value: '2 Lessons' }
-  ],
-  'Skills Learned': [
-    { label: 'Latest Skill', value: 'PyTorch' },
-    { label: 'Level', value: 'Intermediate' },
-    { label: 'Verified', value: '12 Skills' },
-    { label: 'Updated', value: '2 days ago' },
-    { label: 'Practice Hours', value: '48 hrs' },
-    { label: 'Projects', value: '5' },
-    { label: 'Next Skill', value: 'TensorFlow' },
-    { label: 'Skill Score', value: '88%' }
-  ],
-  'Certificates': [
-    { label: 'Verified', value: '3' },
-    { label: 'Pending', value: '1' },
-    { label: 'Latest', value: 'ML Foundations' },
-    { label: 'Issued', value: 'Jul 15, 2026' },
-    { label: 'Total Earned', value: '3' },
-    { label: 'In Review', value: '1' },
-    { label: 'Provider', value: 'Coursera' },
-    { label: 'Next Goal', value: 'AWS ML' }
-  ]
-};
-
 export const StatsGrid: React.FC<StatsGridProps> = ({ stats = DEFAULT_STATS }) => {
   return (
     <div className={styles.statsGridWrapper}>
@@ -198,7 +154,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats = DEFAULT_STATS }) =
             <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.04)', margin: '4px 0' }} />
 
             {/* Quick Details Section */}
-            {QUICK_DETAILS[stat.title] && (
+            {stat.details && stat.details.length > 0 && (
               <div 
                 style={{ 
                   display: 'flex', 
@@ -210,7 +166,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats = DEFAULT_STATS }) =
                   fontFamily: 'inherit'
                 }}
               >
-                {QUICK_DETAILS[stat.title].map((item) => (
+                {stat.details.map((item) => (
                   <div 
                     key={item.label} 
                     style={{ 

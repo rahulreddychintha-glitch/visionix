@@ -2,6 +2,7 @@ export interface PersonalizationContextData {
   userId: string;
   name: string;
   discipline: string;
+  specialization: string;
   educationLevel: string;
   studentStatus: string;
   institution: string;
@@ -51,6 +52,20 @@ export interface PersonalizationContextData {
     weeklyReport: boolean;
   };
   hasCompletedOnboarding: boolean;
+  learningProgress: {
+    completedResources: string[];
+    bookmarkedResources: string[];
+    streakDays: number;
+    totalStudyMinutes: number;
+    lastStudyDate: string | null;
+  } | null;
+  careerProgress: {
+    selectedCareer: string | null;
+    currentPhase: number;
+    completedMilestones: string[];
+    totalMilestones: number;
+    lastActivity: string;
+  } | null;
 }
 
 export interface RecommendationInsights {

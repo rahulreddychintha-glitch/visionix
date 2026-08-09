@@ -18,6 +18,14 @@ import { DashboardService } from '../services/dashboard.service';
 import type { DashboardData } from '../types/dashboard.types';
 import layoutStyles from '../components/DashboardLayout.module.css';
 
+const cleanCareerLabel = (val?: string) => {
+  if (!val) return 'Career Explorer';
+  if (val.includes('_')) {
+    return val.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
+  return val;
+};
+
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { profile, loading: profileLoading, loadProfile } = useProfile();
@@ -45,7 +53,7 @@ export const DashboardPage: React.FC = () => {
           setDashboardLoading(false);
         });
     }
-  }, [user]);
+  }, [user, profile]);
 
   const fullName = user?.fullName || 'Rahul';
   const interests = useMemo(() => profile?.interests?.careerInterests || [], [profile]);
@@ -105,11 +113,11 @@ export const DashboardPage: React.FC = () => {
           {/* Row 2: Recommended Career (spans 9) & Career Roadmap (spans 3) */}
           <div className={layoutStyles.colSpan9}>
             <MemoizedRecommendedCareerCard 
-              dreamCareer={profile?.careerGoals?.dreamCareer || dashboardData?.careerRecommendation.title} 
+              dreamCareer={cleanCareerLabel(profile?.careerGoals?.dreamCareer || dashboardData?.careerRecommendation.title)} 
               careerDescription={dashboardData?.careerRecommendation.description}
               interests={interests} 
               matchPercentage={dashboardData?.careerRecommendation.matchPercentage}
-              salaryRange={dashboardData?.careerRecommendation.salaryRange}
+              salaryRange={dashboardData?.careerRecommendation.salaryRange || 'Not Specified'}
               difficulty={dashboardData?.careerRecommendation.difficulty}
               estimatedTime={dashboardData?.careerRecommendation.estimatedTime}
               expectedGrowth={dashboardData?.careerRecommendation.expectedGrowth}
@@ -118,7 +126,19 @@ export const DashboardPage: React.FC = () => {
             />
           </div>
           <div className={layoutStyles.colSpan3}>
-            <MemoizedRoadmapProgress milestones={dashboardData?.roadmap} />
+            <MemoizedRoadmapProgress 
+              milestones={dashboardData?.roadmap} 
+              trackName={`${cleanCareerLabel(profile?.careerGoals?.dreamCareer || dashboardData?.careerRecommendation.title)} Career Roadmap`}
+              currentPhaseName={
+                dashboardData?.roadmap?.find(m => m.status === 'active')?.title || 
+                dashboardData?.roadmap?.[0]?.title || 
+                'Phase 1'
+              }
+              overallProgressPercent={dashboardData?.careerRecommendation.learningProgress || 0}
+              estimatedCompletion={profile?.careerGoals?.dreamCareer ? '6 Months' : 'Not Specified'}
+              nextGoalName={dashboardData?.careerRecommendation?.topSkills?.[0] || 'Explore'}
+              hoursRemaining="0 Hours"
+            />
           </div>
 
         </div>
@@ -127,14 +147,14 @@ export const DashboardPage: React.FC = () => {
         <div className={layoutStyles.dashboardLowerGrid} style={{ marginTop: '4px' }}>
           
           {/* ROW 1: Continue Learning, Target Skills, Trending Careers */}
-          <MemoizedContinueLearning />
-          <MemoizedRecommendedSkills />
+          <MemoizedContinueLearning courses={dashboardData?.continueLearning} />
+          <MemoizedRecommendedSkills skills={dashboardData?.targetSkills} />
           <MemoizedTrendingCareers careers={dashboardData?.trendingCareers} />
 
           {/* ROW 2: YouTube Learning, Scholarships, Upcoming Exams */}
-          <MemoizedYouTubeLearning />
+          <MemoizedYouTubeLearning videos={dashboardData?.youtubeVideos} />
           <MemoizedScholarships scholarships={dashboardData?.scholarships} />
-          <MemoizedUpcomingExams />
+          <MemoizedUpcomingExams exams={dashboardData?.upcomingExams} />
 
         </div>
       </div>
