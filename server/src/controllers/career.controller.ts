@@ -3,6 +3,7 @@ import { CAREERS_DATA } from '../constants/careers.constants';
 import { SavedCareer } from '../models/SavedCareer';
 import { PersonalizationService } from '../services/personalization.service';
 import { sendSuccess, sendError } from '../utils/response';
+import config from '../config/env';
 
 export class CareerController {
   /**
@@ -92,7 +93,10 @@ export class CareerController {
         return scoreB - scoreA;
       });
 
-      sendSuccess(res, 'Careers listed successfully.', result);
+      sendSuccess(res, 'Careers listed successfully.', {
+        careers: result,
+        isMockMode: config.CAREER_DATA_MODE === 'mock',
+      });
     } catch (error) {
       next(error);
     }
@@ -118,7 +122,10 @@ export class CareerController {
         saved: true,
       }));
 
-      sendSuccess(res, 'Saved careers retrieved successfully.', result);
+      sendSuccess(res, 'Saved careers retrieved successfully.', {
+        careers: result,
+        isMockMode: config.CAREER_DATA_MODE === 'mock',
+      });
     } catch (error) {
       next(error);
     }

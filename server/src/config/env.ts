@@ -12,6 +12,7 @@ interface ServerConfig {
   JWT_EXPIRY: string;
   CLIENT_URL: string;
   GEMINI_API_KEY?: string;
+  CAREER_DATA_MODE: 'mock' | 'production';
 }
 
 /**
@@ -28,14 +29,26 @@ function requireEnv(key: string): string {
   return value;
 }
 
+const nodeEnv = process.env['NODE_ENV'] ?? 'development';
+let rawCareerMode = process.env['CAREER_DATA_MODE'] || 'production';
+
+// Strict fallback validations:
+if (rawCareerMode !== 'mock' && rawCareerMode !== 'production') {
+  rawCareerMode = 'production';
+}
+if (nodeEnv === 'production') {
+  rawCareerMode = 'production'; // Safety lock: Never allow mock mode in production environment
+}
+
 const config: ServerConfig = {
   PORT: parseInt(process.env['PORT'] ?? '5000', 10),
-  NODE_ENV: process.env['NODE_ENV'] ?? 'development',
+  NODE_ENV: nodeEnv,
   MONGODB_URI: requireEnv('MONGODB_URI'),
   JWT_SECRET: requireEnv('JWT_SECRET'),
   JWT_EXPIRY: process.env['JWT_EXPIRY'] ?? '7d',
   CLIENT_URL: process.env['CLIENT_URL'] ?? 'http://localhost:5173',
   GEMINI_API_KEY: process.env['GEMINI_API_KEY'] || '',
+  CAREER_DATA_MODE: rawCareerMode as 'mock' | 'production',
 };
 
 console.log(`[Visionix] GEMINI_API_KEY loaded: ${!!config.GEMINI_API_KEY && config.GEMINI_API_KEY.trim().length > 0}`);

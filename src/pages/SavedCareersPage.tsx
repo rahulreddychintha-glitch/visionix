@@ -14,6 +14,7 @@ import styles from './CareerExplorerPage.module.css';
 
 export const SavedCareersPage: React.FC = () => {
   const [savedCareers, setSavedCareers] = useState<Career[]>([]);
+  const [isMockMode, setIsMockMode] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,8 +27,9 @@ export const SavedCareersPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await CareerService.getSavedCareers();
-      setSavedCareers(data);
+      const response = await CareerService.getSavedCareers();
+      setSavedCareers(response.careers);
+      setIsMockMode(response.isMockMode);
     } catch (err: any) {
       console.error('Error fetching saved careers:', err);
       setError('Failed to load saved bookmarks.');
@@ -83,7 +85,24 @@ export const SavedCareersPage: React.FC = () => {
         <div className={styles.header}>
           <div className={styles.titleRow}>
             <div>
-              <h1 className="text-heading" style={{ fontSize: '1.8rem', marginBottom: '4px' }}>Saved & Bookmarks</h1>
+              <h1 className="text-heading" style={{ fontSize: '1.8rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Saved & Bookmarks
+                {isMockMode && (
+                  <span style={{
+                    fontSize: '0.72rem',
+                    padding: '3px 8px',
+                    borderRadius: '9999px',
+                    background: 'rgba(245, 158, 11, 0.15)',
+                    color: '#f59e0b',
+                    border: '1px solid rgba(245, 158, 11, 0.3)',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em'
+                  }}>
+                    Demo Mode
+                  </span>
+                )}
+              </h1>
               <p className="text-description" style={{ fontSize: '0.9rem' }}>
                 Manage your bookmarked career paths and compare their specifications.
               </p>

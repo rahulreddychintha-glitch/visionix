@@ -35,6 +35,7 @@ const CATEGORIES = [
 
 export const CareerExplorerPage: React.FC = () => {
   const [careers, setCareers] = useState<Career[]>([]);
+  const [isMockMode, setIsMockMode] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -53,11 +54,12 @@ export const CareerExplorerPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await CareerService.getCareers(
+      const response = await CareerService.getCareers(
         searchQuery ? searchQuery : undefined,
         selectedCategory !== 'All' ? selectedCategory : undefined
       );
-      setCareers(data);
+      setCareers(response.careers);
+      setIsMockMode(response.isMockMode);
     } catch (err: any) {
       console.error('Error fetching careers:', err);
       setError('Failed to load careers. Please try again.');
@@ -139,7 +141,24 @@ export const CareerExplorerPage: React.FC = () => {
         <div className={styles.header}>
           <div className={styles.titleRow}>
             <div>
-              <h1 className="text-heading" style={{ fontSize: '1.8rem', marginBottom: '4px' }}>Explore Careers</h1>
+              <h1 className="text-heading" style={{ fontSize: '1.8rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Explore Careers
+                {isMockMode && (
+                  <span style={{
+                    fontSize: '0.72rem',
+                    padding: '3px 8px',
+                    borderRadius: '9999px',
+                    background: 'rgba(245, 158, 11, 0.15)',
+                    color: '#f59e0b',
+                    border: '1px solid rgba(245, 158, 11, 0.3)',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em'
+                  }}>
+                    Demo Mode
+                  </span>
+                )}
+              </h1>
               <p className="text-description" style={{ fontSize: '0.9rem' }}>
                 Discover career pathways across various disciplines and match them to your goals.
               </p>

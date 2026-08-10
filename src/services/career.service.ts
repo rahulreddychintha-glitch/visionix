@@ -15,11 +15,16 @@ export interface Career {
   relevanceTag: 'Dream Career' | 'Interested' | 'Relevant' | null;
 }
 
+export interface CareersListResponse {
+  careers: Career[];
+  isMockMode: boolean;
+}
+
 export class CareerService {
   /**
    * Fetch all careers with optional search and category filters.
    */
-  public static async getCareers(search?: string, category?: string): Promise<Career[]> {
+  public static async getCareers(search?: string, category?: string): Promise<CareersListResponse> {
     const response = await api.get('/careers', {
       params: { search, category }
     });
@@ -29,7 +34,7 @@ export class CareerService {
   /**
    * Fetch all bookmarked careers for current user.
    */
-  public static async getSavedCareers(): Promise<Career[]> {
+  public static async getSavedCareers(): Promise<CareersListResponse> {
     const response = await api.get('/careers/saved');
     return response.data.data;
   }
