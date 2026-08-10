@@ -1,0 +1,60 @@
+import api from './api';
+
+export interface Career {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  education: string;
+  skills: string[];
+  responsibilities: string[];
+  salaryRange: string;
+  growthRate: string;
+  demandLevel: string;
+  saved: boolean;
+  relevanceTag: 'Dream Career' | 'Interested' | 'Relevant' | null;
+}
+
+export class CareerService {
+  /**
+   * Fetch all careers with optional search and category filters.
+   */
+  public static async getCareers(search?: string, category?: string): Promise<Career[]> {
+    const response = await api.get('/careers', {
+      params: { search, category }
+    });
+    return response.data.data;
+  }
+
+  /**
+   * Fetch all bookmarked careers for current user.
+   */
+  public static async getSavedCareers(): Promise<Career[]> {
+    const response = await api.get('/careers/saved');
+    return response.data.data;
+  }
+
+  /**
+   * Fetch detailed metadata of a specific career.
+   */
+  public static async getCareerDetails(id: string): Promise<Career> {
+    const response = await api.get(`/careers/${id}`);
+    return response.data.data;
+  }
+
+  /**
+   * Bookmark a career.
+   */
+  public static async saveCareer(id: string): Promise<{ careerId: string; saved: boolean }> {
+    const response = await api.post(`/careers/${id}/save`);
+    return response.data.data;
+  }
+
+  /**
+   * Remove bookmark.
+   */
+  public static async unsaveCareer(id: string): Promise<{ careerId: string; saved: boolean }> {
+    const response = await api.delete(`/careers/${id}/save`);
+    return response.data.data;
+  }
+}

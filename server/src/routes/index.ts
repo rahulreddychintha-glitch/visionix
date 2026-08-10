@@ -4,6 +4,7 @@ import authRoutes from './auth.routes';
 import profileRoutes from './profile.routes';
 import aiRoutes from './ai.routes';
 import personalizationRoutes from './personalization.routes';
+import careerRoutes from './career.routes';
 
 const router = Router();
 
@@ -15,5 +16,6 @@ router.use('/auth', authRoutes);
 router.use('/profile', profileRoutes);
 router.use('/ai', aiRoutes);
 router.use('/personalization', personalizationRoutes);
+router.use('/careers', careerRoutes);
 
 export default router;

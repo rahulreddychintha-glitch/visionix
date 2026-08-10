@@ -7,6 +7,8 @@ import { OnboardingPage } from './pages/OnboardingPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AiAssistantPage } from './pages/AiAssistantPage';
+import { CareerExplorerPage } from './pages/CareerExplorerPage';
+import { SavedCareersPage } from './pages/SavedCareersPage';
 import { UnderDevelopmentPage } from './pages/UnderDevelopmentPage';
 import { Footer } from './components/Footer';
 import { AuthProvider } from './contexts/AuthContext';
@@ -96,8 +98,27 @@ function App() {
                   } 
                 />
 
+                {/* Career Explorer Routes */}
+                <Route 
+                  path="/explore" 
+                  element={
+                    <ProtectedRoute>
+                      <CareerExplorerPage />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                <Route 
+                  path="/saved" 
+                  element={
+                    <ProtectedRoute>
+                      <SavedCareersPage />
+                    </ProtectedRoute>
+                  } 
+                />
+
                 {/* Under Development Routes */}
-                {['/roadmap', '/explore', '/courses', '/youtube', '/interview', '/certifications', '/exams', '/scholarships', '/resume', '/saved', '/business', '/progress', '/settings', '/account-settings', '/preferences', '/appearance', '/notifications', '/security', '/subscription'].map((path) => (
+                {['/roadmap', '/courses', '/youtube', '/interview', '/certifications', '/exams', '/scholarships', '/resume', '/business', '/progress', '/settings', '/account-settings', '/preferences', '/appearance', '/notifications', '/security', '/subscription'].map((path) => (
                   <Route 
                     key={path}
                     path={path} 
