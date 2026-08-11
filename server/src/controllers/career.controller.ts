@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { CAREERS_DATA } from '../constants/careers.constants';
 import { SavedCareer } from '../models/SavedCareer';
 import { PersonalizationService } from '../services/personalization.service';
+import { RecommendationService } from '../services/recommendation.service';
+import { AiService } from '../services/ai.service';
 import { sendSuccess, sendError } from '../utils/response';
 import config from '../config/env';
 
@@ -212,6 +214,139 @@ export class CareerController {
       await SavedCareer.findOneAndDelete({ userId, careerId: id });
 
       sendSuccess(res, 'Career removed from bookmarks successfully.', { careerId: id, saved: false });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * GET /api/careers/recommended
+   * List personalized recommended careers based on user profile.
+   */
+  public static listRecommendedCareers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+
+      const userId = req.user.sub;
+      const { search, category } = req.query;
+
+      // 1. Fetch user personalization context
+      let userContext: any = null;
+      try {
+        userContext = await PersonalizationService.getPersonalizationContext(userId);
+      } catch (err) {
+        console.warn('Could not load personalization context in listRecommendedCareers:', err);
+      }
+
+      if (!userContext) {
+        sendSuccess(res, 'Personalization profile missing. Cannot recommend.', {
+          careers: [],
+          isProfileComplete: false,
+          isMockMode: config.CAREER_DATA_MODE === 'mock'
+        });
+        return;
+      }
+
+      // 2. Fetch recommendations from deterministic layer
+      const recs = await RecommendationService.getRecommendedCareers(userContext);
+      if (!recs.isProfileComplete) {
+        sendSuccess(res, 'Profile incomplete. Complete onboarding first.', {
+          careers: [],
+          isProfileComplete: false,
+          isMockMode: config.CAREER_DATA_MODE === 'mock'
+        });
+        return;
+      }
+
+      // 3. Fetch user's saved career IDs
+      const savedDocs = await SavedCareer.find({ userId });
+      const savedIds = new Set(savedDocs.map((doc) => doc.careerId));
+
+      // 4. Apply search & category query filters on top of recommended list
+      let filtered = [...recs.careers];
+
+      if (category && typeof category === 'string' && category.toLowerCase() !== 'all') {
+        filtered = filtered.filter(
+          (c) => c.category.toLowerCase() === category.toLowerCase()
+        );
+      }
+
+      if (search && typeof search === 'string') {
+        const query = search.toLowerCase().trim();
+        filtered = filtered.filter(
+          (c) =>
+            c.title.toLowerCase().includes(query) ||
+            c.category.toLowerCase().includes(query) ||
+            c.skills.some((s: string) => s.toLowerCase().includes(query))
+        );
+      }
+
+      // 5. Map saved status and relevance tags
+      const dreamCareer = userContext?.careerGoals?.dreamCareer || '';
+      const interests = userContext?.interests?.careerInterests || [];
+      const userDiscipline = userContext?.discipline || '';
+
+      const result = filtered.map((c) => {
+        let relevanceTag: 'Dream Career' | 'Interested' | 'Relevant' | null = null;
+        
+        if (dreamCareer && c.title.toLowerCase() === dreamCareer.toLowerCase()) {
+          relevanceTag = 'Dream Career';
+        } else if (interests.some((interest: string) => interest.toLowerCase() === c.title.toLowerCase())) {
+          relevanceTag = 'Interested';
+        } else if (
+          userDiscipline &&
+          (c.category.toLowerCase().includes(userDiscipline.toLowerCase()) ||
+            userDiscipline.toLowerCase().includes(c.category.toLowerCase()))
+        ) {
+          relevanceTag = 'Relevant';
+        }
+
+        return {
+          ...c,
+          saved: savedIds.has(c.id),
+          relevanceTag,
+        };
+      });
+
+      sendSuccess(res, 'Recommended careers retrieved successfully.', {
+        careers: result,
+        isProfileComplete: true,
+        isMockMode: config.CAREER_DATA_MODE === 'mock'
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST /api/careers/:id/recommendation-explanation
+   * Retrieve natural-language reasoning for a recommendation.
+   */
+  public static getRecommendationExplanation = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+
+      const { id } = req.params;
+      const userId = req.user.sub;
+
+      const career = CAREERS_DATA.find((c) => c.id === id);
+      if (!career) {
+        sendError(res, 'Career not found.', [], 404);
+        return;
+      }
+
+      const userContext = await PersonalizationService.getPersonalizationContext(userId);
+      const explanation = await AiService.generateRecommendationExplanation(career, userContext);
+
+      sendSuccess(res, 'AI recommendation explanation generated successfully.', {
+        explanation
+      });
     } catch (error) {
       next(error);
     }

@@ -9,7 +9,9 @@ import {
   X, 
   GitCompare, 
   Loader2, 
-  ArrowUpRight 
+  ArrowUpRight,
+  Sparkles,
+  Heart
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import styles from './CareerExplorerPage.module.css';
@@ -40,6 +42,9 @@ export const CareerExplorerPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
+  const [showRecommended, setShowRecommended] = useState<boolean>(false);
+  const [isProfileComplete, setIsProfileComplete] = useState<boolean>(true);
+  
   // Filter & Search states
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -55,19 +60,30 @@ export const CareerExplorerPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await CareerService.getCareers(
-        searchQuery ? searchQuery : undefined,
-        selectedCategory !== 'All' ? selectedCategory : undefined
-      );
-      setCareers(response.careers);
-      setIsMockMode(response.isMockMode);
+      if (showRecommended) {
+        const response = await CareerService.getRecommendations(
+          searchQuery ? searchQuery : undefined,
+          selectedCategory !== 'All' ? selectedCategory : undefined
+        );
+        setCareers(response.careers);
+        setIsProfileComplete(response.isProfileComplete);
+        setIsMockMode(response.isMockMode);
+      } else {
+        const response = await CareerService.getCareers(
+          searchQuery ? searchQuery : undefined,
+          selectedCategory !== 'All' ? selectedCategory : undefined
+        );
+        setCareers(response.careers);
+        setIsProfileComplete(true);
+        setIsMockMode(response.isMockMode);
+      }
     } catch (err: any) {
       console.error('Error fetching careers:', err);
       setError('Failed to load careers. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, showRecommended]);
 
   useEffect(() => {
     fetchCareers();
@@ -164,10 +180,42 @@ export const CareerExplorerPage: React.FC = () => {
                 Discover career pathways across various disciplines and match them to your goals.
               </p>
             </div>
-            <Link to="/saved" className={styles.savedLink}>
-              <BookmarkCheck size={16} />
-              <span>Saved Bookmarks</span>
-            </Link>
+            
+            <div className={styles.headerPills}>
+              <button 
+                className={`${styles.headerPill} ${showRecommended ? styles.headerPillActive : ''}`}
+                onClick={() => {
+                  setShowRecommended(prev => !prev);
+                  setSelectedCategory('All');
+                }}
+              >
+                <Sparkles size={16} />
+                <div style={{ textAlign: 'left' }}>
+                  <div className={styles.pillTitle}>Recommended for You</div>
+                  <div className={styles.pillSubtitle}>Phase 8</div>
+                </div>
+              </button>
+              
+              <button 
+                className={`${styles.headerPill} ${styles.headerPillDisabled}`}
+                disabled
+                title="Career Match is coming in Phase 9"
+              >
+                <Heart size={16} />
+                <div style={{ textAlign: 'left' }}>
+                  <div className={styles.pillTitle}>Career Match</div>
+                  <div className={styles.pillSubtitle}>Phase 9</div>
+                </div>
+              </button>
+              
+              <Link to="/saved" className={styles.headerPill} style={{ textDecoration: 'none' }}>
+                <BookmarkCheck size={16} />
+                <div style={{ textAlign: 'left' }}>
+                  <div className={styles.pillTitle}>Saved Bookmarks</div>
+                  <div className={styles.pillSubtitle}>Saved Careers</div>
+                </div>
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -225,25 +273,43 @@ export const CareerExplorerPage: React.FC = () => {
               Retry Load
             </button>
           </div>
+        ) : showRecommended && !isProfileComplete ? (
+          <div className={styles.neutralState}>
+            <p className={styles.neutralTitle}>Personalize Your Profile</p>
+            <p className={styles.neutralText}>
+              Complete more of your profile to receive personalized career recommendations.
+            </p>
+            <Link to="/profile" className="premiumButtonPrimary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+              Update Profile
+            </Link>
+          </div>
         ) : displayedCareers.length === 0 ? (
           <div className={styles.neutralState}>
-            <p className={styles.neutralTitle}>No Careers Found</p>
+            <p className={styles.neutralTitle}>{showRecommended ? "No Recommendations Available" : "No Careers Found"}</p>
             <p className={styles.neutralText}>
-              {searchQuery || selectedCategory !== 'All' || relevanceFilter !== 'All'
-                ? "No careers match the selected search terms or active filters."
-                : "No career definitions currently available."}
+              {showRecommended
+                ? "Personalized career recommendations are currently unavailable."
+                : (searchQuery || selectedCategory !== 'All' || relevanceFilter !== 'All'
+                  ? "No careers match the selected search terms or active filters."
+                  : "No career definitions currently available.")}
             </p>
-            {(searchQuery || selectedCategory !== 'All' || relevanceFilter !== 'All') && (
-              <button
-                className="premiumButtonSecondary"
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedCategory('All');
-                  setRelevanceFilter('All');
-                }}
-              >
-                Clear Filters
-              </button>
+            {showRecommended ? (
+              <Link to="/profile" className="premiumButtonSecondary" style={{ textDecoration: 'none' }}>
+                Edit Profile
+              </Link>
+            ) : (
+              (searchQuery || selectedCategory !== 'All' || relevanceFilter !== 'All') && (
+                <button
+                  className="premiumButtonSecondary"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedCategory('All');
+                    setRelevanceFilter('All');
+                  }}
+                >
+                  Clear Filters
+                </button>
+              )
             )}
           </div>
         ) : (
@@ -290,6 +356,20 @@ export const CareerExplorerPage: React.FC = () => {
                       {career.skills.length > 3 && (
                         <span className={styles.skillTag}>+{career.skills.length - 3}</span>
                       )}
+                    </div>
+                  )}
+
+                  {showRecommended && career.recommendationReason && (
+                    <div style={{
+                      marginTop: '12px',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      background: 'rgba(124, 58, 237, 0.05)',
+                      border: '1px solid rgba(124, 58, 237, 0.15)'
+                    }}>
+                      <p style={{ margin: 0, fontSize: '0.78rem', color: '#a78bfa', lineHeight: '1.4' }}>
+                        <strong>Relevance:</strong> {career.recommendationReason}
+                      </p>
                     </div>
                   )}
                 </div>

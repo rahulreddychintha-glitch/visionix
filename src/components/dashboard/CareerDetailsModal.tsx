@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { X, Send, Sparkles, Loader2, ArrowLeft, Rocket } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { CareerService } from '../../services/career.service';
 import type { Career } from '../../services/career.service';
 import { AiApiService } from '../../services/ai.service';
 import { MarkdownRenderer } from '../ui/MarkdownRenderer';
@@ -25,6 +26,28 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
   const [inputText, setInputText] = useState<string>('');
   const [isSending, setIsSending] = useState<boolean>(false);
   const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
+  const [aiExplanation, setAiExplanation] = useState<string | null>(null);
+  const [loadingExplanation, setLoadingExplanation] = useState<boolean>(false);
+
+  // Reset explanation when career changes
+  useEffect(() => {
+    setAiExplanation(null);
+    setLoadingExplanation(false);
+  }, [career?.id]);
+
+  const handleGenerateExplanation = async () => {
+    if (!career) return;
+    try {
+      setLoadingExplanation(true);
+      const explanation = await CareerService.getRecommendationExplanation(career.id);
+      setAiExplanation(explanation);
+    } catch (err) {
+      console.error('Error generating AI explanation:', err);
+      setAiExplanation('Could not generate the AI explanation at this time. Please try again.');
+    } finally {
+      setLoadingExplanation(false);
+    }
+  };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -163,6 +186,49 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
               <p className={styles.infoLabel}>Description</p>
               <p className={styles.infoVal}>{career.description}</p>
             </div>
+
+            {career.recommendationReason && (
+              <div style={{ padding: '14px', borderRadius: '8px', background: 'rgba(124, 58, 237, 0.04)', border: '1px solid rgba(124, 58, 237, 0.12)', marginBottom: '16px' }}>
+                <p className={styles.infoLabel} style={{ color: '#a78bfa', display: 'flex', alignItems: 'center', gap: '6px', margin: '0 0 8px 0', fontSize: '0.74rem' }}>
+                  <Sparkles size={14} />
+                  <span>Recommendation Insight</span>
+                </p>
+                <p style={{ margin: '0 0 10px 0', fontSize: '0.88rem', color: 'var(--text-primary)', lineHeight: '1.45' }}>
+                  {career.recommendationReason}
+                </p>
+                
+                {aiExplanation ? (
+                  <div style={{ marginTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '8px' }}>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                      {aiExplanation}
+                    </p>
+                  </div>
+                ) : loadingExplanation ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
+                    <Loader2 className="spin-animation" size={14} style={{ color: '#a78bfa' }} />
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Generating AI explanation...</span>
+                  </div>
+                ) : (
+                  <button 
+                    className="premiumButtonPrimary" 
+                    style={{ 
+                      padding: '5px 10px', 
+                      fontSize: '0.74rem', 
+                      background: 'rgba(124, 58, 237, 0.12)', 
+                      border: '1px solid rgba(124, 58, 237, 0.25)', 
+                      color: '#a78bfa',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      marginTop: '4px'
+                    }}
+                    onClick={handleGenerateExplanation}
+                  >
+                    Why is this recommended? Ask AI
+                  </button>
+                )}
+              </div>
+            )}
 
             <div className={styles.infoSection}>
               <p className={styles.infoLabel}>Typical Skills Required</p>

@@ -14,10 +14,22 @@ router.use(authenticate);
 router.get('/', CareerController.listCareers);
 
 /**
+ * GET /api/careers/recommended
+ * List personalized recommendations
+ */
+router.get('/recommended', CareerController.listRecommendedCareers);
+
+/**
  * GET /api/careers/saved
  * List all bookmarked careers
  */
 router.get('/saved', CareerController.getSavedCareers);
+
+/**
+ * POST /api/careers/:id/recommendation-explanation
+ * Generate natural-language explanation for why a career is recommended
+ */
+router.post('/:id/recommendation-explanation', CareerController.getRecommendationExplanation);
 
 /**
  * GET /api/careers/:id

@@ -13,6 +13,8 @@ export interface Career {
   demandLevel: string;
   saved: boolean;
   relevanceTag: 'Dream Career' | 'Interested' | 'Relevant' | null;
+  recommendationReason?: string;
+  relevanceScore?: number;
 }
 
 export interface CareersListResponse {
@@ -37,6 +39,24 @@ export class CareerService {
   public static async getSavedCareers(): Promise<CareersListResponse> {
     const response = await api.get('/careers/saved');
     return response.data.data;
+  }
+
+  /**
+   * Fetch personalized career recommendations based on user profile.
+   */
+  public static async getRecommendations(search?: string, category?: string): Promise<CareersListResponse & { isProfileComplete: boolean }> {
+    const response = await api.get('/careers/recommended', {
+      params: { search, category }
+    });
+    return response.data.data;
+  }
+
+  /**
+   * Fetch natural-language AI explanation for why a career is recommended.
+   */
+  public static async getRecommendationExplanation(id: string): Promise<string> {
+    const response = await api.post(`/careers/${id}/recommendation-explanation`);
+    return response.data.data.explanation;
   }
 
   /**

@@ -336,4 +336,72 @@ Instructions:
 
     throw lastError || new Error('Failed to connect to Gemini API after maximum retry attempts.');
   }
+
+  /**
+   * Generates a personalized natural-language explanation for why a career is recommended.
+   */
+  public static async generateRecommendationExplanation(
+    career: any,
+    pContext: any
+  ): Promise<string> {
+    const systemPrompt = `You are Visionix, an AI career guidance counselor.
+Your task is to explain directly to the user why the career "${career.title}" is recommended for them.
+
+User Profile:
+- Name: ${pContext.name}
+- Stream/Discipline: ${pContext.discipline}
+- Education Level: ${pContext.educationLevel}
+- Dream Career: ${pContext.dreamCareer}
+- Skills: ${pContext.skills?.technicalSkills?.slice(0, 5).join(', ') || 'None specified'}
+- Interests: ${pContext.interests?.careerInterests?.slice(0, 5).join(', ') || 'None specified'}
+
+Career Details:
+- Title: ${career.title}
+- Category: ${career.category}
+- Skills Required: ${career.skills.join(', ')}
+- Description: ${career.description}
+
+Instructions:
+1. Write a direct, conversational explanation (3-4 sentences, single paragraph) explaining why this career is a strong match for their stream, skills, or interests.
+2. Address the user directly (e.g. "Since you're studying computer science...").
+3. Do not invent any salary figures, employment rates, growth percentages, job counts, or company rankings that are not in the career details above.
+4. If requested or necessary details are missing from the verified data, state clearly that verified details are currently unavailable. Do not pretend unavailable data is verified.
+5. Keep the explanation action-oriented and encouraging, without making definitive claims about their future success.`;
+
+    const modelName = 'gemini-3.5-flash-lite';
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${config.GEMINI_API_KEY}`;
+
+    if (!config.GEMINI_API_KEY || config.GEMINI_API_KEY.trim().length === 0) {
+      return "Visionix AI service is currently unconfigured. The GEMINI_API_KEY environment variable is missing on the server.";
+    }
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            { role: 'user', parts: [{ text: `Explain why I should consider a career as a ${career.title}.` }] }
+          ],
+          systemInstruction: {
+            parts: [{ text: systemPrompt }]
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gemini API returned status ${response.status}`);
+      }
+
+      const data: any = await response.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) {
+        throw new Error('Empty response from Gemini API.');
+      }
+      return text.trim();
+    } catch (err: any) {
+      console.error('[Visionix AI] Gemini recommendation explanation request failed:', err?.message || err);
+      return "An error occurred while generating the AI explanation. Please try again later.";
+    }
+  }
 }
