@@ -1,11 +1,13 @@
 import config from '../config/env';
 import { AiConversationHistory } from '../models/AiConversationHistory';
 import { PersonalizationService, IPersonalizationContext } from './personalization.service';
+import { CAREERS_DATA } from '../constants/careers.constants';
 
 export interface IAiChatMessageInput {
   userId: string;
   message: string;
   sessionId?: string;
+  careerId?: string;
 }
 
 export interface IAiChatMessageResponse {
@@ -24,10 +26,27 @@ export class AiService {
    * Generates a context-aware AI response for the user's message.
    */
   public static async processChatMessage(input: IAiChatMessageInput): Promise<IAiChatMessageResponse> {
-    const { userId, message, sessionId: providedSessionId } = input;
+    const { userId, message, sessionId: providedSessionId, careerId } = input;
 
     // Load user's personalization context
     const pContext = await PersonalizationService.getPersonalizationContext(userId);
+
+    // Validate careerId against server-side verified CAREERS_DATA
+    let verifiedCareerContext: any = null;
+    if (careerId) {
+      const career = CAREERS_DATA.find((c) => c.id === careerId);
+      if (career) {
+        verifiedCareerContext = {
+          id: career.id,
+          title: career.title,
+          category: career.category,
+          description: career.description,
+          education: career.education,
+          skills: career.skills,
+          responsibilities: career.responsibilities,
+        };
+      }
+    }
 
     // Fetch or create AI conversation history record
     let historyDoc = await AiConversationHistory.findOne({ userId });
@@ -40,9 +59,13 @@ export class AiService {
     let session = historyDoc.sessions.find((s) => s.sessionId === sessionId);
 
     if (!session) {
+      let title = message.length > 30 ? `${message.substring(0, 30)}...` : message;
+      if (verifiedCareerContext) {
+        title = `Career: ${verifiedCareerContext.title}`;
+      }
       session = {
         sessionId,
-        title: message.length > 30 ? `${message.substring(0, 30)}...` : message,
+        title,
         messages: [],
         lastActive: new Date(),
       };
@@ -66,7 +89,7 @@ export class AiService {
       providerUsed = 'unconfigured';
     } else {
       try {
-        aiReply = await this.callGeminiApi(message, pContext, session.messages);
+        aiReply = await this.callGeminiApi(message, pContext, session.messages, verifiedCareerContext);
         providerUsed = 'gemini';
       } catch (err: any) {
         console.error('[Visionix AI] Gemini API request failed:', err?.message || err);
@@ -148,9 +171,18 @@ export class AiService {
   private static async callGeminiApi(
     userMessage: string,
     pContext: IPersonalizationContext,
-    messagesHistory: Array<{ role: 'user' | 'model' | 'system'; content: string }>
+    messagesHistory: Array<{ role: 'user' | 'model' | 'system'; content: string }>,
+    careerContext?: {
+      id: string;
+      title: string;
+      category: string;
+      description: string;
+      education: string;
+      skills: string[];
+      responsibilities: string[];
+    }
   ): Promise<string> {
-    const systemPrompt = `You are Visionix, a concise AI career mentor and academic advisor.
+    let systemPrompt = `You are Visionix, a concise AI career mentor and academic advisor.
 User Profile Context:
 - Name: ${pContext.name}
 - Discipline/Stream: ${pContext.discipline}
@@ -159,7 +191,42 @@ User Profile Context:
 - Technical/Core Skills: ${pContext.skills.technicalSkills.join(', ') || 'Not specified'}
 - Soft Skills: ${pContext.skills.softSkills.join(', ') || 'Not specified'}
 - Career Objectives: ${pContext.careerGoals.careerObjectives || 'Not specified'}
+`;
 
+    if (careerContext) {
+      systemPrompt += `
+You are assisting the user with questions about the career currently selected in Visionix Career Explorer.
+
+Current career:
+${careerContext.title}
+
+Category:
+${careerContext.category}
+
+Verified skills:
+${careerContext.skills.join(', ') || 'Not Specified'}
+
+Verified career information:
+- Description: ${careerContext.description}
+- Typical Education: ${careerContext.education}
+- Typical Responsibilities: ${careerContext.responsibilities.join(', ') || 'Not Specified'}
+
+Instructions:
+1. Persona & Tone: Be a friendly, conversational mentor. Write with a direct, conversational, and personalized tone. Answer questions specifically about this career: ${careerContext.title}.
+2. Personalization: Personalize explanations using the user's verified profile details (discipline/stream, education level) when relevant to their fit for this career.
+3. Content & Safety Constraints:
+   - Do not invent statistics, salaries, employment numbers, growth rates, rankings, companies, or other factual data that is not available from the verified career information listed above.
+   - If requested information is unavailable, clearly say that verified information is currently unavailable. Do not pretend unavailable information is verified.
+   - Give practical, understandable career guidance. Do not make definitive claims about the user's future success.
+   - If the user asks for a roadmap, provide a general educational roadmap based on the available career context rather than pretending it is an official or verified roadmap.
+4. Conciseness & Length:
+   - Keep responses easy to scan. Prefer short paragraphs and bullet points. Avoid huge blocks of text.
+   - For simple questions, provide a short 2-5 sentence answer.
+   - For regular or complex questions, keep responses to approximately 3-7 short paragraphs OR 3-7 useful bullet points.
+5. Formatting: Use Markdown (headings, bold, lists, paragraphs) for structure.
+6. Follow-up: When useful, end with at most ONE concise follow-up question related to this career.`;
+    } else {
+      systemPrompt += `
 Instructions:
 1. Persona & Tone: Be a friendly, conversational mentor. Write with a direct, conversational, and personalized tone.
 2. Conciseness & Length:
@@ -174,6 +241,7 @@ Instructions:
 4. Formatting: Use Markdown (headings, bold, lists, paragraphs, code blocks when necessary) for structure.
 5. Roadmaps: If a career roadmap is explicitly requested, use a compact 5-step structure (Goal, 1. Current position, 2. Next skill/education step, 3. Next milestone, 4. Practical experience, 5. Target outcome) with short, single-sentence descriptions per step.
 6. Follow-up: When useful, end with at most ONE concise follow-up question. Do not ask multiple questions at once.`;
+    }
 
     const modelName = 'gemini-3.5-flash-lite';
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${config.GEMINI_API_KEY}`;

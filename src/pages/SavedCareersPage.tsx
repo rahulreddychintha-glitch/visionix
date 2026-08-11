@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import styles from './CareerExplorerPage.module.css';
+import { CareerDetailsModal } from '../components/dashboard/CareerDetailsModal';
 
 export const SavedCareersPage: React.FC = () => {
   const [savedCareers, setSavedCareers] = useState<Career[]>([]);
@@ -228,82 +229,12 @@ export const SavedCareersPage: React.FC = () => {
 
         {/* Detail Modal */}
         {selectedCareer && (
-          <div className={styles.modalOverlay} onClick={() => setSelectedCareer(null)}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.modalHeader}>
-                <div className={styles.modalTitleWrapper}>
-                  <p className={styles.cardCategory} style={{ marginBottom: '2px' }}>{selectedCareer.category}</p>
-                  <h2 className="text-heading" style={{ fontSize: '1.45rem' }}>{selectedCareer.title}</h2>
-                </div>
-                <button className={styles.modalCloseBtn} onClick={() => setSelectedCareer(null)} aria-label="Close modal">
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className={styles.modalBody}>
-                <div className={styles.infoSection}>
-                  <p className={styles.infoLabel}>Description</p>
-                  <p className={styles.infoVal}>{selectedCareer.description}</p>
-                </div>
-
-                <div className={styles.infoSection}>
-                  <p className={styles.infoLabel}>Typical Skills Required</p>
-                  {selectedCareer.skills.length > 0 ? (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
-                      {selectedCareer.skills.map((skill) => (
-                        <span key={skill} className={styles.skillTag} style={{ fontSize: '0.78rem', padding: '4px 10px' }}>
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className={styles.infoVal}>Not Specified</p>
-                  )}
-                </div>
-
-                <div className={styles.infoSection}>
-                  <p className={styles.infoLabel}>Education Pathway</p>
-                  <p className={styles.infoVal}>{selectedCareer.education}</p>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <div className={styles.infoSection}>
-                    <p className={styles.infoLabel}>Salary Range</p>
-                    <p className={styles.infoVal}>{selectedCareer.salaryRange}</p>
-                  </div>
-                  <div className={styles.infoSection}>
-                    <p className={styles.infoLabel}>Growth Outlook</p>
-                    <p className={styles.infoVal}>{selectedCareer.growthRate}</p>
-                  </div>
-                </div>
-
-                <div className={styles.infoSection}>
-                  <p className={styles.infoLabel}>Demand Level</p>
-                  <p className={styles.infoVal}>{selectedCareer.demandLevel}</p>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', marginTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '16px' }}>
-                <button
-                  className="premiumButtonSecondary"
-                  style={{ flex: 1 }}
-                  onClick={() => handleRemoveBookmark(selectedCareer)}
-                >
-                  Remove Bookmark
-                </button>
-                <button
-                  className="premiumButtonSecondary"
-                  onClick={() => {
-                    handleToggleCompare(selectedCareer);
-                    setSelectedCareer(null);
-                  }}
-                >
-                  <GitCompare size={14} />
-                  <span>{compareList.some((c) => c.id === selectedCareer.id) ? 'Remove Compare' : 'Add to Compare'}</span>
-                </button>
-              </div>
-            </div>
-          </div>
+          <CareerDetailsModal
+            career={selectedCareer}
+            onClose={() => setSelectedCareer(null)}
+            onToggleBookmark={handleRemoveBookmark}
+            onToggleCompare={handleToggleCompare}
+          />
         )}
 
         {/* Comparison Modal */}

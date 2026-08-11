@@ -5,10 +5,11 @@ export class AiApiService {
   /**
    * Send a chat message to Visionix AI Assistant.
    */
-  public static async sendMessage(message: string, sessionId?: string): Promise<AiChatResponse> {
+  public static async sendMessage(message: string, sessionId?: string, careerId?: string): Promise<AiChatResponse> {
     const response = await api.post<{ success: boolean; data: AiChatResponse }>('/ai/chat', {
       message,
       sessionId,
+      careerId,
     });
     return response.data.data;
   }

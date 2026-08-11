@@ -29,12 +29,13 @@ export class AiController {
       }
 
       const userId = req.user.sub;
-      const { message, sessionId } = req.body;
+      const { message, sessionId, careerId } = req.body;
 
       const result = await AiService.processChatMessage({
         userId,
         message,
         sessionId,
+        careerId,
       });
 
       sendSuccess(res, 'AI response generated successfully.', result);

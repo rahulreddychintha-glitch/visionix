@@ -26,6 +26,10 @@ router.post(
       .optional()
       .isString()
       .trim(),
+    body('careerId')
+      .optional()
+      .isString()
+      .trim(),
   ],
   AiController.chat
 );
