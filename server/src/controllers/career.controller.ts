@@ -4,6 +4,7 @@ import { SavedCareer } from '../models/SavedCareer';
 import { PersonalizationService } from '../services/personalization.service';
 import { RecommendationService } from '../services/recommendation.service';
 import { AiService } from '../services/ai.service';
+import { MatchService } from '../services/match.service';
 import { sendSuccess, sendError } from '../utils/response';
 import config from '../config/env';
 
@@ -345,6 +346,69 @@ export class CareerController {
       const explanation = await AiService.generateRecommendationExplanation(career, userContext);
 
       sendSuccess(res, 'AI recommendation explanation generated successfully.', {
+        explanation
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * GET /api/careers/:id/match
+   * Evaluate user profile compatibility against a target career.
+   */
+  public static getCareerMatch = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+
+      const { id } = req.params;
+      const userId = req.user.sub;
+
+      const career = CAREERS_DATA.find((c) => c.id === id);
+      if (!career) {
+        sendError(res, 'Career not found.', [], 404);
+        return;
+      }
+
+      const userContext = await PersonalizationService.getPersonalizationContext(userId);
+      const match = MatchService.calculateMatch(career, userContext);
+
+      sendSuccess(res, 'Career match calculated successfully.', {
+        match
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST /api/careers/:id/match/explanation
+   * Generate natural-language analysis for a career match.
+   */
+  public static getCareerMatchExplanation = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+
+      const { id } = req.params;
+      const userId = req.user.sub;
+
+      const career = CAREERS_DATA.find((c) => c.id === id);
+      if (!career) {
+        sendError(res, 'Career not found.', [], 404);
+        return;
+      }
+
+      const userContext = await PersonalizationService.getPersonalizationContext(userId);
+      const match = MatchService.calculateMatch(career, userContext);
+      const explanation = await AiService.generateMatchExplanation(career, match, userContext);
+
+      sendSuccess(res, 'Career match explanation generated successfully.', {
         explanation
       });
     } catch (error) {

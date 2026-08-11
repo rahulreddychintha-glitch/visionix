@@ -22,6 +22,18 @@ export interface CareersListResponse {
   isMockMode: boolean;
 }
 
+export interface CareerMatchResult {
+  careerId: string;
+  careerTitle: string;
+  matchScore: number;
+  matchLevel: 'Strong' | 'Moderate' | 'Low' | 'Needs Development';
+  isProfileComplete: boolean;
+  strengths: string[];
+  skillsYouHave: string[];
+  skillGaps: string[];
+  improvementSuggestions: string[];
+}
+
 export class CareerService {
   /**
    * Fetch all careers with optional search and category filters.
@@ -56,6 +68,22 @@ export class CareerService {
    */
   public static async getRecommendationExplanation(id: string): Promise<string> {
     const response = await api.post(`/careers/${id}/recommendation-explanation`);
+    return response.data.data.explanation;
+  }
+
+  /**
+   * Fetch deterministic career match analysis for a selected career.
+   */
+  public static async getCareerMatch(id: string): Promise<CareerMatchResult> {
+    const response = await api.get(`/careers/${id}/match`);
+    return response.data.data.match;
+  }
+
+  /**
+   * Fetch natural-language AI explanation of the calculated match score.
+   */
+  public static async getCareerMatchExplanation(id: string): Promise<string> {
+    const response = await api.post(`/careers/${id}/match/explanation`);
     return response.data.data.explanation;
   }
 

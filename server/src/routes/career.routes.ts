@@ -32,6 +32,18 @@ router.get('/saved', CareerController.getSavedCareers);
 router.post('/:id/recommendation-explanation', CareerController.getRecommendationExplanation);
 
 /**
+ * GET /api/careers/:id/match
+ * Evaluate career match compatibility
+ */
+router.get('/:id/match', CareerController.getCareerMatch);
+
+/**
+ * POST /api/careers/:id/match/explanation
+ * Generate natural-language match summary explanation
+ */
+router.post('/:id/match/explanation', CareerController.getCareerMatchExplanation);
+
+/**
  * GET /api/careers/:id
  * Retrieve details of a single career
  */

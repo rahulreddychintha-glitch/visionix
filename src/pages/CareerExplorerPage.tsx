@@ -199,12 +199,13 @@ export const CareerExplorerPage: React.FC = () => {
               <button 
                 className={`${styles.headerPill} ${styles.headerPillDisabled}`}
                 disabled
-                title="Career Match is coming in Phase 9"
+                title="Select any career below and click 'View Details' to calculate your personalized Career Match score!"
+                style={{ cursor: 'help' }}
               >
-                <Heart size={16} />
+                <Heart size={16} style={{ color: '#ec4899' }} />
                 <div style={{ textAlign: 'left' }}>
                   <div className={styles.pillTitle}>Career Match</div>
-                  <div className={styles.pillSubtitle}>Phase 9</div>
+                  <div className={styles.pillSubtitle}>Calculated in Details</div>
                 </div>
               </button>
               

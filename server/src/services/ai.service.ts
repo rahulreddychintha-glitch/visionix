@@ -404,4 +404,74 @@ Instructions:
       return "An error occurred while generating the AI explanation. Please try again later.";
     }
   }
+
+  /**
+   * Generates a personalized natural-language explanation of a Career Match analysis.
+   */
+  public static async generateMatchExplanation(
+    career: any,
+    matchData: any,
+    pContext: any
+  ): Promise<string> {
+    const systemPrompt = `You are Visionix, an AI career guidance counselor.
+Explain directly to the user how they match the career "${career.title}" based on their calculated match score of ${matchData.matchScore}% (${matchData.matchLevel} Alignment).
+
+User Profile:
+- Stream/Discipline: ${pContext.discipline}
+- Education Level: ${pContext.educationLevel}
+- Dream Career: ${pContext.dreamCareer}
+- Skills: ${pContext.skills?.technicalSkills?.slice(0, 5).join(', ') || 'None specified'}
+
+Calculated Match Data:
+- Overall Score: ${matchData.matchScore}%
+- Match Level: ${matchData.matchLevel}
+- Strengths Identified: ${matchData.strengths.join('; ')}
+- Matching Skills: ${matchData.skillsYouHave.join(', ') || 'None'}
+- Skill Gaps: ${matchData.skillGaps.map((sg: string) => sg.replace('Missing verified skill: ', '')).join(', ') || 'None'}
+- Improvement Suggestions: ${matchData.improvementSuggestions.join('; ')}
+
+Instructions:
+1. Provide a constructive, personalized 3-4 sentence summary explanation.
+2. Emphasize their strengths and highlight the primary skill gaps or actions needed to improve their compatibility.
+3. Use encouraging, supportive language (e.g. "To bridge the gap, focus on developing...").
+4. Do not invent any salary numbers, growth statistics, job counts, or company rankings.
+5. If requested or necessary details are missing, state that verified details are currently unavailable. Do not pretend unavailable details are verified.
+6. Do not modify the score or matching parameters; explain the deterministic match output directly.`;
+
+    const modelName = 'gemini-3.5-flash-lite';
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${config.GEMINI_API_KEY}`;
+
+    if (!config.GEMINI_API_KEY || config.GEMINI_API_KEY.trim().length === 0) {
+      return "Visionix AI service is currently unconfigured. The GEMINI_API_KEY environment variable is missing on the server.";
+    }
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            { role: 'user', parts: [{ text: `Explain my ${matchData.matchScore}% match score for a career as a ${career.title}.` }] }
+          ],
+          systemInstruction: {
+            parts: [{ text: systemPrompt }]
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gemini API returned status ${response.status}`);
+      }
+
+      const data: any = await response.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) {
+        throw new Error('Empty response from Gemini API.');
+      }
+      return text.trim();
+    } catch (err: any) {
+      console.error('[Visionix AI] Gemini match explanation request failed:', err?.message || err);
+      return "An error occurred while generating the match explanation. Please rely on the deterministic indicators below.";
+    }
+  }
 }
