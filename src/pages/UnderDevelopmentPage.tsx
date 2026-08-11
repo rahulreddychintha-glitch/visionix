@@ -2,12 +2,16 @@ import React from 'react';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { HelpCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 
 interface UnderDevelopmentPageProps {
   title: string;
 }
 
 export const UnderDevelopmentPage: React.FC<UnderDevelopmentPageProps> = ({ title }) => {
+  const location = useLocation();
+  const selectedCareer = location.state?.selectedCareer;
+
   return (
     <DashboardLayout>
       <div className="ambient-noise" />
@@ -50,6 +54,28 @@ export const UnderDevelopmentPage: React.FC<UnderDevelopmentPageProps> = ({ titl
               {title} Page
             </p>
           </div>
+
+          {selectedCareer && (
+            <div style={{
+              padding: '12px 18px',
+              borderRadius: '8px',
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.2)',
+              width: '100%',
+              textAlign: 'left'
+            }}>
+              <p className="text-caption" style={{ color: '#10b981', margin: '0 0 4px 0', fontSize: '0.76rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                🚀 Roadmap Destination Target
+              </p>
+              <p className="text-heading" style={{ fontSize: '1.1rem', margin: 0 }}>
+                {selectedCareer.title}
+              </p>
+              <p className="text-description" style={{ fontSize: '0.8rem', marginTop: '6px', lineHeight: '1.4' }}>
+                Verified Category: {selectedCareer.category}
+              </p>
+            </div>
+          )}
+
           <p className="text-description" style={{ fontSize: '0.85rem', lineHeight: '1.5' }}>
             The {title.toLowerCase()} page details and backend configurations are currently being prepared for the next release phase. Live updates will reflect once the server synchronization completes.
           </p>

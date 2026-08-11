@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Send, Sparkles, Loader2, ArrowLeft } from 'lucide-react';
+import { X, Send, Sparkles, Loader2, ArrowLeft, Rocket } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { Career } from '../../services/career.service';
 import { AiApiService } from '../../services/ai.service';
 import { MarkdownRenderer } from '../ui/MarkdownRenderer';
@@ -18,6 +19,7 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
   onToggleBookmark,
   onToggleCompare
 }) => {
+  const navigate = useNavigate();
   const [isChatActive, setIsChatActive] = useState<boolean>(false);
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'model' | 'system'; content: string; timestamp: string | Date }>>([]);
   const [inputText, setInputText] = useState<string>('');
@@ -275,7 +277,7 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
         </div>
 
         {/* Modal Footer Controls */}
-        <div style={{ display: 'flex', gap: '12px', marginTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '16px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '12px', marginTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '16px', flexWrap: 'wrap', width: '100%' }}>
           <button
             className={career.saved ? 'premiumButtonSecondary' : 'premiumButtonPrimary'}
             style={{ flex: 1, minWidth: '130px' }}
@@ -295,7 +297,7 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
             Compare
           </button>
 
-          {!isChatActive && (
+          {!isChatActive ? (
             <button
               className="premiumButtonPrimary"
               style={{ 
@@ -314,7 +316,37 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
               <Sparkles size={16} />
               <span>Ask AI About Career</span>
             </button>
+          ) : (
+            <button
+              className="premiumButtonSecondary"
+              style={{ flex: 1, minWidth: '130px' }}
+              onClick={() => setIsChatActive(false)}
+            >
+              Back to Details
+            </button>
           )}
+
+          <button
+            className="premiumButtonPrimary"
+            style={{ 
+              flex: 1.2, 
+              minWidth: '160px',
+              background: 'linear-gradient(135deg, #059669, #10b981)',
+              border: 'none',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}
+            onClick={() => {
+              navigate('/roadmap', { state: { selectedCareer: career } });
+              onClose();
+            }}
+          >
+            <Rocket size={16} />
+            <span>Create Roadmap</span>
+          </button>
         </div>
       </div>
     </div>
