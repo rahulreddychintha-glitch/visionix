@@ -234,6 +234,7 @@ export const SavedCareersPage: React.FC = () => {
             onClose={() => setSelectedCareer(null)}
             onToggleBookmark={handleRemoveBookmark}
             onToggleCompare={handleToggleCompare}
+            compareList={compareList}
           />
         )}
 

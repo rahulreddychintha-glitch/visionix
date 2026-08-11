@@ -15,6 +15,7 @@ export interface Career {
   relevanceTag: 'Dream Career' | 'Interested' | 'Relevant' | null;
   recommendationReason?: string;
   relevanceScore?: number;
+  match?: CareerMatchResult;
 }
 
 export interface CareersListResponse {

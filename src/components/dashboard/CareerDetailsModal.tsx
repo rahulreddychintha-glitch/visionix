@@ -12,14 +12,17 @@ interface CareerDetailsModalProps {
   onClose: () => void;
   onToggleBookmark: (career: Career) => void;
   onToggleCompare: (career: Career) => void;
+  compareList: Career[];
 }
 
 export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
   career,
   onClose,
   onToggleBookmark,
-  onToggleCompare
+  onToggleCompare,
+  compareList
 }) => {
+  const isInCompare = career ? compareList.some((c) => c.id === career.id) : false;
   const navigate = useNavigate();
   const [isChatActive, setIsChatActive] = useState<boolean>(false);
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'model' | 'system'; content: string; timestamp: string | Date }>>([]);
@@ -592,14 +595,23 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
           </button>
           
           <button
-            className="premiumButtonSecondary"
-            style={{ flex: 1, minWidth: '130px' }}
-            onClick={() => {
-              onToggleCompare(career);
-              onClose();
+            className={isInCompare ? "premiumButtonPrimary" : "premiumButtonSecondary"}
+            style={{ 
+              flex: 1, 
+              minWidth: '130px',
+              background: isInCompare ? 'rgba(236, 72, 153, 0.15)' : '',
+              border: isInCompare ? '1px solid rgba(236, 72, 153, 0.4)' : '',
+              color: isInCompare ? '#ec4899' : ''
             }}
+            onClick={() => {
+              if (career) {
+                onToggleCompare(career);
+              }
+            }}
+            disabled={!isInCompare && compareList.length >= 3}
+            title={!isInCompare && compareList.length >= 3 ? "You can compare up to 3 careers max." : ""}
           >
-            Compare
+            {isInCompare ? 'Remove Compare' : 'Add to Compare'}
           </button>
 
           {!isChatActive ? (

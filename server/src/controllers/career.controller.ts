@@ -81,10 +81,16 @@ export class CareerController {
           relevanceTag = 'Relevant';
         }
 
+        let match = null;
+        if (userContext) {
+          match = MatchService.calculateMatch(c, userContext);
+        }
+
         return {
           ...c,
           saved: savedIds.has(c.id),
           relevanceTag,
+          match
         };
       });
 
@@ -305,10 +311,16 @@ export class CareerController {
           relevanceTag = 'Relevant';
         }
 
+        let match = null;
+        if (userContext) {
+          match = MatchService.calculateMatch(c, userContext);
+        }
+
         return {
           ...c,
           saved: savedIds.has(c.id),
           relevanceTag,
+          match
         };
       });
 
