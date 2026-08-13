@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import axios from 'axios';
 import { PersonalizationService } from '../services/personalization.service';
 import { RecommendationService } from '../services/recommendation.service';
+import { YoutubeService } from '../services/youtube.service';
 import { UserPreferences } from '../models/UserPreferences';
 import { sendSuccess, sendError } from '../utils/response';
 
@@ -57,33 +57,19 @@ export class PersonalizationController {
         query = 'professional career development skills';
       }
 
-      const apiKey = process.env.YOUTUBE_API_KEY;
-      if (!apiKey) {
-        sendSuccess(res, 'YouTube search disabled.', []);
-        return;
-      }
+      const videos = await YoutubeService.searchVideos(query, 2);
 
-      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&maxResults=2&type=video&key=${apiKey}`;
-      const response = await axios.get(url, { timeout: 5000 });
+      const mappedVideos = videos.map((v) => ({
+        id: v.videoId,
+        title: v.title,
+        channel: v.channelTitle,
+        duration: '15 mins',
+        views: '100K+ views',
+        publishedAt: v.publishedAt,
+        thumbnail: v.thumbnail,
+      }));
 
-      if (response.data?.items && Array.isArray(response.data.items) && response.data.items.length > 0) {
-        const videos = response.data.items.map((item: any) => {
-          const thumbnails = item.snippet?.thumbnails || {};
-          const thumbnailUrl = thumbnails.high?.url || thumbnails.medium?.url || thumbnails.default?.url || `https://img.youtube.com/vi/${item.id?.videoId}/mqdefault.jpg`;
-          return {
-            id: item.id?.videoId,
-            title: item.snippet?.title || 'YouTube Tutorial',
-            channel: item.snippet?.channelTitle || 'YouTube Creator',
-            duration: '15 mins',
-            views: '100K+ views',
-            publishedAt: item.snippet?.publishedAt ? new Date(item.snippet.publishedAt).toLocaleDateString() : 'Recent',
-            thumbnail: thumbnailUrl
-          };
-        });
-        sendSuccess(res, 'Personalized YouTube videos retrieved successfully.', videos);
-      } else {
-        sendSuccess(res, 'YouTube search returned no results.', []);
-      }
+      sendSuccess(res, 'Personalized YouTube videos retrieved successfully.', mappedVideos);
     } catch {
       sendSuccess(res, 'YouTube search failed.', []);
     }

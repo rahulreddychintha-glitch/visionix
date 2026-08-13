@@ -54,7 +54,7 @@ const NAV_GROUPS = [
       { label: 'YouTube Learning', path: '/youtube', icon: Video },
       { label: 'Interview Prep', path: '/interview', icon: HelpCircle },
       { label: 'Certifications', path: '/certifications', icon: Award },
-      { label: 'Entrance Exams', path: '/exams', icon: FileText },
+      { label: 'Quizzes & Assessments', path: '/exams', icon: FileText },
     ]
   },
   {

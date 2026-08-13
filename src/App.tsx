@@ -10,6 +10,11 @@ import { AiAssistantPage } from './pages/AiAssistantPage';
 import { CareerExplorerPage } from './pages/CareerExplorerPage';
 import { SavedCareersPage } from './pages/SavedCareersPage';
 import { UnderDevelopmentPage } from './pages/UnderDevelopmentPage';
+import { CareerRoadmapPage } from './pages/CareerRoadmapPage';
+import { MyProgressPage } from './pages/MyProgressPage';
+import { LearningHubPage } from './pages/LearningHubPage';
+import { YouTubeLearningPage } from './pages/YouTubeLearningPage';
+import { ExamsPage } from './pages/ExamsPage';
 import { Footer } from './components/Footer';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProfileProvider } from './contexts/ProfileContext';
@@ -117,8 +122,53 @@ function App() {
                   } 
                 />
 
+                <Route 
+                  path="/roadmap" 
+                  element={
+                    <ProtectedRoute>
+                      <CareerRoadmapPage />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                <Route 
+                  path="/progress" 
+                  element={
+                    <ProtectedRoute>
+                      <MyProgressPage />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                <Route 
+                  path="/courses" 
+                  element={
+                    <ProtectedRoute>
+                      <LearningHubPage />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                <Route 
+                  path="/youtube" 
+                  element={
+                    <ProtectedRoute>
+                      <YouTubeLearningPage />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                <Route 
+                  path="/exams" 
+                  element={
+                    <ProtectedRoute>
+                      <ExamsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+
                 {/* Under Development Routes */}
-                {['/roadmap', '/courses', '/youtube', '/interview', '/certifications', '/exams', '/scholarships', '/resume', '/business', '/progress', '/settings', '/account-settings', '/preferences', '/appearance', '/notifications', '/security', '/subscription'].map((path) => (
+                {['/interview', '/certifications', '/scholarships', '/resume', '/business', '/settings', '/account-settings', '/preferences', '/appearance', '/notifications', '/security', '/subscription'].map((path) => (
                   <Route 
                     key={path}
                     path={path} 

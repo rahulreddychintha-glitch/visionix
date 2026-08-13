@@ -5,6 +5,9 @@ import profileRoutes from './profile.routes';
 import aiRoutes from './ai.routes';
 import personalizationRoutes from './personalization.routes';
 import careerRoutes from './career.routes';
+import roadmapRoutes from './roadmap.routes';
+import youtubeRoutes from './youtube.routes';
+import learningRoutes from './learning.routes';
 
 const router = Router();
 
@@ -17,5 +20,8 @@ router.use('/profile', profileRoutes);
 router.use('/ai', aiRoutes);
 router.use('/personalization', personalizationRoutes);
 router.use('/careers', careerRoutes);
+router.use('/roadmap', roadmapRoutes);
+router.use('/youtube', youtubeRoutes);
+router.use('/learning-hub', learningRoutes);
 
 export default router;

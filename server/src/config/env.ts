@@ -12,6 +12,7 @@ interface ServerConfig {
   JWT_EXPIRY: string;
   CLIENT_URL: string;
   GEMINI_API_KEY?: string;
+  YOUTUBE_API_KEY?: string;
   CAREER_DATA_MODE: 'mock' | 'production';
 }
 
@@ -48,9 +49,11 @@ const config: ServerConfig = {
   JWT_EXPIRY: process.env['JWT_EXPIRY'] ?? '7d',
   CLIENT_URL: process.env['CLIENT_URL'] ?? 'http://localhost:5173',
   GEMINI_API_KEY: process.env['GEMINI_API_KEY'] || '',
+  YOUTUBE_API_KEY: process.env['YOUTUBE_API_KEY'] || '',
   CAREER_DATA_MODE: rawCareerMode as 'mock' | 'production',
 };
 
 console.log(`[Visionix] GEMINI_API_KEY loaded: ${!!config.GEMINI_API_KEY && config.GEMINI_API_KEY.trim().length > 0}`);
+console.log(`[Visionix] YOUTUBE_API_KEY loaded: ${!!config.YOUTUBE_API_KEY && config.YOUTUBE_API_KEY.trim().length > 0}`);
 
 export default config;

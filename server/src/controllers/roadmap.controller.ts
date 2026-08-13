@@ -1,0 +1,208 @@
+import { Request, Response, NextFunction } from 'express';
+import { RoadmapService } from '../services/roadmap.service';
+import { CareerRoadmap } from '../models/CareerRoadmap';
+import { CareerAssessment } from '../models/CareerAssessment';
+import { sendSuccess, sendError } from '../utils/response';
+import mongoose from 'mongoose';
+
+export class RoadmapController {
+  /**
+   * GET /api/roadmap
+   * Fetches the user's roadmap. Supports optional query param `careerId`.
+   */
+  public static getRoadmap = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+
+      const userId = req.user.sub;
+      const { careerId } = req.query;
+
+      const roadmap = await RoadmapService.getRoadmap(userId, typeof careerId === 'string' ? careerId : undefined);
+
+      sendSuccess(res, 'Roadmap retrieved successfully.', { roadmap });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST /api/roadmap/generate
+   * Generates a personalized roadmap. Checks for existing roadmap to prevent silent overwrite.
+   */
+  public static generateRoadmap = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+
+      const userId = req.user.sub;
+      const { careerId, overwrite } = req.body;
+
+      if (!careerId) {
+        sendError(res, 'Career ID is required.', [], 400);
+        return;
+      }
+
+      // Check if a roadmap already exists for this career
+      const existingRoadmap = await CareerRoadmap.findOne({
+        userId: new mongoose.Types.ObjectId(userId),
+        careerId,
+      });
+
+      if (existingRoadmap && !overwrite) {
+        // Return information that roadmap exists, prompting the client to ask for confirmation
+        sendSuccess(res, 'Roadmap already exists for this career. Confirmation required to overwrite.', {
+          exists: true,
+          careerId,
+          careerTitle: existingRoadmap.careerTitle,
+          progress: existingRoadmap.progress,
+        });
+        return;
+      }
+
+      // Generate (or regenerate) the roadmap
+      const roadmap = await RoadmapService.generateRoadmap(userId, careerId);
+
+      sendSuccess(res, 'Roadmap generated successfully.', {
+        exists: false,
+        roadmap,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST /api/roadmap/toggle-milestone
+   * Toggles the completion status of a milestone.
+   */
+  public static toggleMilestone = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+
+      const userId = req.user.sub;
+      const { careerId, milestoneId, completed } = req.body;
+
+      if (!careerId || !milestoneId || completed === undefined) {
+        sendError(res, 'Career ID, Milestone ID, and Completed status are required.', [], 400);
+        return;
+      }
+
+      const roadmap = await RoadmapService.toggleMilestone(userId, careerId, milestoneId, completed);
+
+      sendSuccess(res, 'Milestone completion status toggled successfully.', { roadmap });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST /api/roadmap/start-milestone
+   * Set milestone status to 'In Progress'
+   */
+  public static startMilestone = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+
+      const userId = req.user.sub;
+      const { careerId, milestoneId } = req.body;
+
+      if (!careerId || !milestoneId) {
+        sendError(res, 'Career ID and Milestone ID are required.', [], 400);
+        return;
+      }
+
+      const roadmap = await RoadmapService.startMilestone(userId, careerId, milestoneId);
+
+      sendSuccess(res, 'Milestone started successfully.', { roadmap });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST /api/roadmap/assessment/generate
+   * Generates or retrieves questions for milestone quiz
+   */
+  public static generateAssessment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+
+      const userId = req.user.sub;
+      const { careerId, milestoneId } = req.body;
+
+      if (!careerId || !milestoneId) {
+        sendError(res, 'Career ID and Milestone ID are required.', [], 400);
+        return;
+      }
+
+      const questions = await RoadmapService.generateMilestoneAssessment(userId, careerId, milestoneId);
+
+      sendSuccess(res, 'Milestone assessment questions generated successfully.', { questions });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST /api/roadmap/assessment/submit
+   * Evaluates quiz answers and updates milestone completion status
+   */
+  public static submitAssessment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+
+      const userId = req.user.sub;
+      const { careerId, milestoneId, answers } = req.body;
+
+      if (!careerId || !milestoneId || !Array.isArray(answers)) {
+        sendError(res, 'Career ID, Milestone ID, and answers array are required.', [], 400);
+        return;
+      }
+
+      const result = await RoadmapService.submitMilestoneAssessment(userId, careerId, milestoneId, answers);
+
+      sendSuccess(res, 'Milestone assessment graded successfully.', result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * GET /api/roadmap/assessment/history
+   * Retrieves completed assessment attempts for the user
+   */
+  public static getAssessmentHistory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+      const userId = req.user.sub;
+      const history = await CareerAssessment.find({
+        userId: new mongoose.Types.ObjectId(userId),
+        completed: true
+      }).sort({ updatedAt: -1 });
+
+      sendSuccess(res, 'Assessment history retrieved successfully.', { history });
+    } catch (error) {
+      next(error);
+    }
+  };
+}
