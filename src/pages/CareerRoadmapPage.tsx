@@ -253,10 +253,21 @@ export const CareerRoadmapPage: React.FC = () => {
 
   // Mark Completed action: fetches and starts the assessment wizard
   // Mark Completed action: navigates to the Quizzes & Assessments page
-  const handleMarkCompleted = (milestone: Milestone) => {
+  const handleMarkCompleted = async (milestone: Milestone) => {
     if (!roadmap) return;
+
+    if (milestone.status === 'Upcoming') {
+      try {
+        const updated = await RoadmapService.startMilestone(roadmap.careerId, milestone.id);
+        setRoadmap(updated);
+      } catch (err) {
+        console.warn('Could not auto-start milestone:', err);
+      }
+    }
+
     navigate('/exams', { 
       state: { 
+        mode: 'milestone',
         selectedCareer: { 
           title: roadmap.careerTitle, 
           category: roadmap.careerId 
@@ -265,7 +276,8 @@ export const CareerRoadmapPage: React.FC = () => {
           id: milestone.id,
           title: milestone.title,
           skills: milestone.skills
-        }
+        },
+        autoStart: true
       } 
     });
   };
@@ -1085,17 +1097,11 @@ export const CareerRoadmapPage: React.FC = () => {
                                 </p>
                                 <button 
                                   className={`${styles.button} ${styles.primaryButton}`}
-                                  disabled={selectedMilestone.status === 'Upcoming'}
                                   onClick={() => handleMarkCompleted(selectedMilestone)}
                                   style={{ fontSize: '0.8rem', padding: '6px 14px' }}
                                 >
                                   Take Assessment
                                 </button>
-                                {selectedMilestone.status === 'Upcoming' && (
-                                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
-                                    Start this milestone first to unlock the assessment.
-                                  </span>
-                                )}
                               </div>
                             )}
                           </div>

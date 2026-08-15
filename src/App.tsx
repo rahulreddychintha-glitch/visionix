@@ -18,11 +18,14 @@ import { ExamsPage } from './pages/ExamsPage';
 import { ResumeBuilderPage } from './pages/ResumeBuilderPage';
 import { InterviewPage } from './pages/InterviewPage';
 import { BusinessPage } from './pages/BusinessPage';
+import { SkillNavigatorPage } from './pages/SkillNavigatorPage';
+import { SettingsPage } from './pages/SettingsPage';
 import { Footer } from './components/Footer';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProfileProvider } from './contexts/ProfileContext';
 import { PersonalizationProvider } from './contexts/PersonalizationContext';
 import { AiModalProvider } from './contexts/AiModalContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { GuestRoute } from './components/GuestRoute';
 import './App.css';
@@ -41,11 +44,12 @@ const PublicLayout = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <ProfileProvider>
-        <PersonalizationProvider>
-          <Router>
-            <AiModalProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <ProfileProvider>
+          <PersonalizationProvider>
+            <Router>
+              <AiModalProvider>
               <Routes>
                 {/* Public Layout wrapper routes */}
                 <Route element={<PublicLayout />}>
@@ -232,8 +236,39 @@ function App() {
                   } 
                 />
 
+                {/* Skill Gap & Next-Step Planner Phase 15 Route */}
+                <Route 
+                  path="/skill-gap" 
+                  element={
+                    <ProtectedRoute>
+                      <SkillNavigatorPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/skill-navigator" 
+                  element={
+                    <ProtectedRoute>
+                      <SkillNavigatorPage />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                {/* Settings Phase 16 Route & Aliases */}
+                {['/settings', '/account-settings', '/preferences', '/appearance', '/notifications', '/security'].map((path) => (
+                  <Route 
+                    key={path}
+                    path={path} 
+                    element={
+                      <ProtectedRoute>
+                        <SettingsPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                ))}
+
                 {/* Under Development Routes */}
-                {['/certifications', '/scholarships', '/settings', '/account-settings', '/preferences', '/appearance', '/notifications', '/security'].map((path) => (
+                {['/scholarships'].map((path) => (
                   <Route 
                     key={path}
                     path={path} 
@@ -247,9 +282,10 @@ function App() {
               </Routes>
             </AiModalProvider>
           </Router>
-        </PersonalizationProvider>
-      </ProfileProvider>
-    </AuthProvider>
+          </PersonalizationProvider>
+        </ProfileProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

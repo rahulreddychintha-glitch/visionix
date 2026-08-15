@@ -54,6 +54,90 @@
   --spacing-lg: 18px;
 }
 
+/* Light Theme Variables & Tokens */
+[data-theme='light'],
+html.light-theme,
+body.light-theme {
+  --bg-dark: #f8fafc;
+  --bg-card: rgba(255, 255, 255, 0.92);
+  --bg-card-hover: rgba(241, 245, 249, 0.98);
+  --border-card: rgba(0, 0, 0, 0.1);
+  --border-card-hover: rgba(0, 0, 0, 0.2);
+
+  --color-primary: #4f46e5;
+  --color-primary-glow: rgba(79, 70, 229, 0.12);
+  --color-secondary: #7c3aed;
+  --color-secondary-glow: rgba(124, 58, 237, 0.12);
+  --color-accent: #0891b2;
+  --color-accent-glow: rgba(8, 145, 178, 0.1);
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+
+  --glow-primary: 0 0 30px rgba(79, 70, 229, 0.12);
+  --glow-secondary: 0 0 30px rgba(124, 58, 237, 0.12);
+  --glow-indigo: 0 0 15px rgba(79, 70, 229, 0.15);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+[data-theme='light'] .ambient-bg,
+body.light-theme .ambient-bg {
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 5% 5%, rgba(79, 70, 229, 0.05) 0px, transparent 50%),
+    radial-gradient(at 95% 5%, rgba(124, 58, 237, 0.05) 0px, transparent 50%),
+    radial-gradient(at 50% 90%, rgba(8, 145, 178, 0.04) 0px, transparent 60%),
+    radial-gradient(circle at center, transparent 40%, rgba(241, 245, 249, 0.8) 100%);
+}
+
+[data-theme='light'] ::-webkit-scrollbar-track,
+body.light-theme ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+[data-theme='light'] ::-webkit-scrollbar-thumb,
+body.light-theme ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.16);
+}
+
+[data-theme='light'] ::-webkit-scrollbar-thumb:hover,
+body.light-theme ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+/* Light Theme Component Overrides */
+[data-theme='light'] nav,
+[data-theme='light'] header,
+[data-theme='light'] aside,
+body.light-theme nav,
+body.light-theme header,
+body.light-theme aside {
+  background: rgba(255, 255, 255, 0.82) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme='light'] input,
+[data-theme='light'] select,
+[data-theme='light'] textarea,
+body.light-theme input,
+body.light-theme select,
+body.light-theme textarea {
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme='light'] input::placeholder,
+[data-theme='light'] textarea::placeholder,
+body.light-theme input::placeholder,
+body.light-theme textarea::placeholder {
+  color: #94a3b8;
+}
+
 /* Reset and Global Styles */
 * {
   box-sizing: border-box;

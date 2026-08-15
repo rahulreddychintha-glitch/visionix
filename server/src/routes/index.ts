@@ -12,6 +12,8 @@ import resumeRoutes from './resume.routes';
 import resumeAnalysisRoutes from './resumeAnalysis.routes';
 import interviewRoutes from './interview.routes';
 import businessRoutes from './business.routes';
+import skillNavigatorRoutes from './skillNavigator.routes';
+import settingsRoutes from './settings.routes';
 
 const router = Router();
 
@@ -31,5 +33,8 @@ router.use('/resume', resumeRoutes);
 router.use('/resume-analysis', resumeAnalysisRoutes);
 router.use('/interview', interviewRoutes);
 router.use('/business', businessRoutes);
+router.use('/skill-navigator', skillNavigatorRoutes);
+router.use('/skill-gap', skillNavigatorRoutes);
+router.use('/settings', settingsRoutes);
 
 export default router;

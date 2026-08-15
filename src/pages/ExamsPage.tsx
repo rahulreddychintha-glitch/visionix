@@ -43,6 +43,7 @@ export const ExamsPage: React.FC = () => {
     milestone?: { id: string; title: string; skills: string[] };
     skillName?: string;
     mode?: ExamMode;
+    autoStart?: boolean;
   } | null;
 
   // Mode Selection: Milestone Checkpoint vs Standalone Skill Exam
@@ -116,12 +117,11 @@ export const ExamsPage: React.FC = () => {
   const fetchActiveRoadmap = useCallback(async () => {
     try {
       setRoadmapLoading(true);
-      const res = await RoadmapService.getRoadmap();
+      const targetCategory = stateContext?.selectedCareer?.category;
+      const res = await RoadmapService.getRoadmap(targetCategory);
       if (res) {
         setActiveRoadmap(res);
-        if (!targetCareer) {
-          setTargetCareer({ title: res.careerTitle, category: res.careerId });
-        }
+        setTargetCareer({ title: res.careerTitle, category: res.careerId });
         
         // Match specific milestone state if passed via navigation
         if (stateContext?.milestone) {
@@ -138,7 +138,7 @@ export const ExamsPage: React.FC = () => {
     } finally {
       setRoadmapLoading(false);
     }
-  }, [targetCareer, stateContext]);
+  }, [stateContext]);
 
   // Load history records
   const fetchHistory = useCallback(async () => {
@@ -167,6 +167,23 @@ export const ExamsPage: React.FC = () => {
     setQuestionsError(null);
     setSkillAssessmentId(null);
   }, [selectedMilestone, examMode, selectedSkill, selectedDifficulty]);
+
+  // Auto-start assessment if coming from Roadmap "Take Assessment"
+  useEffect(() => {
+    if (
+      stateContext?.autoStart &&
+      examMode === 'milestone' &&
+      targetCareer &&
+      selectedMilestone &&
+      questions.length === 0 &&
+      !questionsLoading &&
+      !quizActive &&
+      !quizResult
+    ) {
+      handleLoadMilestoneQuestions();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetCareer, selectedMilestone, stateContext]);
 
   // Generate milestone assessment questions
   const handleLoadMilestoneQuestions = async () => {

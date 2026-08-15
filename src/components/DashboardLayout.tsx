@@ -8,7 +8,6 @@ import {
   GraduationCap, 
   Video, 
   HelpCircle, 
-  Award, 
   FileText, 
   Landmark, 
   FileEdit, 
@@ -24,7 +23,8 @@ import {
   ChevronRight,
   Menu,
   X,
-  Mic
+  Mic,
+  Target
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { usePersonalization } from '../hooks/usePersonalization';
@@ -53,7 +53,7 @@ const NAV_GROUPS = [
       { label: 'Courses & Learning', path: '/courses', icon: GraduationCap },
       { label: 'YouTube Learning', path: '/youtube', icon: Video },
       { label: 'Interview Prep', path: '/interview', icon: HelpCircle },
-      { label: 'Certifications', path: '/certifications', icon: Award },
+      { label: 'Skill Gap', path: '/skill-gap', icon: Target },
       { label: 'Quizzes & Assessments', path: '/exams', icon: FileText },
     ]
   },
