@@ -1,3 +1,5 @@
+import type { IVerifiedSkill } from './profile.types';
+
 export interface PersonalizationContextData {
   userId: string;
   name: string;
@@ -18,6 +20,7 @@ export interface PersonalizationContextData {
     softSkills: string[];
     languages: string[];
     certifications: string[];
+    verifiedSkills?: IVerifiedSkill[];
   };
   interests: {
     careerInterests: string[];

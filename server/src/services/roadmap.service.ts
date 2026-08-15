@@ -1,7 +1,8 @@
 import config from '../config/env';
 import { CareerRoadmap, ICareerRoadmapDocument, IMilestone, IRoadmapStage } from '../models/CareerRoadmap';
 import { CareerProgress } from '../models/CareerProgress';
-import { CareerAssessment } from '../models/CareerAssessment';
+import { CareerAssessment, IQuestion, SkillDifficulty } from '../models/CareerAssessment';
+import { UserProfile } from '../models/UserProfile';
 import { PersonalizationService } from './personalization.service';
 import { MatchService } from './match.service';
 import { CAREERS_DATA } from '../constants/careers.constants';
@@ -191,13 +192,19 @@ export class RoadmapService {
   ): Promise<any[]> {
     const userObjectId = new mongoose.Types.ObjectId(userId);
 
-    // Check if there is an existing uncompleted assessment for this milestone
+    // Check if there is an existing uncompleted assessment for this milestone with valid questions
     let assessment = await CareerAssessment.findOne({
       userId: userObjectId,
       careerId,
       milestoneId,
       completed: false,
     });
+
+    if (assessment && (!assessment.questions || assessment.questions.length === 0)) {
+      // Remove corrupt/empty uncompleted attempt
+      await CareerAssessment.deleteOne({ _id: assessment._id });
+      assessment = null;
+    }
 
     if (!assessment) {
       // Fetch roadmap and milestone details to customize the questions
@@ -214,19 +221,14 @@ export class RoadmapService {
       }
       if (!milestone) throw new Error(`Milestone not found: ${milestoneId}`);
 
-      let questions: any[] = [];
-      if (config.GEMINI_API_KEY && config.GEMINI_API_KEY.trim().length > 0) {
-        try {
-          questions = await this.generateAssessmentQuestionsWithAi(milestone, roadmap.careerTitle);
-        } catch (err) {
-          console.warn('Gemini assessment generation failed, using fallback:', err);
-        }
+      if (!config.GEMINI_API_KEY || config.GEMINI_API_KEY.trim().length === 0) {
+        throw new Error('AI assessment generation is currently unavailable (GEMINI_API_KEY not configured).');
       }
 
-      if (questions.length === 0) {
-        // Enforce data integrity: do not use hardcoded/deterministic fallbacks.
-        // Return empty array to represent that no questions are available.
-        questions = [];
+      const questions = await this.generateAssessmentQuestionsWithAi(milestone, roadmap.careerTitle);
+
+      if (!questions || questions.length === 0) {
+        throw new Error('Could not generate assessment questions for this milestone. Please try again.');
       }
 
       assessment = new CareerAssessment({
@@ -244,6 +246,178 @@ export class RoadmapService {
       question: q.question,
       options: q.options,
     }));
+  }
+
+  /**
+   * Generates or retrieves an uncompleted standalone skill assessment.
+   */
+  public static async generateStandaloneSkillAssessment(
+    userId: string,
+    skillName: string,
+    domain?: string,
+    difficulty: SkillDifficulty = 'Intermediate'
+  ): Promise<{ assessmentId: string; skillName: string; difficulty: string; domain: string; questions: Array<{ question: string; options: string[] }> }> {
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const cleanSkillName = skillName.trim();
+    if (!cleanSkillName) {
+      throw new Error('Skill name is required.');
+    }
+
+    // Check if there is an existing uncompleted assessment for this skill
+    let assessment = await CareerAssessment.findOne({
+      userId: userObjectId,
+      assessmentType: 'standalone_skill',
+      skillName: cleanSkillName,
+      completed: false,
+    });
+
+    if (assessment && (!assessment.questions || assessment.questions.length === 0)) {
+      await CareerAssessment.deleteOne({ _id: assessment._id });
+      assessment = null;
+    }
+
+    if (!assessment) {
+      if (!config.GEMINI_API_KEY || config.GEMINI_API_KEY.trim().length === 0) {
+        throw new Error('AI assessment generation is currently unavailable (GEMINI_API_KEY not configured).');
+      }
+
+      // Fetch user profile for discipline context if available
+      const profile = await UserProfile.findOne({ userId: userObjectId });
+      const userDiscipline = profile?.education?.stream || domain || 'General';
+
+      const questions = await this.generateSkillQuestionsWithAi(cleanSkillName, domain || userDiscipline, difficulty);
+
+      if (!questions || questions.length === 0) {
+        throw new Error(`Could not generate assessment questions for skill: ${cleanSkillName}. Please try again.`);
+      }
+
+      assessment = new CareerAssessment({
+        userId: userObjectId,
+        assessmentType: 'standalone_skill',
+        skillName: cleanSkillName,
+        domain: domain || userDiscipline,
+        difficulty,
+        questions,
+        completed: false,
+      });
+      await assessment.save();
+    }
+
+    return {
+      assessmentId: (assessment._id as mongoose.Types.ObjectId).toString(),
+      skillName: assessment.skillName || cleanSkillName,
+      difficulty: assessment.difficulty || difficulty,
+      domain: assessment.domain || domain || 'General',
+      questions: assessment.questions.map((q) => ({
+        question: q.question,
+        options: q.options,
+      })),
+    };
+  }
+
+  /**
+   * Evaluates answers for a standalone skill assessment and updates UserProfile.skills.verifiedSkills on pass.
+   */
+  public static async submitStandaloneSkillAssessment(
+    userId: string,
+    assessmentId: string,
+    answers: number[]
+  ): Promise<{ assessmentId: string; skillName: string; score: number; passed: boolean; difficulty?: string }> {
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const assessment = await CareerAssessment.findOne({
+      _id: new mongoose.Types.ObjectId(assessmentId),
+      userId: userObjectId,
+      completed: false,
+    });
+
+    if (!assessment) {
+      throw new Error('Active skill assessment not found or already completed.');
+    }
+
+    if (!assessment.questions || assessment.questions.length === 0) {
+      throw new Error('Assessment questions are missing.');
+    }
+
+    const totalQuestions = assessment.questions.length;
+    let correctCount = 0;
+    assessment.questions.forEach((q, idx) => {
+      if (answers[idx] === q.correctAnswerIndex) {
+        correctCount += 1;
+      }
+    });
+
+    const score = Math.round((correctCount / totalQuestions) * 100);
+    const passed = score >= 60;
+
+    assessment.score = score;
+    assessment.passed = passed;
+    assessment.completed = true;
+    await assessment.save();
+
+    const skillName = assessment.skillName || 'Skill';
+
+    // If passed, record into UserProfile.skills.verifiedSkills without duplicates
+    if (passed) {
+      try {
+        const profile = await UserProfile.findOne({ userId: userObjectId });
+        if (profile) {
+          if (!profile.skills) {
+            profile.skills = { technicalSkills: [], softSkills: [], languages: [], skillLevels: new Map(), verifiedSkills: [] };
+          }
+          if (!profile.skills.verifiedSkills) {
+            profile.skills.verifiedSkills = [];
+          }
+
+          const cleanSkill = skillName.trim();
+          const existingIdx = profile.skills.verifiedSkills.findIndex(
+            (vs) => vs.name.toLowerCase() === cleanSkill.toLowerCase()
+          );
+
+          const now = new Date();
+          if (existingIdx === -1) {
+            profile.skills.verifiedSkills.push({
+              name: cleanSkill,
+              verifiedAt: now,
+              source: 'skill_assessment',
+              assessmentId: assessment._id.toString(),
+              score,
+            });
+          } else {
+            // Update timestamp and score if higher
+            profile.skills.verifiedSkills[existingIdx].verifiedAt = now;
+            profile.skills.verifiedSkills[existingIdx].assessmentId = assessment._id.toString();
+            if (score > (profile.skills.verifiedSkills[existingIdx].score || 0)) {
+              profile.skills.verifiedSkills[existingIdx].score = score;
+            }
+          }
+          await profile.save();
+        }
+      } catch (profileErr) {
+        console.error('Error updating verified skill on profile:', profileErr);
+      }
+    }
+
+    return {
+      assessmentId: assessment._id.toString(),
+      skillName,
+      score,
+      passed,
+      difficulty: assessment.difficulty,
+    };
+  }
+
+  /**
+   * Resets uncompleted attempts for a standalone skill to allow retaking fresh.
+   */
+  public static async resetStandaloneSkillAssessment(userId: string, skillName: string): Promise<void> {
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const cleanSkillName = skillName.trim();
+    await CareerAssessment.deleteMany({
+      userId: userObjectId,
+      assessmentType: 'standalone_skill',
+      skillName: cleanSkillName,
+      completed: false,
+    });
   }
 
   /**
@@ -310,6 +484,59 @@ export class RoadmapService {
         milestone.assessmentAttemptedAt = new Date();
         milestone.retakeAvailable = !passed; // Retake is available only if they failed to verify
         milestoneFound = true;
+
+        // If passed, record milestone skills into UserProfile verifiedSkills
+        if (passed && milestone.skills && milestone.skills.length > 0) {
+          try {
+            const profile = await UserProfile.findOne({ userId: userObjectId });
+            if (profile) {
+              if (!profile.skills) {
+                profile.skills = {
+                  technicalSkills: [],
+                  softSkills: [],
+                  languages: [],
+                  certifications: [],
+                  portfolioLinks: {},
+                  skillLevels: new Map(),
+                  verifiedSkills: [],
+                };
+              }
+              if (!profile.skills.verifiedSkills) {
+                profile.skills.verifiedSkills = [];
+              }
+
+              const existingVerifiedMap = new Set<string>();
+              profile.skills.verifiedSkills.forEach((vs) => {
+                if (vs && vs.name) {
+                  existingVerifiedMap.add(vs.name.trim().toLowerCase());
+                }
+              });
+
+              const now = new Date();
+              const assessmentId = (assessment._id as mongoose.Types.ObjectId).toString();
+
+              for (const skillName of milestone.skills) {
+                const cleanSkill = skillName.trim();
+                if (cleanSkill && !existingVerifiedMap.has(cleanSkill.toLowerCase())) {
+                  profile.skills.verifiedSkills.push({
+                    name: cleanSkill,
+                    verifiedAt: now,
+                    source: 'milestone_assessment',
+                    assessmentId,
+                    careerId,
+                    milestoneId,
+                    score,
+                  });
+                  existingVerifiedMap.add(cleanSkill.toLowerCase());
+                }
+              }
+              await profile.save();
+            }
+          } catch (profileErr) {
+            console.error('Error updating verified skills on profile:', profileErr);
+          }
+        }
+
         break;
       }
     }
@@ -371,6 +598,19 @@ export class RoadmapService {
       careerId,
       milestoneId,
     });
+
+    // Remove verified skills associated with this specific milestone assessment
+    try {
+      const profile = await UserProfile.findOne({ userId: userObjectId });
+      if (profile && profile.skills && profile.skills.verifiedSkills) {
+        profile.skills.verifiedSkills = profile.skills.verifiedSkills.filter(
+          (vs) => !(vs.careerId === careerId && vs.milestoneId === milestoneId)
+        );
+        await profile.save();
+      }
+    } catch (err) {
+      console.warn('Error removing reset verified skills from profile:', err);
+    }
   }
 
   /**
@@ -395,15 +635,18 @@ export class RoadmapService {
       const milestone = stage.milestones.find((m) => m.id === milestoneId);
       if (milestone) {
         milestone.completed = completed;
-        milestone.status = completed ? 'Completed & Verified' : 'Upcoming';
-        if (!completed) {
+        if (completed) {
+          // If already verified through a passed assessment, keep verified status, otherwise mark as Review Recommended
+          milestone.status = milestone.assessmentStatus === 'passed' ? 'Completed & Verified' : 'Completed — Review Recommended';
+        } else {
+          milestone.status = 'Upcoming';
           // Reset quiz telemetry if toggled off
           milestone.assessmentAttempted = false;
           milestone.assessmentScore = 0;
           milestone.assessmentStatus = null;
           milestone.assessmentAttemptedAt = null;
           milestone.retakeAvailable = true;
-          // Delete assessments
+          // Delete assessments and remove associated verified skills
           await this.resetMilestoneAssessment(userId, careerId, milestoneId);
         }
         milestoneFound = true;
@@ -470,7 +713,7 @@ export class RoadmapService {
   ): Promise<IRoadmapStage[]> {
     const technicalSkills = pContext.skills?.technicalSkills || [];
     const softSkills = pContext.skills?.softSkills || [];
-    const skillGaps = match.skillGaps.map((sg: string) => sg.replace('Missing verified skill: ', ''));
+    const skillGaps = match.skillGaps.map((sg: string) => sg.replace(/^(Missing verified skill: |Missing career skill: |Missing skill: )/, ''));
 
     const userCountry = pContext.location?.country || 'Not specified';
     const userRegion = pContext.location 
@@ -586,7 +829,7 @@ JSON Schema:
     const userSkills = [...technicalSkills, ...softSkills].map((s) => s.toLowerCase());
     
     // Extract gaps
-    const gaps: string[] = match.skillGaps.map((sg: string) => sg.replace('Missing verified skill: ', ''));
+    const gaps: string[] = match.skillGaps.map((sg: string) => sg.replace(/^(Missing verified skill: |Missing career skill: |Missing skill: )/, ''));
 
     // Check if a skill is an existing strength
     const isStrength = (skill: string) => userSkills.some(us => us === skill.toLowerCase() || skill.toLowerCase().includes(us) || us.includes(skill.toLowerCase()));
@@ -1356,9 +1599,9 @@ JSON Schema:
   }
 
   /**
-   * Calls Gemini to generate assessment questions.
+   * Calls Gemini to generate assessment questions with strict validation.
    */
-  private static async generateAssessmentQuestionsWithAi(milestone: IMilestone, careerTitle: string): Promise<any[]> {
+  private static async generateAssessmentQuestionsWithAi(milestone: IMilestone, careerTitle: string): Promise<IQuestion[]> {
     const systemPrompt = `You are a professional certification exam developer.
 Create a high-quality, milestone-specific review quiz for the milestone: "${milestone.title}" in the career path: "${careerTitle}".
 Milestone context:
@@ -1369,13 +1612,13 @@ Milestone context:
 
 Instructions:
 1. Generate exactly 5 high-quality, multiple-choice questions focusing on scenarios, concepts, or tools relevant to this milestone.
-2. Avoid generic questions. Tailor them to the specific skills (${milestone.skills.join(', ')}) and description.
+2. Avoid generic questions. Tailor them specifically to the skills (${milestone.skills.join(', ')}) and description.
 3. Each question must contain:
-   - "question": string question text
-   - "options": array of exactly 4 choices
-   - "correctAnswerIndex": number index of correct choice (0, 1, 2, or 3)
-4. Do NOT include markdown blocks (like \`\`\`json), HTML tags, or any other explanations. Respond ONLY with a valid JSON array of questions matching the schema.
-5. Factual integrity: Do not invent any salary figures, hiring rates, company requirements, or certifications.
+   - "question": string question text (clear, concise, factual)
+   - "options": array of exactly 4 choices (distinct, plausible, non-empty strings)
+   - "correctAnswerIndex": number index of the correct choice (0, 1, 2, or 3)
+4. Do NOT include markdown formatting blocks (like \`\`\`json), HTML tags, or any surrounding text. Respond ONLY with a valid JSON array of question objects.
+5. Factual integrity: Do not invent false company requirements or fake statistics.
 
 JSON Schema:
 [
@@ -1389,102 +1632,228 @@ JSON Schema:
     const modelName = 'gemini-3.5-flash-lite';
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${config.GEMINI_API_KEY}`;
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [
-          { role: 'user', parts: [{ text: `Generate a 5-question milestone assessment for ${milestone.title}.` }] }
-        ],
-        systemInstruction: {
-          parts: [{ text: systemPrompt }]
-        }
-      }),
-    });
+    let response: Response;
+    try {
+      response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            { role: 'user', parts: [{ text: `Generate a 5-question milestone assessment for ${milestone.title}.` }] }
+          ],
+          systemInstruction: {
+            parts: [{ text: systemPrompt }]
+          }
+        }),
+        signal: AbortSignal.timeout(20000), // 20-second network timeout
+      });
+    } catch (fetchErr: any) {
+      if (fetchErr?.name === 'TimeoutError' || fetchErr?.name === 'AbortError') {
+        throw new Error('AI question generation request timed out. Please try again.');
+      }
+      throw new Error(`Failed to connect to AI assessment service: ${fetchErr?.message || 'Network error'}`);
+    }
 
     if (!response.ok) {
-      throw new Error(`Gemini assessment API returned status ${response.status}`);
+      if (response.status === 429) {
+        throw new Error('AI assessment service is temporarily busy (rate limit reached). Please try again shortly.');
+      }
+      if (response.status === 403 || response.status === 401) {
+        throw new Error('AI assessment service authentication failed. Please check Gemini API key configuration.');
+      }
+      throw new Error(`AI assessment service responded with status ${response.status}`);
     }
 
     const data: any = await response.json();
     let text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) {
-      throw new Error('Empty response from Gemini.');
+    if (!text || typeof text !== 'string') {
+      throw new Error('Empty or invalid response received from AI assessment service.');
     }
 
     text = text.trim();
     if (text.startsWith('```')) {
-      text = text.replace(/^```json\s*/, '').replace(/```$/, '').trim();
+      text = text.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```$/g, '').trim();
     }
 
-    const parsed = JSON.parse(text);
+    let parsed: any;
+    try {
+      parsed = JSON.parse(text);
+    } catch (_parseErr) {
+      throw new Error('Malformed JSON received from AI assessment service.');
+    }
+
     if (!Array.isArray(parsed)) {
-      throw new Error('Invalid JSON structure returned by Gemini for assessment.');
+      throw new Error('Invalid assessment structure: Expected a JSON array of questions.');
     }
 
-    return parsed;
+    // Strict validation and sanitization of each question item
+    const validatedQuestions: IQuestion[] = [];
+    for (const item of parsed) {
+      if (!item || typeof item !== 'object') continue;
+
+      const questionText = typeof item.question === 'string' ? item.question.trim() : '';
+      if (questionText.length < 8) continue;
+
+      if (!Array.isArray(item.options) || item.options.length < 2) continue;
+      const cleanOptions = item.options
+        .map((opt: any) => (typeof opt === 'string' ? opt.trim() : ''))
+        .filter((opt: string) => opt.length > 0);
+
+      // Check for distinct choices
+      const uniqueOptions = new Set(cleanOptions.map((opt: string) => opt.toLowerCase()));
+      if (cleanOptions.length < 2 || uniqueOptions.size !== cleanOptions.length) continue;
+
+      const answerIdx = item.correctAnswerIndex;
+      if (
+        typeof answerIdx !== 'number' ||
+        !Number.isInteger(answerIdx) ||
+        answerIdx < 0 ||
+        answerIdx >= cleanOptions.length
+      ) {
+        continue;
+      }
+
+      validatedQuestions.push({
+        question: questionText,
+        options: cleanOptions,
+        correctAnswerIndex: answerIdx,
+      });
+    }
+
+    if (validatedQuestions.length < 3) {
+      throw new Error(
+        `AI generated insufficient valid questions (${validatedQuestions.length} valid out of ${parsed.length} received).`
+      );
+    }
+
+    return validatedQuestions;
   }
 
   /**
-   * Generates a local fallback multiple-choice assessment for the milestone.
+   * Calls Gemini to generate standalone skill assessment questions with strict validation.
    */
-  private static generateDeterministicQuestions(milestone: IMilestone): any[] {
-    const skills = milestone.skills.length > 0 ? milestone.skills : ['core concepts'];
-    const primarySkill = skills[0];
-    const objectives = milestone.learningObjectives.length > 0 ? milestone.learningObjectives : ['understanding the core topics'];
-    const primaryObj = objectives[0];
+  private static async generateSkillQuestionsWithAi(
+    skillName: string,
+    domain: string,
+    difficulty: SkillDifficulty
+  ): Promise<IQuestion[]> {
+    const systemPrompt = `You are a professional technical skills assessor and certification author.
+Create a high-quality, practical multiple-choice skill assessment for the technical skill: "${skillName}" (Domain/Field: "${domain}", Proficiency Level: "${difficulty}").
 
-    return [
-      {
-        question: `What is the primary role of ${milestone.title} in this career path?`,
-        options: [
-          `To build foundational competency in ${primarySkill} and execute related workflows.`,
-          `To completely automate all processes and bypass basic learning stages.`,
-          `To act as a generic filler checkpoint with no relation to professional practice.`,
-          `To serve purely as a theoretical guideline without any practical application.`
-        ],
-        correctAnswerIndex: 0
-      },
-      {
-        question: `Which of the following describes a key workflow task required under this milestone?`,
-        options: [
-          `Creating a random mock project that has no bearing on actual skills development.`,
-          `Learning to use ${primarySkill} tools and validating their behaviors through checkpoints.`,
-          `Focusing solely on salary statistics and employment growth estimates.`,
-          `Assuming user settings are default and disregarding specialization stream.`
-        ],
-        correctAnswerIndex: 1
-      },
-      {
-        question: `When executing the learning objective "${primaryObj}", what is the recommended practice?`,
-        options: [
-          `Bypassing practical exercises and focusing only on flashcard memorization.`,
-          `Delegating tasks to external teams without reviewing the internal designs.`,
-          `Systematically verifying understanding through hands-on practice, task checks, and assessments.`,
-          `Ignoring project guidelines and building arbitrary assets.`
-        ],
-        correctAnswerIndex: 2
-      },
-      {
-        question: `How should a professional address any identified gaps in ${primarySkill}?`,
-        options: [
-          `Pretending the skill is already verified in order to skip to final stages.`,
-          `Postponing all learning until professional employment has been secured.`,
-          `Relying entirely on general AI helpers without doing the core checkpoints.`,
-          `Incorporating targeted learning checkpoints, studying materials, and building mini-projects to bridge the gap.`
-        ],
-        correctAnswerIndex: 3
-      },
-      {
-        question: `What represents a completed milestone verified status in the Career Roadmap?`,
-        options: [
-          `Passing the milestone-specific review assessment with a score of 60% or higher.`,
-          `Successfully completing onboarding preferences without selecting interests.`,
-          `Failing the assessment multiple times and locking the subsequent timeline checkpoints.`,
-          `Creating duplicate user profiles to manipulate completion telemetry.`
-        ],
-        correctAnswerIndex: 0
+Instructions:
+1. Generate exactly 5 high-quality, multiple-choice questions testing core concepts, syntax/rules, best practices, real-world application, and troubleshooting of ${skillName} at a ${difficulty} level.
+2. Avoid generic filler questions. Tailor questions specifically to "${skillName}".
+3. Each question must contain:
+   - "question": string question text (clear, unambiguous, factual)
+   - "options": array of exactly 4 choices (distinct, plausible, non-empty strings)
+   - "correctAnswerIndex": number index of the correct choice (0, 1, 2, or 3)
+4. Do NOT include markdown blocks (like \`\`\`json), HTML tags, or any explanatory commentary. Respond ONLY with a valid JSON array matching the schema.
+5. Factual integrity: Ensure technical correctness and accuracy.
+
+JSON Schema:
+[
+  {
+    "question": "Question text?",
+    "options": ["Choice A", "Choice B", "Choice C", "Choice D"],
+    "correctAnswerIndex": 0
+  }
+]`;
+
+    const modelName = 'gemini-3.5-flash-lite';
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${config.GEMINI_API_KEY}`;
+
+    let response: Response;
+    try {
+      response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            { role: 'user', parts: [{ text: `Generate a 5-question ${difficulty} skill assessment for ${skillName}.` }] }
+          ],
+          systemInstruction: {
+            parts: [{ text: systemPrompt }]
+          }
+        }),
+        signal: AbortSignal.timeout(20000),
+      });
+    } catch (fetchErr: any) {
+      if (fetchErr?.name === 'TimeoutError' || fetchErr?.name === 'AbortError') {
+        throw new Error('AI question generation request timed out. Please try again.');
       }
-    ];
+      throw new Error(`Failed to connect to AI assessment service: ${fetchErr?.message || 'Network error'}`);
+    }
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error('AI assessment service is temporarily busy (rate limit reached). Please try again shortly.');
+      }
+      if (response.status === 403 || response.status === 401) {
+        throw new Error('AI assessment service authentication failed. Please check Gemini API key configuration.');
+      }
+      throw new Error(`AI assessment service responded with status ${response.status}`);
+    }
+
+    const data: any = await response.json();
+    let text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text || typeof text !== 'string') {
+      throw new Error('Empty or invalid response received from AI assessment service.');
+    }
+
+    text = text.trim();
+    if (text.startsWith('```')) {
+      text = text.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```$/g, '').trim();
+    }
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(text);
+    } catch (_parseErr) {
+      throw new Error('Malformed JSON received from AI assessment service.');
+    }
+
+    if (!Array.isArray(parsed)) {
+      throw new Error('Invalid assessment structure: Expected a JSON array of questions.');
+    }
+
+    const validatedQuestions: IQuestion[] = [];
+    for (const item of parsed) {
+      if (!item || typeof item !== 'object') continue;
+
+      const questionText = typeof item.question === 'string' ? item.question.trim() : '';
+      if (questionText.length < 8) continue;
+
+      if (!Array.isArray(item.options) || item.options.length < 2) continue;
+      const cleanOptions = item.options
+        .map((opt: any) => (typeof opt === 'string' ? opt.trim() : ''))
+        .filter((opt: string) => opt.length > 0);
+
+      const uniqueOptions = new Set(cleanOptions.map((opt: string) => opt.toLowerCase()));
+      if (cleanOptions.length < 2 || uniqueOptions.size !== cleanOptions.length) continue;
+
+      const answerIdx = item.correctAnswerIndex;
+      if (
+        typeof answerIdx !== 'number' ||
+        !Number.isInteger(answerIdx) ||
+        answerIdx < 0 ||
+        answerIdx >= cleanOptions.length
+      ) {
+        continue;
+      }
+
+      validatedQuestions.push({
+        question: questionText,
+        options: cleanOptions,
+        correctAnswerIndex: answerIdx,
+      });
+    }
+
+    if (validatedQuestions.length < 3) {
+      throw new Error(
+        `AI generated insufficient valid questions for ${skillName} (${validatedQuestions.length} valid out of ${parsed.length} received).`
+      );
+    }
+
+    return validatedQuestions;
   }
 }

@@ -15,6 +15,9 @@ import { MyProgressPage } from './pages/MyProgressPage';
 import { LearningHubPage } from './pages/LearningHubPage';
 import { YouTubeLearningPage } from './pages/YouTubeLearningPage';
 import { ExamsPage } from './pages/ExamsPage';
+import { ResumeBuilderPage } from './pages/ResumeBuilderPage';
+import { InterviewPage } from './pages/InterviewPage';
+import { BusinessPage } from './pages/BusinessPage';
 import { Footer } from './components/Footer';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProfileProvider } from './contexts/ProfileContext';
@@ -112,9 +115,25 @@ function App() {
                     </ProtectedRoute>
                   } 
                 />
+                <Route 
+                  path="/career-explorer" 
+                  element={
+                    <ProtectedRoute>
+                      <CareerExplorerPage />
+                    </ProtectedRoute>
+                  } 
+                />
 
                 <Route 
                   path="/saved" 
+                  element={
+                    <ProtectedRoute>
+                      <SavedCareersPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/saved-careers" 
                   element={
                     <ProtectedRoute>
                       <SavedCareersPage />
@@ -139,9 +158,25 @@ function App() {
                     </ProtectedRoute>
                   } 
                 />
+                <Route 
+                  path="/my-progress" 
+                  element={
+                    <ProtectedRoute>
+                      <MyProgressPage />
+                    </ProtectedRoute>
+                  } 
+                />
 
                 <Route 
                   path="/courses" 
+                  element={
+                    <ProtectedRoute>
+                      <LearningHubPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/learning-hub" 
                   element={
                     <ProtectedRoute>
                       <LearningHubPage />
@@ -167,8 +202,38 @@ function App() {
                   } 
                 />
 
+                {/* Resume Builder Phase 13 Foundation Route */}
+                <Route 
+                  path="/resume" 
+                  element={
+                    <ProtectedRoute>
+                      <ResumeBuilderPage />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                {/* Interview Preparation Phase 13.5 Route */}
+                <Route 
+                  path="/interview" 
+                  element={
+                    <ProtectedRoute>
+                      <InterviewPage />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                {/* Business & Startup Hub Phase 14 Foundation Route */}
+                <Route 
+                  path="/business" 
+                  element={
+                    <ProtectedRoute>
+                      <BusinessPage />
+                    </ProtectedRoute>
+                  } 
+                />
+
                 {/* Under Development Routes */}
-                {['/interview', '/certifications', '/scholarships', '/resume', '/business', '/settings', '/account-settings', '/preferences', '/appearance', '/notifications', '/security', '/subscription'].map((path) => (
+                {['/certifications', '/scholarships', '/settings', '/account-settings', '/preferences', '/appearance', '/notifications', '/security'].map((path) => (
                   <Route 
                     key={path}
                     path={path} 

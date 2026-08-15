@@ -37,6 +37,16 @@ export interface IPortfolioLinks {
   other?: string;
 }
 
+export interface IVerifiedSkill {
+  name: string;
+  verifiedAt: string | Date;
+  source: string;
+  assessmentId?: string;
+  careerId?: string;
+  milestoneId?: string;
+  score?: number;
+}
+
 export interface ISkillsProfile {
   technicalSkills: string[];
   softSkills: string[];
@@ -44,6 +54,7 @@ export interface ISkillsProfile {
   certifications?: string[];
   portfolioLinks?: IPortfolioLinks;
   skillLevels?: Record<string, string>;
+  verifiedSkills?: IVerifiedSkill[];
 }
 
 export interface ICareerGoalsProfile {

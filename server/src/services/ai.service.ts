@@ -188,7 +188,8 @@ User Profile Context:
 - Discipline/Stream: ${pContext.discipline}
 - Education Level: ${pContext.educationLevel} (${pContext.studentStatus})
 - Target Career: ${pContext.dreamCareer}
-- Technical/Core Skills: ${pContext.skills.technicalSkills.join(', ') || 'Not specified'}
+- Self-reported Profile Skills: ${pContext.skills.technicalSkills.join(', ') || 'Not specified'}
+- Assessment Verified Skills: ${(pContext.skills.verifiedSkills || []).map((vs: any) => typeof vs === 'string' ? vs : vs.name).join(', ') || 'None verified yet'}
 - Soft Skills: ${pContext.skills.softSkills.join(', ') || 'Not specified'}
 - Career Objectives: ${pContext.careerGoals.careerObjectives || 'Not specified'}
 `;
@@ -203,7 +204,7 @@ ${careerContext.title}
 Category:
 ${careerContext.category}
 
-Verified skills:
+Required career skills:
 ${careerContext.skills.join(', ') || 'Not Specified'}
 
 Verified career information:
@@ -427,7 +428,7 @@ Calculated Match Data:
 - Match Level: ${matchData.matchLevel}
 - Strengths Identified: ${matchData.strengths.join('; ')}
 - Matching Skills: ${matchData.skillsYouHave.join(', ') || 'None'}
-- Skill Gaps: ${matchData.skillGaps.map((sg: string) => sg.replace('Missing verified skill: ', '')).join(', ') || 'None'}
+- Skill Gaps: ${matchData.skillGaps.map((sg: string) => sg.replace(/^(Missing verified skill: |Missing career skill: |Missing skill: )/, '')).join(', ') || 'None'}
 - Improvement Suggestions: ${matchData.improvementSuggestions.join('; ')}
 
 Instructions:

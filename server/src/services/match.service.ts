@@ -64,7 +64,8 @@ export class MatchService {
     }
 
     // 2. Skills match (Max 45 points)
-    const userSkills = [...techSkills, ...softSkills].map(s => s.toLowerCase());
+    const verifiedNames = (ctx.skills?.verifiedSkills || []).map((vs: any) => typeof vs === 'string' ? vs : vs.name);
+    const userSkills = Array.from(new Set([...techSkills, ...softSkills, ...verifiedNames])).map(s => s.toLowerCase());
     const matchingSkills = career.skills.filter((cs: string) => 
       userSkills.some(us => us === cs.toLowerCase() || cs.toLowerCase().includes(us) || us.includes(cs.toLowerCase()))
     );
@@ -106,8 +107,22 @@ export class MatchService {
     } else if (eduScore > 0) {
       strengths.push(`Broad academic exposure to this industry category.`);
     }
-    if (matchingSkills.length > 0) {
-      strengths.push(`Possess verified skills in ${matchingSkills.slice(0, 3).join(', ')}.`);
+    // Check verified skills vs self-reported skills
+    const verifiedSkillsList = (ctx.skills.verifiedSkills || []).map((vs: any) =>
+      (typeof vs === 'string' ? vs : vs.name).toLowerCase()
+    );
+    const matchingVerifiedSkills = matchingSkills.filter((ms: string) =>
+      verifiedSkillsList.some((vs: string) => vs === ms.toLowerCase() || ms.toLowerCase().includes(vs) || vs.includes(ms.toLowerCase()))
+    );
+    const matchingProfileSkills = matchingSkills.filter((ms: string) =>
+      !matchingVerifiedSkills.some((vs: string) => vs.toLowerCase() === ms.toLowerCase())
+    );
+
+    if (matchingVerifiedSkills.length > 0) {
+      strengths.push(`Possess verified skills in ${matchingVerifiedSkills.slice(0, 3).join(', ')}.`);
+    }
+    if (matchingProfileSkills.length > 0) {
+      strengths.push(`Profile background includes skills in ${matchingProfileSkills.slice(0, 3).join(', ')}.`);
     }
     if (interestScore > 0) {
       strengths.push(`Matches your stated career goals and interests.`);
@@ -117,7 +132,7 @@ export class MatchService {
     }
 
     // Skill Gaps
-    const skillGaps = gaps.map((g: string) => `Missing verified skill: ${g}`);
+    const skillGaps = gaps.map((g: string) => `Missing career skill: ${g}`);
 
     // Improvement suggestions
     const improvementSuggestions: string[] = [];

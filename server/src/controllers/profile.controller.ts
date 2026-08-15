@@ -91,6 +91,7 @@ export class ProfileController {
             certifications: [],
             portfolioLinks: { github: '', linkedin: '', portfolio: '', other: '' },
             skillLevels: {},
+            verifiedSkills: [],
           },
           careerGoals: {
             dreamCareer: '',
@@ -190,7 +191,15 @@ export class ProfileController {
         };
       }
       if (body.skills) {
-        const currentSkills = profile.skills || { technicalSkills: [], softSkills: [], languages: [], certifications: [], portfolioLinks: {}, skillLevels: new Map() };
+        const currentSkills = profile.skills || {
+          technicalSkills: [],
+          softSkills: [],
+          languages: [],
+          certifications: [],
+          portfolioLinks: {},
+          skillLevels: new Map(),
+          verifiedSkills: [],
+        };
         profile.skills = {
           technicalSkills: body.skills.technicalSkills ?? currentSkills.technicalSkills,
           softSkills: body.skills.softSkills ?? currentSkills.softSkills,
@@ -203,6 +212,7 @@ export class ProfileController {
           skillLevels: body.skills.skillLevels 
             ? new Map(Object.entries(body.skills.skillLevels))
             : currentSkills.skillLevels,
+          verifiedSkills: currentSkills.verifiedSkills || [],
         };
       }
       if (body.careerGoals) {

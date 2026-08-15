@@ -63,7 +63,7 @@ const NAV_GROUPS = [
       { label: 'Scholarships', path: '/scholarships', icon: Landmark },
       { label: 'Resume Builder', path: '/resume', icon: FileEdit },
       { label: 'Saved & Bookmarks', path: '/saved', icon: Bookmark },
-      { label: 'Business Ideas', path: '/business', icon: Lightbulb },
+      { label: 'Business & Startup', path: '/business', icon: Lightbulb },
       { label: 'My Progress', path: '/progress', icon: TrendingUp },
       { label: 'Settings', path: '/settings', icon: Settings },
     ]
@@ -164,17 +164,21 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           ))}
         </nav>
 
-        {/* Premium Upgrade Promotion Card */}
+        {/* Free AI Assistant & Platform Hub Card */}
         <div className={styles.upgradeCard}>
           <div className={styles.upgradeCardTitle}>
-            <Sparkles size={16} style={{ color: 'var(--color-primary)' }} />
-            <span>Upgrade to Pro</span>
+            <Sparkles size={16} style={{ color: '#818cf8' }} />
+            <span>Visionix AI Hub</span>
           </div>
           <p className={styles.upgradeCardText}>
-            Unlock advanced AI features, personalized roadmaps, and more.
+            100% free AI career guidance, resume tools, mock interviews, and startup roadmaps.
           </p>
-          <button className={styles.upgradeBtn} aria-label="Upgrade to Pro Now">
-            <span>Upgrade Now</span>
+          <button
+            className={styles.upgradeBtn}
+            onClick={() => navigate('/ai-assistant')}
+            aria-label="Open AI Career Assistant"
+          >
+            <span>Ask AI Assistant</span>
             <ChevronRight size={14} />
           </button>
         </div>
@@ -367,10 +371,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                         className={styles.dropdownItem} 
                         onClick={() => {
                           setIsProfileDropdownOpen(false);
-                          navigate('/subscription');
+                          navigate('/progress');
                         }}
                       >
-                        Subscription
+                        My Progress
                       </div>
                     </div>
                     <div className={styles.dropdownSection} style={{ borderTop: '1px solid rgba(255, 255, 255, 0.04)', paddingTop: '8px' }}>

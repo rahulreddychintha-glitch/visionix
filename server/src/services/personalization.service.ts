@@ -25,6 +25,15 @@ export interface IPersonalizationContext {
     softSkills: string[];
     languages: string[];
     certifications: string[];
+    verifiedSkills?: Array<{
+      name: string;
+      verifiedAt: Date;
+      source: string;
+      assessmentId?: string;
+      careerId?: string;
+      milestoneId?: string;
+      score?: number;
+    }>;
   };
   interests: {
     careerInterests: string[];
@@ -114,6 +123,7 @@ export class PersonalizationService {
         softSkills: profile?.skills?.softSkills || [],
         languages: profile?.skills?.languages || [],
         certifications: profile?.skills?.certifications || [],
+        verifiedSkills: profile?.skills?.verifiedSkills || [],
       },
       interests: {
         careerInterests: profile?.interests?.careerInterests || [],

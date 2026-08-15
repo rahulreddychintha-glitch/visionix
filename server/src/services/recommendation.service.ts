@@ -32,7 +32,8 @@ export class RecommendationService {
     const dreamCareer = ctx.dreamCareer || 'Career Professional';
     const techSkills = ctx.skills.technicalSkills;
     const softSkills = ctx.skills.softSkills;
-    const allUserSkills = [...techSkills, ...softSkills].map((s) => s.toLowerCase());
+    const verifiedNames = (ctx.skills.verifiedSkills || []).map((vs: any) => typeof vs === 'string' ? vs : vs.name);
+    const allUserSkills = Array.from(new Set([...techSkills, ...softSkills, ...verifiedNames])).map((s) => s.toLowerCase());
 
     // Domain heuristic recommendations
     let topCareers: IRecommendationResult['topCareers'] = [];

@@ -430,7 +430,7 @@ export const CareerExplorerPage: React.FC = () => {
                             <strong>Strength:</strong> {career.match.strengths[0] || 'Domain exposure'}
                           </p>
                           <p style={{ margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            <strong>Gap:</strong> {career.match.skillGaps[0]?.replace('Missing verified skill: ', '') || 'None'}
+                            <strong>Gap:</strong> {career.match.skillGaps[0]?.replace(/^(Missing verified skill: |Missing career skill: |Missing skill: )/, '') || 'None'}
                           </p>
                         </div>
                       )}
@@ -620,7 +620,7 @@ export const CareerExplorerPage: React.FC = () => {
                         <td key={item.id}>
                           <ul style={{ margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                             {item.match?.isProfileComplete && item.match.skillGaps.map((sg, idx) => (
-                              <li key={idx} style={{ fontSize: '0.8rem', color: '#ef4444' }}>{sg.replace('Missing verified skill: ', '')}</li>
+                              <li key={idx} style={{ fontSize: '0.8rem', color: '#ef4444' }}>{sg.replace(/^(Missing verified skill: |Missing career skill: |Missing skill: )/, '')}</li>
                             ))}
                             {item.match?.isProfileComplete && item.match.skillGaps.length === 0 && (
                               <span style={{ fontSize: '0.8rem', color: '#10b981' }}>✓ No skill gaps!</span>

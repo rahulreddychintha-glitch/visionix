@@ -5,6 +5,7 @@ import {
   DashboardLayout 
 } from '../components/DashboardLayout';
 import { RoadmapService } from '../services/roadmap.service';
+import { ExamsApiService } from '../services/exams.service';
 import { YoutubeApiService } from '../services/youtube.service';
 import type { 
   CareerRoadmap, 
@@ -283,7 +284,7 @@ export const CareerRoadmapPage: React.FC = () => {
     if (!roadmap || !selectedMilestone) return;
     try {
       setQuizSubmitting(true);
-      const result = await RoadmapService.submitAssessment(
+      const result = await ExamsApiService.submitAssessment(
         roadmap.careerId,
         selectedMilestone.id,
         userAnswers

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { RoadmapService } from '../services/roadmap.service';
 import type { CareerRoadmap, Milestone } from '../services/roadmap.service';
+import { PersonalizationApiService } from '../services/personalization.service';
 import { 
   Target, 
   CheckCircle, 
@@ -47,11 +48,11 @@ export const MyProgressPage: React.FC = () => {
         setFlatMilestones(flatM);
         const flatMilestones = flatM;
         
-        // 1. Completed Milestones (includes both verified and review recommended)
+        // 1. Completed Milestones (includes both verified and review recommended for overall track metrics)
         const completed = flatMilestones.filter(m => m.completed || m.status === 'Completed & Verified' || m.status === 'Completed — Review Recommended');
         setCompletedMilestones(completed);
         
-        // 2. Current Milestone (First uncompleted milestone)
+        // 3. Current Milestone (First uncompleted milestone)
         const currentIdx = flatMilestones.findIndex(m => !m.completed && m.status !== 'Completed & Verified' && m.status !== 'Completed — Review Recommended');
         let current: Milestone | null = null;
         if (currentIdx !== -1) {
@@ -61,29 +62,39 @@ export const MyProgressPage: React.FC = () => {
           setCurrentMilestone(null);
         }
         
-        // 3. Upcoming Milestones (Uncompleted milestones after current)
+        // 4. Upcoming Milestones (Uncompleted milestones after current)
         const upcoming = currentIdx !== -1 ? flatMilestones.slice(currentIdx + 1) : [];
         setUpcomingMilestones(upcoming);
         
-        // 4. Skills extraction
-        const compSkillsSet = new Set<string>();
-        completed.forEach(m => m.skills.forEach(s => compSkillsSet.add(s)));
-        const compSkills = Array.from(compSkillsSet);
+        // Fetch user profile verified skills
+        let profileVerifiedSkills: string[] = [];
+        try {
+          const pData = await PersonalizationApiService.getPersonalizationData();
+          if (pData?.context?.skills?.verifiedSkills) {
+            profileVerifiedSkills = pData.context.skills.verifiedSkills.map((vs: any) => typeof vs === 'string' ? vs : vs.name);
+          }
+        } catch (pErr) {
+          console.warn('Could not load profile verified skills in MyProgressPage:', pErr);
+        }
+
+        // 5. Verified Skills extraction (Strictly from authoritative UserProfile.skills.verifiedSkills)
+        const compSkills = Array.from(new Set(profileVerifiedSkills));
         setCompletedSkills(compSkills);
 
+        const compSkillsLower = new Set(compSkills.map(s => s.toLowerCase()));
         const remSkillsSet = new Set<string>();
-        // Skills in uncompleted milestones
-        const uncompleted = flatMilestones.filter(m => !m.completed);
-        uncompleted.forEach(m => {
+        // Target roadmap skills not yet verified
+        flatMilestones.forEach(m => {
           m.skills.forEach(s => {
-            if (!compSkillsSet.has(s)) {
+            if (!compSkillsLower.has(s.toLowerCase())) {
               remSkillsSet.add(s);
             }
           });
         });
         setRemainingSkills(Array.from(remSkillsSet));
 
-        // 5. Goals (Next 3 uncompleted milestones)
+        // 6. Goals (Next 3 uncompleted milestones)
+        const uncompleted = flatMilestones.filter(m => !m.completed);
         setGoals(uncompleted.slice(0, 3));
 
         // 6. Recent Activity list (based on saved status)
@@ -339,9 +350,9 @@ export const MyProgressPage: React.FC = () => {
                 <div className={styles.skillsSplit}>
                   {/* Completed Skills */}
                   <div className={styles.skillsGroup}>
-                    <h4>Acquired Skills ({completedSkills.length})</h4>
+                    <h4>Verified Skills ({completedSkills.length})</h4>
                     {completedSkills.length === 0 ? (
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Complete milestones to verify skills</p>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Pass milestone assessments to verify skills</p>
                     ) : (
                       <div className={styles.skillsWrap}>
                         {completedSkills.map(s => (

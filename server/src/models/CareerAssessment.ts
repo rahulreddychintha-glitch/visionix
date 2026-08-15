@@ -6,10 +6,17 @@ export interface IQuestion {
   correctAnswerIndex: number;
 }
 
+export type AssessmentType = 'milestone' | 'standalone_skill';
+export type SkillDifficulty = 'Beginner' | 'Intermediate' | 'Advanced';
+
 export interface ICareerAssessmentDocument extends Document {
   userId: mongoose.Types.ObjectId;
-  careerId: string;
-  milestoneId: string;
+  assessmentType: AssessmentType;
+  careerId?: string;
+  milestoneId?: string;
+  skillName?: string;
+  domain?: string;
+  difficulty?: SkillDifficulty;
   questions: IQuestion[];
   completed: boolean;
   score: number;
@@ -31,13 +38,32 @@ const CareerAssessmentSchema = new Schema<ICareerAssessmentDocument>(
       ref: 'User',
       required: true,
     },
+    assessmentType: {
+      type: String,
+      enum: ['milestone', 'standalone_skill'],
+      default: 'milestone',
+    },
     careerId: {
       type: String,
-      required: true,
+      required: false,
     },
     milestoneId: {
       type: String,
-      required: true,
+      required: false,
+    },
+    skillName: {
+      type: String,
+      required: false,
+    },
+    domain: {
+      type: String,
+      required: false,
+    },
+    difficulty: {
+      type: String,
+      enum: ['Beginner', 'Intermediate', 'Advanced'],
+      default: 'Intermediate',
+      required: false,
     },
     questions: {
       type: [QuestionSchema],
@@ -61,7 +87,9 @@ const CareerAssessmentSchema = new Schema<ICareerAssessmentDocument>(
   }
 );
 
-// We index by userId, careerId, milestoneId. We can have one active (completed: false) assessment at a time.
+// Indexes
 CareerAssessmentSchema.index({ userId: 1, careerId: 1, milestoneId: 1, completed: 1 });
+CareerAssessmentSchema.index({ userId: 1, assessmentType: 1, skillName: 1, completed: 1 });
+CareerAssessmentSchema.index({ userId: 1, completed: 1, createdAt: -1 });
 
 export const CareerAssessment = mongoose.model<ICareerAssessmentDocument>('CareerAssessment', CareerAssessmentSchema);

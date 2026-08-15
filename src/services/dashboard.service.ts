@@ -46,10 +46,12 @@ export class DashboardService {
       const salaryGoal = ctx.careerGoals?.salaryGoal || '$75,000/yr';
       const specialization = ctx.specialization || '';
       
-      // Calculate dynamic Stats
+      // Calculate verified skills vs self-reported skills
+      const verifiedSkills = ctx.skills.verifiedSkills || [];
+      const verifiedCount = verifiedSkills.length;
       const skillsCount = techSkills.length;
-      const skillsLearnedText = `${skillsCount} / 24`;
-      const skillsProgressPercent = Math.min(Math.round((skillsCount / 24) * 100), 100);
+      const verifiedText = `${verifiedCount} Verified`;
+      const verifiedProgressPercent = Math.min(Math.round((verifiedCount / 20) * 100), 100);
 
       // Real database progress calculation from careerProgress milestones
       let progressPercent = 0;
@@ -103,20 +105,20 @@ export class DashboardService {
           ]
         },
         {
-          title: 'Skills Learned',
-          value: skillsLearnedText,
-          trend: `+${skillsCount} verified`,
-          trendPositive: true,
-          subtext: 'Core domain skills verified',
+          title: 'Verified Skills',
+          value: verifiedText,
+          trend: verifiedCount > 0 ? `+${verifiedCount} verified` : '0 verified',
+          trendPositive: verifiedCount > 0,
+          subtext: 'Assessed milestone competencies',
           color: 'var(--color-accent)',
-          sparklinePoints: [0, Math.round(skillsCount / 3), Math.round(skillsCount / 2), skillsCount],
-          hasProgress: true,
-          progress: skillsProgressPercent,
+          sparklinePoints: [0, Math.round(verifiedCount / 3), Math.round(verifiedCount / 2), verifiedCount],
+          hasProgress: verifiedCount > 0,
+          progress: verifiedProgressPercent,
           details: [
-            { label: 'Latest Skill', value: techSkills[techSkills.length - 1] || 'None' },
+            { label: 'Latest Verified', value: (verifiedSkills[verifiedSkills.length - 1] as any)?.name || 'None' },
             { label: 'Level', value: ctx.educationLevel || 'Not Specified' },
-            { label: 'Verified', value: `${skillsCount} Skills` },
-            { label: 'Updated', value: ctx.learningProgress?.lastStudyDate ? 'Recently' : 'Never' },
+            { label: 'Verified', value: `${verifiedCount} Skills` },
+            { label: 'Self-Reported', value: `${skillsCount} Skills` },
             { label: 'Practice Hours', value: ctx.learningProgress?.totalStudyMinutes ? `${Math.round(ctx.learningProgress.totalStudyMinutes / 60)} hrs` : '0 hrs' },
             { label: 'Projects', value: `${ctx.learningProgress?.completedResources?.length || 0}` },
             { label: 'Next Skill', value: recs.skillGap.missingSkills[0] || 'Explore' },

@@ -1,5 +1,15 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export interface IVerifiedSkill {
+  name: string;
+  verifiedAt: Date;
+  source: string;
+  assessmentId?: string;
+  careerId?: string;
+  milestoneId?: string;
+  score?: number;
+}
+
 export interface IUserProfile {
   userId: mongoose.Types.ObjectId;
   personal: {
@@ -42,6 +52,7 @@ export interface IUserProfile {
       other?: string;
     };
     skillLevels: Map<string, string>;
+    verifiedSkills?: IVerifiedSkill[];
   };
   careerGoals: {
     dreamCareer?: string;
@@ -73,6 +84,19 @@ export interface IUserProfile {
 }
 
 export interface IUserProfileDocument extends IUserProfile, Document {}
+
+const VerifiedSkillSchema = new Schema<IVerifiedSkill>(
+  {
+    name: { type: String, required: true },
+    verifiedAt: { type: Date, default: Date.now },
+    source: { type: String, default: 'milestone_assessment' },
+    assessmentId: { type: String },
+    careerId: { type: String },
+    milestoneId: { type: String },
+    score: { type: Number },
+  },
+  { _id: false }
+);
 
 const UserProfileSchema = new Schema<IUserProfileDocument>(
   {
@@ -202,6 +226,10 @@ const UserProfileSchema = new Schema<IUserProfileDocument>(
         type: Map,
         of: String,
         default: {},
+      },
+      verifiedSkills: {
+        type: [VerifiedSkillSchema],
+        default: [],
       },
     },
     careerGoals: {

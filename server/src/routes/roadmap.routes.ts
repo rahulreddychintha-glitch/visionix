@@ -49,4 +49,22 @@ router.post('/assessment/generate', RoadmapController.generateAssessment);
  */
 router.post('/assessment/submit', RoadmapController.submitAssessment);
 
+/**
+ * POST /api/roadmap/assessment/skill/generate
+ * Generates quiz questions for a standalone skill
+ */
+router.post('/assessment/skill/generate', RoadmapController.generateSkillAssessment);
+
+/**
+ * POST /api/roadmap/assessment/skill/submit
+ * Submits and scores standalone skill quiz answers
+ */
+router.post('/assessment/skill/submit', RoadmapController.submitSkillAssessment);
+
+/**
+ * POST /api/roadmap/assessment/skill/reset
+ * Resets uncompleted attempts for a skill
+ */
+router.post('/assessment/skill/reset', RoadmapController.resetSkillAssessment);
+
 export default router;

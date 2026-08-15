@@ -130,16 +130,16 @@ const DASHBOARD_CAREERS: DashboardCareerPath[] = [
         skills: ['Onboarding Flow UX', 'Referral Loop Mechanics', 'Conversion Optimizing', 'UX Audit']
       },
       {
-        title: 'Phase 3: Scaling & Monetization Hooks',
+        title: 'Phase 3: Scaling & Sustainable Unit Economics',
         duration: 'Month 7 - 9',
-        description: 'Optimize subscription upgrade paywalls, localized billing structures, and growth loops.',
-        skills: ['Monetization Models', 'Agile Team Sync', 'Roadmap Allocation', 'Market Expansion']
+        description: 'Optimize user retention funnels, pricing architecture, and long-term customer value.',
+        skills: ['Unit Economics', 'Agile Team Sync', 'Roadmap Allocation', 'Market Expansion']
       }
     ],
     skillsProgress: [
       { name: 'Product Analytics (SQL / Mixpanel)', value: 75 },
       { name: 'Funnel Optimization Loops', value: 60 },
-      { name: 'Subscription Monetization Hook', value: 40 }
+      { name: 'Pricing & Retention Strategy', value: 40 }
     ],
     aiAssistantMessages: [
       "Start by setting up event tracking for key user actions. Mixpanel and SQL are your core analytics tools here.",

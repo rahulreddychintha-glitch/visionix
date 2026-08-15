@@ -1,0 +1,415 @@
+/* ============================================================
+   Resume Document Base & Preview Container (Phase 13.3)
+   ============================================================ */
+
+.previewContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  padding: 16px 0 32px 0;
+}
+
+.documentSheet {
+  width: 100%;
+  max-width: 210mm;
+  min-height: 297mm;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  border-radius: 2px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+/* ============================================================
+   TEMPLATE 1: MODERN (Clean, Professional, Contemporary)
+   ============================================================ */
+
+.modernLayout {
+  padding: 28px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modernHeader {
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 12px;
+  margin-bottom: 2px;
+}
+
+.modernName {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 2px 0;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.modernTargetRole {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #4338ca;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.03em;
+}
+
+.modernContactRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: 0.8rem;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.modernContactItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.modernContactSeparator {
+  color: #cbd5e1;
+}
+
+.modernSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modernSectionTitle {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modernSummaryText {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #334155;
+  margin: 0;
+}
+
+.modernItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.modernItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+}
+
+.modernItemTitle {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.modernItemSubtitle {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #4338ca;
+}
+
+.modernItemDate {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.modernItemDesc {
+  font-size: 0.81rem;
+  line-height: 1.45;
+  color: #334155;
+  margin: 2px 0 0 0;
+}
+
+.modernHighlightsList {
+  margin: 2px 0 0 0;
+  padding-left: 16px;
+  font-size: 0.81rem;
+  line-height: 1.45;
+  color: #334155;
+}
+
+.modernHighlightsList li {
+  margin-bottom: 2px;
+}
+
+.modernSkillsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.81rem;
+  line-height: 1.45;
+  color: #334155;
+}
+
+.modernSkillLabel {
+  font-weight: 700;
+  color: #0f172a;
+  margin-right: 6px;
+}
+
+/* ============================================================
+   TEMPLATE 2: CLASSIC (Executive, Academic, Traditional)
+   ============================================================ */
+
+.classicLayout {
+  padding: 30px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-family: 'Georgia', 'Cambria', 'Times New Roman', serif;
+}
+
+.classicHeader {
+  text-align: center;
+  border-bottom: 1.5px solid #1e293b;
+  padding-bottom: 10px;
+  margin-bottom: 2px;
+}
+
+.classicName {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 2px 0;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.classicTargetRole {
+  font-size: 0.9rem;
+  font-weight: normal;
+  font-style: italic;
+  color: #475569;
+  margin: 0 0 6px 0;
+}
+
+.classicContactRow {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: 0.78rem;
+  color: #334155;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.classicSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.classicSectionTitle {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 2px;
+  margin: 0;
+}
+
+.classicSummaryText {
+  font-size: 0.81rem;
+  line-height: 1.5;
+  color: #1e293b;
+  margin: 0;
+}
+
+.classicItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.classicItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+}
+
+.classicItemTitle {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.classicItemDate {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: #475569;
+}
+
+.classicItemSubtitle {
+  font-size: 0.81rem;
+  font-style: italic;
+  color: #334155;
+}
+
+.classicHighlightsList {
+  margin: 2px 0 0 0;
+  padding-left: 16px;
+  font-size: 0.81rem;
+  line-height: 1.45;
+  color: #1e293b;
+}
+
+.classicSkillsText {
+  font-size: 0.81rem;
+  line-height: 1.45;
+  color: #1e293b;
+}
+
+/* ============================================================
+   TEMPLATE 3: MINIMAL (Tech, Compact, High-Density)
+   ============================================================ */
+
+.minimalLayout {
+  padding: 26px 34px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.minimalHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-left: 3px solid #0f172a;
+  padding-left: 14px;
+  margin-bottom: 2px;
+}
+
+.minimalName {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.minimalTargetRole {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0;
+}
+
+.minimalContactRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 0.78rem;
+  color: #475569;
+  margin-top: 2px;
+}
+
+.minimalSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.minimalSectionTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+  padding-bottom: 2px;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.minimalItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.minimalItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.minimalItemTitle {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.minimalItemDate {
+  font-size: 0.76rem;
+  color: #64748b;
+  font-family: monospace;
+}
+
+.minimalItemSubtitle {
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.minimalItemDesc {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #334155;
+  margin: 2px 0 0 0;
+}
+
+/* ============================================================
+   PAGE BREAK & PRINT PREVIEW RULES
+   ============================================================ */
+
+.modernSection,
+.classicSection,
+.minimalSection {
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+.modernItem,
+.classicItem,
+.minimalItem {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}

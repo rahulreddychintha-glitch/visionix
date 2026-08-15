@@ -478,7 +478,7 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
                         {matchData.skillGaps.length > 0 ? (
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
                             {matchData.skillGaps.map(gapStr => {
-                              const skillName = gapStr.replace('Missing verified skill: ', '');
+                              const skillName = gapStr.replace(/^(Missing verified skill: |Missing career skill: |Missing skill: )/, '');
                               return (
                                 <span key={skillName} className={styles.skillTag} style={{ fontSize: '0.72rem', padding: '3px 8px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
                                   {skillName}

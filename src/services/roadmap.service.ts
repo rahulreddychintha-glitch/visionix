@@ -86,31 +86,5 @@ export class RoadmapService {
     });
     return response.data.data.roadmap;
   }
-
-  /**
-   * Generates or fetches assessment questions.
-   */
-  public static async generateAssessment(careerId: string, milestoneId: string): Promise<Array<{ question: string; options: string[] }>> {
-    const response = await api.post('/roadmap/assessment/generate', {
-      careerId,
-      milestoneId
-    });
-    return response.data.data.questions;
-  }
-
-  /**
-   * Submits selected answer indices and grades it.
-   */
-  public static async submitAssessment(
-    careerId: string,
-    milestoneId: string,
-    answers: number[]
-  ): Promise<{ score: number; passed: boolean; roadmap: CareerRoadmap }> {
-    const response = await api.post('/roadmap/assessment/submit', {
-      careerId,
-      milestoneId,
-      answers
-    });
-    return response.data.data;
-  }
 }
+

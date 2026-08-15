@@ -8,6 +8,10 @@ import careerRoutes from './career.routes';
 import roadmapRoutes from './roadmap.routes';
 import youtubeRoutes from './youtube.routes';
 import learningRoutes from './learning.routes';
+import resumeRoutes from './resume.routes';
+import resumeAnalysisRoutes from './resumeAnalysis.routes';
+import interviewRoutes from './interview.routes';
+import businessRoutes from './business.routes';
 
 const router = Router();
 
@@ -23,5 +27,9 @@ router.use('/careers', careerRoutes);
 router.use('/roadmap', roadmapRoutes);
 router.use('/youtube', youtubeRoutes);
 router.use('/learning-hub', learningRoutes);
+router.use('/resume', resumeRoutes);
+router.use('/resume-analysis', resumeAnalysisRoutes);
+router.use('/interview', interviewRoutes);
+router.use('/business', businessRoutes);
 
 export default router;

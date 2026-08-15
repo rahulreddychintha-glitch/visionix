@@ -134,7 +134,7 @@ export class RoadmapController {
    * POST /api/roadmap/assessment/generate
    * Generates or retrieves questions for milestone quiz
    */
-  public static generateAssessment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public static generateAssessment = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     try {
       if (!req.user) {
         sendError(res, 'Not authenticated.', [], 401);
@@ -152,8 +152,8 @@ export class RoadmapController {
       const questions = await RoadmapService.generateMilestoneAssessment(userId, careerId, milestoneId);
 
       sendSuccess(res, 'Milestone assessment questions generated successfully.', { questions });
-    } catch (error) {
-      next(error);
+    } catch (error: any) {
+      sendError(res, error?.message || 'Failed to generate milestone assessment.', [], error?.statusCode || 503);
     }
   };
 
@@ -161,7 +161,7 @@ export class RoadmapController {
    * POST /api/roadmap/assessment/submit
    * Evaluates quiz answers and updates milestone completion status
    */
-  public static submitAssessment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public static submitAssessment = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     try {
       if (!req.user) {
         sendError(res, 'Not authenticated.', [], 401);
@@ -179,8 +179,94 @@ export class RoadmapController {
       const result = await RoadmapService.submitMilestoneAssessment(userId, careerId, milestoneId, answers);
 
       sendSuccess(res, 'Milestone assessment graded successfully.', result);
-    } catch (error) {
-      next(error);
+    } catch (error: any) {
+      sendError(res, error?.message || 'Failed to grade milestone assessment.', [], error?.statusCode || 400);
+    }
+  };
+
+  /**
+   * POST /api/roadmap/assessment/skill/generate
+   * Generates or retrieves questions for a standalone skill assessment
+   */
+  public static generateSkillAssessment = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+
+      const userId = req.user.sub;
+      const { skillName, domain, difficulty } = req.body;
+
+      if (!skillName || typeof skillName !== 'string' || !skillName.trim()) {
+        sendError(res, 'Skill name is required.', [], 400);
+        return;
+      }
+
+      const result = await RoadmapService.generateStandaloneSkillAssessment(
+        userId,
+        skillName.trim(),
+        domain,
+        difficulty || 'Intermediate'
+      );
+
+      sendSuccess(res, 'Skill assessment questions generated successfully.', result);
+    } catch (error: any) {
+      sendError(res, error?.message || 'Failed to generate skill assessment.', [], error?.statusCode || 503);
+    }
+  };
+
+  /**
+   * POST /api/roadmap/assessment/skill/submit
+   * Evaluates answers for a standalone skill assessment
+   */
+  public static submitSkillAssessment = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+
+      const userId = req.user.sub;
+      const { assessmentId, answers } = req.body;
+
+      if (!assessmentId || !Array.isArray(answers)) {
+        sendError(res, 'Assessment ID and answers array are required.', [], 400);
+        return;
+      }
+
+      const result = await RoadmapService.submitStandaloneSkillAssessment(userId, assessmentId, answers);
+
+      sendSuccess(res, 'Skill assessment evaluated successfully.', result);
+    } catch (error: any) {
+      sendError(res, error?.message || 'Failed to grade skill assessment.', [], error?.statusCode || 400);
+    }
+  };
+
+  /**
+   * POST /api/roadmap/assessment/skill/reset
+   * Resets active uncompleted assessment attempts for a skill
+   */
+  public static resetSkillAssessment = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+
+      const userId = req.user.sub;
+      const { skillName } = req.body;
+
+      if (!skillName || typeof skillName !== 'string') {
+        sendError(res, 'Skill name is required.', [], 400);
+        return;
+      }
+
+      await RoadmapService.resetStandaloneSkillAssessment(userId, skillName.trim());
+
+      sendSuccess(res, 'Skill assessment reset successfully.', { reset: true });
+    } catch (error: any) {
+      sendError(res, error?.message || 'Failed to reset skill assessment.', [], error?.statusCode || 400);
     }
   };
 
