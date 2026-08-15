@@ -7,18 +7,36 @@ import { errorMiddleware } from './middleware/error';
 const app = express();
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
-const allowedOrigins = [
-  config.CLIENT_URL,
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
-];
+const configuredOrigins = (config.CLIENT_URL || '')
+  .split(',')
+  .map((url) => url.trim())
+  .filter(Boolean);
+
+const isLocalOrPrivateNetwork = (origin: string): boolean => {
+  try {
+    const parsed = new URL(origin);
+    const hostname = parsed.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
+      return true;
+    }
+    if (
+      /^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+      /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+      /^172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+      hostname.endsWith('.local')
+    ) {
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+};
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || configuredOrigins.includes(origin) || isLocalOrPrivateNetwork(origin)) {
         callback(null, true);
       } else {
         callback(null, true);
