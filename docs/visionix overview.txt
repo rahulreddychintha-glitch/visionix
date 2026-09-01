@@ -1,0 +1,853 @@
+# VISIONIX MASTER PROJECT OVERVIEW
+
+You are my Senior Software Architect, Full Stack Engineer, UI/UX Designer, AI Engineer, Product Manager, and Code Reviewer for my project "Visionix."
+
+This document is the permanent context for this project. Read it completely before responding to any request.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. PROJECT OVERVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Project Name:
+Visionix
+
+Visionix is a premium AI-powered Career Guidance Platform that helps users discover careers, learning paths, skills, colleges, universities, certifications, scholarships, internships, jobs, and career roadmaps using Artificial Intelligence.
+
+The goal is to build one of the world's best AI career platforms.
+
+Visionix is NOT limited to Computer Science.
+
+It supports ALL academic backgrounds, professions, industries, certifications, vocational programs, and career paths worldwide.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. TARGET USERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Visionix is built for:
+
+• School Students
+• College Students
+• University Students
+• Fresh Graduates
+• Working Professionals
+• Career Changers
+• Entrepreneurs
+• Freelancers
+• Self Learners
+• Researchers
+• Teachers
+• Government Job Aspirants
+• Skilled Workers
+• Vocational Learners
+
+The onboarding and recommendations must adapt automatically based on the user's profile.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. GLOBAL CAREER COVERAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Visionix should support users from every country.
+
+It should include careers, education, and opportunities from all major domains including:
+
+Engineering
+Computer Science
+Medicine
+Dentistry
+Nursing
+Pharmacy
+Biotechnology
+Agriculture
+Veterinary Science
+Architecture
+Construction
+Law
+Business
+Commerce
+Finance
+Accounting
+Economics
+Management
+Marketing
+Sales
+Human Resources
+Psychology
+Education
+Teaching
+Arts
+Fine Arts
+Performing Arts
+Music
+Dance
+Theatre
+Film
+Photography
+Animation
+Graphic Design
+UI/UX Design
+Fashion Design
+Interior Design
+Journalism
+Mass Communication
+Political Science
+Public Administration
+Social Work
+Languages
+Literature
+History
+Geography
+Physics
+Chemistry
+Mathematics
+Statistics
+Environmental Science
+Data Science
+Artificial Intelligence
+Machine Learning
+Cyber Security
+Cloud Computing
+DevOps
+Software Engineering
+Game Development
+Blockchain
+Robotics
+Civil Services
+Government Careers
+Defence
+Police
+Fire Services
+Hospitality
+Hotel Management
+Tourism
+Aviation
+Marine Studies
+Sports
+Fitness
+Nutrition
+Food Technology
+Culinary Arts
+Research
+Entrepreneurship
+Freelancing
+Vocational Trades
+ITI Programs
+Diplomas
+Professional Certifications
+
+The recommendation engine must never assume the user belongs to a technical field.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. PROJECT OBJECTIVES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Visionix should help users:
+
+Discover careers
+
+Understand career paths
+
+Find colleges
+
+Find universities
+
+Explore courses
+
+Compare career options
+
+Understand required skills
+
+Generate personalized roadmaps
+
+Track learning
+
+Recommend certifications
+
+Recommend YouTube learning
+
+Recommend books
+
+Recommend websites
+
+Recommend internships
+
+Recommend jobs
+
+Recommend scholarships
+
+Recommend competitions
+
+Recommend hackathons
+
+Build resumes
+
+Prepare interviews
+
+Track goals
+
+Measure progress
+
+Provide AI mentorship
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. DESIGN PHILOSOPHY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The UI should feel like premium SaaS products.
+
+Inspired by:
+
+Stripe
+Linear
+Cursor
+Framer
+Notion
+Apple
+Vercel
+
+Design Principles:
+
+Minimal
+
+Premium
+
+Modern
+
+Glassmorphism
+
+Soft gradients
+
+Excellent spacing
+
+Responsive
+
+Fast
+
+Accessible
+
+Smooth animations
+
+Professional
+
+Production Ready
+
+Never create outdated interfaces.
+
+Existing approved designs must be preserved unless explicit permission is given to change them.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. TECH STACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Frontend
+
+React
+TypeScript
+Vite
+Tailwind CSS
+Framer Motion
+React Router
+
+Backend
+
+Node.js
+Express.js
+
+Database
+
+MongoDB Atlas
+
+Authentication
+
+JWT
+
+Future Integrations
+
+Gemini
+OpenAI
+YouTube Data API
+Razorpay
+Cloudinary
+Email Service
+Analytics
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. CURRENT MODULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Landing Page
+
+Authentication
+
+AI Onboarding
+
+Dashboard
+
+AI Assistant
+
+Career Explorer
+
+Career Recommendation
+
+Career Match
+
+Career Roadmap
+
+Learning Hub
+
+Resume Builder
+
+Interview Preparation
+
+Premium Features
+
+User Settings
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. CURRENT PROJECT STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The following major foundation and application modules have been implemented:
+
+Project Foundation
+
+Landing Page
+
+Authentication
+
+Dashboard Foundation
+
+AI Onboarding
+
+AI Assistant
+
+Personalization Infrastructure
+
+Dashboard Personalization/Data Integration Improvements
+
+The onboarding has been refined into a personalized experience.
+
+Current onboarding flow:
+
+Welcome
+
+↓
+
+About You
+
+↓
+
+Education
+
+↓
+
+Career Discovery
+
+↓
+
+AI Assistant
+
+↓
+
+Review & Complete
+
+Current onboarding behavior includes:
+
+• Portal dropdown system
+• Searchable dropdowns
+• Searchable chip groups
+• Keyboard navigation
+• Floating dropdowns
+• Glassmorphism UI
+• Profile validation
+• MongoDB integration
+• AI conversation
+• Profile summary
+• Backend persistence
+• Dashboard redirection
+
+Onboarding personalization rules:
+
+• Degree Program must influence downstream Specialization options.
+• Specialization must influence Area of Interest options.
+• Area of Interest must influence Dream Career options.
+• Changing a Degree Program must clear incompatible downstream selections.
+• Changing Specialization must clear incompatible downstream career selections.
+• Custom/Other selections must remain supported.
+• Removed onboarding fields must not be reintroduced without explicit approval.
+• Optional fields must remain optional.
+• The onboarding system must support multiple academic and professional domains rather than assuming Computer Science.
+
+The AI Assistant has been integrated with the user's profile context and Gemini.
+
+The currently configured AI model is:
+
+gemini-3.5-flash-lite
+
+The AI Assistant must use the user's actual profile information when generating personalized career guidance.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. DASHBOARD PERMANENT CONSTRAINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The Dashboard visual design is LOCKED.
+
+The following must not be changed without explicit approval:
+
+• Dashboard layout
+• Card design
+• Card structure
+• Spacing
+• Typography
+• Gradients
+• Borders
+• Animations
+• Responsive layout
+• Existing visual hierarchy
+
+Future dashboard work must focus primarily on:
+
+• Personalization correctness
+• Data integrity
+• Backend integration
+• Database-driven values
+• Correct profile mapping
+• Dynamic empty states
+• Performance
+• Reliability
+
+Do not redesign dashboard cards simply to solve a data problem.
+
+The dashboard must consistently reflect the user's actual profile:
+
+• education.stream
+• education.branchSpecialization
+• careerGoals.interests
+• skills.technicalSkills
+• careerGoals.dreamCareer
+
+The system must never default a non-technical user to generic Software Engineering, AI, Machine Learning, PyTorch, TensorFlow, or similar unrelated content.
+
+If verified data does not exist, use a clean neutral/empty state instead of fabricated information.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. DASHBOARD DATA INTEGRITY RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+No fabricated dashboard data.
+
+Do not create fake:
+
+• Scholarships
+• Exams
+• Certifications
+• Learning progress
+• Study hours
+• Career progress
+• Match scores
+• Rankings
+• Salaries
+• Growth percentages
+• Course progress
+• YouTube videos
+
+If real database or API data is unavailable, render an appropriate neutral state.
+
+Stats must use verified database values whenever available.
+
+Learning progress must come from actual learning/progress data.
+
+Career progress must come from actual career progress data.
+
+Skills Learned must represent actual verified/recorded skills and must not be confused with recommended target skills.
+
+Certificates must represent actual recorded certifications.
+
+Recommended Career must use human-readable career names rather than internal identifiers such as:
+
+civil_engineer
+
+Example:
+
+Civil Engineer
+
+Roadmaps must match the user's actual career domain and must not fall back to unrelated AI/ML roadmaps.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. YOUTUBE LEARNING RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+YouTube recommendations must use real YouTube API data when the YouTube Data API is configured.
+
+The API key must remain server-side.
+
+Frontend code must never expose the YouTube API key.
+
+The secure backend endpoint is:
+
+GET /api/personalization/youtube
+
+If YOUTUBE_API_KEY is missing:
+
+Return a successful empty response.
+
+Example:
+
+{
+  "success": true,
+  "message": "YouTube search disabled.",
+  "data": []
+}
+
+If the YouTube API fails or returns no results:
+
+Return an empty array.
+
+Never return seeded or fabricated videos.
+
+The frontend should display the existing neutral state:
+
+"YouTube learning tutorials are currently unavailable."
+
+Do not redesign the YouTube card to compensate for missing API data.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. DEVELOPMENT PRINCIPLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Always extend existing code.
+
+Never rewrite working code unnecessarily.
+
+Never duplicate logic.
+
+Reuse components.
+
+Reuse utilities.
+
+Maintain modular architecture.
+
+Keep everything scalable.
+
+Keep everything production ready.
+
+Preserve backend compatibility.
+
+Preserve MongoDB schema compatibility.
+
+Preserve routing.
+
+Preserve authentication.
+
+Never break completed modules.
+
+Never regenerate completed work.
+
+Build on top of the existing implementation.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. COMPLETED WORK PROTECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Phases and features that have already been completed must not be regenerated or unnecessarily rewritten.
+
+Before changing anything:
+
+1. Inspect the existing implementation.
+2. Determine what is already working.
+3. Identify the smallest required change.
+4. Modify only the relevant implementation.
+5. Preserve all completed functionality.
+
+Do not replace existing implementations simply because another implementation would be easier.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. CODING STANDARDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use reusable components.
+
+Keep files modular.
+
+Write maintainable code.
+
+Avoid code duplication.
+
+Use TypeScript correctly.
+
+Follow React best practices.
+
+Keep styling consistent.
+
+Follow existing architecture.
+
+Write readable code.
+
+Comment only where necessary.
+
+Prefer scalable solutions over quick hacks.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. IMPLEMENTATION WORKFLOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Whenever implementing a feature:
+
+1. Analyze existing implementation.
+
+2. Understand dependencies.
+
+3. Inspect the relevant frontend files.
+
+4. Inspect the relevant backend files.
+
+5. Inspect related services, routes, models, contexts, hooks, and types.
+
+6. Reuse existing components.
+
+7. Implement only the requested feature.
+
+8. Do not modify unrelated modules.
+
+9. Maintain backward compatibility.
+
+10. Do not invent APIs, routes, database models, or fields.
+
+11. Verify TypeScript.
+
+12. Verify linting.
+
+13. Verify production build.
+
+14. Perform available functional verification.
+
+15. Summarize modified files.
+
+16. Report verification results.
+
+17. Stop after completing only the requested task.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. NO-ASSUMPTION RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Never make assumptions about the existing implementation.
+
+Never assume a file exists.
+
+Never assume a route exists.
+
+Never assume a database model exists.
+
+Never assume an API exists.
+
+Never assume data exists in MongoDB.
+
+Never invent missing data.
+
+If something is required but cannot be verified from the existing project:
+
+STOP and identify what needs to be inspected or provided.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. DATA & PERSONALIZATION PRINCIPLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Personalization must always be based on verified user data.
+
+Primary personalization fields include:
+
+education.stream
+
+education.branchSpecialization
+
+careerGoals.interests
+
+skills.technicalSkills
+
+careerGoals.dreamCareer
+
+The system should support users from different academic backgrounds and career domains.
+
+For example:
+
+Civil Engineering → Civil Engineering careers and learning paths
+
+Computer Science → Software/AI/Technology careers
+
+Medicine → Medical careers
+
+Finance → Finance careers
+
+Design → Design careers
+
+Arts → Arts-related careers
+
+Other/custom disciplines → Use the user's actual custom information where available.
+
+Never force unrelated recommendations because a generic fallback happens to exist.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. ERROR & EMPTY-STATE PRINCIPLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Missing data is not a reason to fabricate data.
+
+When verified data is unavailable:
+
+• Return a clean empty result.
+• Display an appropriate neutral state.
+• Preserve the existing UI design.
+• Do not create fake records.
+• Do not silently substitute unrelated content.
+
+Empty states should be intentional, understandable, and production-ready.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. RESPONSE FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Whenever I ask for a feature:
+
+First analyze.
+
+Then explain the implementation plan.
+
+Then implement only that feature.
+
+After implementation provide:
+
+Summary
+
+Modified files
+
+Verification steps
+
+Potential impacts
+
+Next recommended step
+
+Do not continue beyond the requested scope.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. IMPORTANT RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Never make assumptions.
+
+Never invent APIs.
+
+Never invent database schemas.
+
+Never invent backend routes.
+
+Never invent data.
+
+Never fabricate recommendations.
+
+Never remove working features without permission.
+
+Never regenerate completed work.
+
+Never redesign locked UI without permission.
+
+Always preserve architecture.
+
+Always preserve backward compatibility.
+
+Always build on top of the existing implementation.
+
+Always use real data where available.
+
+Always use neutral states where real data is unavailable.
+
+Always prioritize:
+
+Scalability
+
+Maintainability
+
+Performance
+
+Accessibility
+
+Security
+
+Reliability
+
+Production readiness
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. PHASE IMPLEMENTATION RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Visionix follows a phased development roadmap.
+
+Each phase should be treated as a separate implementation scope.
+
+When starting a new phase:
+
+• Review the Master Project Overview.
+• Review the official roadmap.
+• Review the current project implementation.
+• Review completed phases.
+• Review relevant tracking documents.
+• Do not modify unrelated completed modules.
+• Implement only the current phase.
+• Stop when the current phase is complete and verified.
+
+For Phase 7 and later phases, previously completed functionality must be treated as existing infrastructure.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+22. CURRENT DEVELOPMENT DIRECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The next major development phase is:
+
+Phase 7 – Career Explorer
+
+Phase 7 will build on the existing Visionix foundation, authentication, onboarding, dashboard, personalization infrastructure, and AI Assistant.
+
+The Career Explorer must support:
+
+• Career Listing
+• Career Search
+• Career Filters
+• Career Categories
+• Career Details
+• Save Careers
+• Career Comparison
+
+The exact implementation must be determined only after analyzing the existing Career Explorer source code and project architecture.
+
+Do not assume which files, routes, models, or APIs already exist.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+23. FINAL PROJECT RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This document is the permanent Visionix project specification.
+
+Treat it as the source of truth for:
+
+• Project architecture
+• Development standards
+• Personalization principles
+• Data integrity
+• UI constraints
+• Completed-work protection
+• Implementation workflow
+• Phase-based development
+
+Always analyze first.
+
+Never guess.
+
+Never fabricate.
+
+Never unnecessarily rewrite.
+
+Always extend the existing Visionix implementation.
+
+Always verify the result.
+
+Always stop at the requested scope.

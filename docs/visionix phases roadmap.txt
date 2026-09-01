@@ -1,0 +1,670 @@
+# Visionix — Official Development Roadmap
+
+## Modified 18-Phase Implementation Roadmap
+
+### 1. Project Vision
+
+**Visionix** is a premium, full-stack, AI-powered career guidance platform designed to help students, graduates, job seekers, working professionals, career changers, and self-learners make informed career decisions and continuously develop toward their target careers.
+
+The platform should provide personalized, reliable, scalable, and production-ready career guidance using real user data and real integrations rather than mock functionality.
+
+### 2. Core Technology Stack
+
+* **Frontend:** React + Vite
+* **Backend:** Node.js + Express
+* **Database:** MongoDB Atlas
+* **Authentication:** JWT-based authentication
+* **Styling:** Tailwind CSS / existing project styling system
+* **Animations:** Framer Motion
+* **AI:** Gemini / approved AI provider
+* **Video Learning:** YouTube Data API
+* **Charts & Progress Visualization:** Chart.js / Recharts where appropriate
+* **Payments:** Razorpay for premium functionality
+* **Deployment:** Vercel + Render
+* **Docker:** Optional where required
+
+---
+
+# 3. Implementation Principles
+
+These principles apply to every phase:
+
+1. **Do not regenerate completed functionality.**
+2. Always inspect the existing implementation before making changes.
+3. Extend the existing architecture instead of creating duplicate systems.
+4. Do not replace working functionality without a clear reason.
+5. Keep modules modular, reusable, scalable, and production-ready.
+6. Do not use fake/mock data where real functionality is required.
+7. Preserve existing approved UI decisions unless a redesign is explicitly approved.
+8. Verify functionality after implementation.
+9. Run appropriate TypeScript/build/lint checks after major implementation work.
+10. Do not move to the next phase until the current phase has been implemented, tested, verified, and explicitly approved.
+11. Future phases must remain compatible with already completed phases.
+12. API keys and secrets must remain server-side and must never be exposed to the client.
+
+---
+
+# 4. Modified 18-Phase Roadmap
+
+## Phase 1 — Project Foundation
+
+Establish the complete Visionix foundation.
+
+Includes:
+
+* Frontend setup
+* Backend setup
+* Express server
+* MongoDB connection
+* Environment configuration
+* Authentication foundation
+* API structure
+* Middleware
+* Project architecture
+* Development/build scripts
+* Health-check endpoint
+* Base production configuration
+
+**Status:** ✅ Completed / Locked
+
+---
+
+## Phase 2 — Landing Website
+
+Build the premium Visionix landing website based on the approved design direction.
+
+Includes:
+
+* Hero section
+* Navigation
+* Product presentation
+* Feature sections
+* Career-focused messaging
+* Responsive design
+* Premium visual system
+* Animations
+* CTA sections
+* Footer
+
+The approved landing design remains the primary reference.
+
+**Status:** ✅ Completed / Locked
+
+---
+
+## Phase 3 — Authentication & User Management
+
+Implement secure user account functionality.
+
+Includes:
+
+* Sign up
+* Login
+* Logout
+* JWT authentication
+* Protected routes
+* User sessions
+* User profile
+* Password management
+* Authentication persistence
+* Backend authorization
+
+**Status:** ✅ Completed / Locked
+
+---
+
+## Phase 4 — AI User Onboarding
+
+Create the personalized onboarding system that collects the user's career context.
+
+Required information includes:
+
+* Full name
+* Education level
+* Student/professional status
+* Major/discipline
+* Dream career
+* Target industry
+* Primary goal
+
+Extended information may include:
+
+* Specialization
+* Experience
+* Preferred job type
+* Preferred location
+* Certifications
+* Portfolio links
+* Languages
+* Long-term aspirations
+
+The onboarding system must support different educational and professional backgrounds.
+
+**Status:** ✅ Completed / Locked
+
+---
+
+## Phase 5 — Dashboard Foundation
+
+Build the main Visionix dashboard.
+
+Includes:
+
+* Dashboard layout
+* Navigation
+* Sidebar
+* Top navigation
+* Career recommendation section
+* Career match section
+* Roadmap progress
+* Learning sections
+* Skills
+* Scholarships
+* Trending careers
+* Exams/assessment-related sections
+* Personalized dashboard data
+
+The dashboard must remain modular and scalable.
+
+### Future Dashboard Section Redesign
+
+The **dashboard content sections will be reviewed and redesigned later** to improve:
+
+* Layout
+* Spacing
+* Information hierarchy
+* Usability
+* Responsiveness
+* Visual consistency
+* Premium appearance
+* Content density
+
+**Important:** This future redesign applies to the **dashboard sections/content**, not the sidebar.
+
+The existing sidebar/navigation structure should remain unchanged unless a separate explicit decision is made to modify it.
+
+**Status:** ✅ Foundation Completed / Future Section Redesign Planned
+
+---
+
+## Phase 6 — AI Assistant
+
+Develop the Visionix AI Assistant.
+
+Includes:
+
+* AI conversation interface
+* Personalized career assistance
+* User profile context
+* Career-related questions
+* Learning guidance
+* Career planning assistance
+* Context-aware responses
+* Secure AI API integration
+* Error handling
+* Production-ready AI architecture
+
+**Status:** ⏳ Planned / Continue according to implementation state
+
+---
+
+## Phase 7 — Career Explorer
+
+Build the complete career exploration system.
+
+Includes:
+
+* Career database
+* Career search
+* Career categories
+* Career filtering
+* Career details
+* Career requirements
+* Education requirements
+* Skills
+* Career information
+* Saved careers
+* Career details modal
+* Responsive career exploration experience
+
+**Status:** ✅ Completed / Locked
+
+---
+
+## Phase 8 — Career Recommendation
+
+Build personalized career recommendations based on the user's profile.
+
+The system should consider:
+
+* Dream career
+* Education
+* Discipline
+* Skills
+* Interests
+* Career goals
+* Target industry
+* Professional background
+* Other verified profile information
+
+Recommendations must be **career-specific**.
+
+For example, if the user's dream career is **Surgeon**, the system should show careers related to healthcare, medicine, surgery, and appropriate adjacent career paths rather than unrelated generic careers.
+
+Recommendations should adapt when the user's target career changes.
+
+**Status:** ✅ Completed / Locked
+
+---
+
+## Phase 9 — Career Match & Multi-Career Comparison
+
+Build the deterministic Career Match system.
+
+The matching system evaluates:
+
+* Education/stream compatibility
+* Skills overlap
+* Interests fit
+* Dream career fit
+
+The match score is calculated using the defined scoring system and should remain deterministic and explainable.
+
+Includes:
+
+* Career Match mode
+* Match percentage
+* Match level
+* Strengths
+* Skill gaps
+* Improvement areas
+* Career Match details
+* Multi-career comparison
+* Comparison of 2–3 careers
+* Side-by-side match metrics
+
+Users should be able to compare multiple careers before deciding which career to pursue.
+
+**Status:** ✅ Completed / Locked
+
+---
+
+# Phase 10 — Career Roadmap & My Progress
+
+Create a detailed, personalized career roadmap based on the user's selected career, profile, and Career Match information.
+
+Includes:
+
+* Personalized career roadmap
+* Multiple stages
+* Multiple meaningful milestones
+* Career-specific learning path
+* Milestone descriptions
+* Tasks
+* Practical activities
+* Skills
+* Learning objectives
+* Dependencies/prerequisites
+* Current milestone
+* Upcoming milestones
+* Completed milestones
+* Progress tracking
+* My Progress page
+* Assessment status tracking
+* Verified/review-recommended milestone states
+
+### Milestone Verification
+
+Milestones should support:
+
+* In Progress
+* Completed & Verified
+* Completed — Review Recommended
+* Upcoming
+
+Assessment results should be able to verify milestone completion in the future assessment system.
+
+A failed assessment should **not block the user from continuing**. Instead, Visionix should recommend reviewing the relevant milestone material and allow the user to continue or retake the assessment later.
+
+### Phase 10 Navigation Integration
+
+The roadmap includes navigation points for future learning modules:
+
+* **Take Assessment**
+* **Learn from YouTube**
+
+At this stage, these buttons should navigate to the existing **Module Under Development** experiences.
+
+The actual Quiz & Assessment system and YouTube Learning system are **not part of Phase 10 implementation**.
+
+### Phase 10 Scope Boundary
+
+Do not implement:
+
+* Actual quiz system
+* Actual assessment question generation
+* Actual YouTube Learning system
+* YouTube recommendation engine
+
+These will be implemented in their dedicated future phases.
+
+**Status:** 🔒 Completed / Locked
+
+---
+
+# Phase 11 — Learning Hub & Personalized Learning
+
+Redesign and develop the Learning Hub around the user's actual career-development needs.
+
+The Learning Hub should eventually include personalized learning experiences such as:
+
+* Recommended learning
+* Continue learning
+* Recommended skills
+* Learning resources
+* YouTube Learning
+* Career-specific videos
+* Skill-development resources
+* Scholarships
+* Trending careers
+* Relevant educational opportunities
+* Personalized learning recommendations
+
+### YouTube Learning
+
+The YouTube Data API should be used for real video recommendations.
+
+Videos should be personalized using relevant context such as:
+
+* Career
+* Milestone
+* Skills
+* Learning objectives
+* User profile
+* Current learning needs
+
+The system should avoid irrelevant generic recommendations.
+
+### Important
+
+Phase 11 should be redesigned before implementation so that it fits the actual Visionix architecture and does not duplicate functionality already completed in Phases 7–10.
+
+**Status:** ⏳ Planned / To Be Redesigned Before Implementation
+
+---
+
+# Phase 12 — Quizzes, Assessments & Skill Verification
+
+Build the dedicated Quiz & Assessment system.
+
+Includes:
+
+* Career-related quizzes
+* Milestone assessments
+* Skill assessments
+* Knowledge tests
+* Assessment categories
+* Question generation
+* Answer evaluation
+* Score calculation
+* Pass/fail evaluation
+* Retakes
+* Assessment history
+* Milestone verification
+* Progress integration
+
+The system should connect with Career Roadmap and My Progress without duplicating roadmap logic.
+
+**Status:** ⏳ Planned
+
+---
+
+# Phase 13 — Resume & Interview Preparation
+
+Build career-focused resume and interview preparation tools.
+
+Includes:
+
+* Resume creation/support
+* Resume analysis
+* Resume improvement suggestions
+* Career-specific resume guidance
+* Interview preparation
+* Interview questions
+* AI interview assistance
+* Skill-gap-based interview preparation
+* Career-specific preparation
+
+**Status:** ⏳ Planned
+
+---
+
+# Phase 14 — Career Tracker
+
+Build long-term career tracking functionality.
+
+Includes:
+
+* Career goals
+* Application tracking
+* Learning progress
+* Skill development
+* Career milestones
+* Personal achievements
+* Progress history
+* Career journey tracking
+* Personalized activity tracking
+
+The Career Tracker should integrate with the user's existing profile, roadmap, learning, and progress data.
+
+**Status:** ⏳ Planned
+
+---
+
+# Phase 15 — Premium Features & Payments
+
+Implement Visionix premium functionality.
+
+Includes:
+
+* Premium subscription
+* Razorpay integration
+* Payment verification
+* Premium feature access
+* Subscription management
+* Protected premium functionality
+* Secure payment handling
+
+Premium features should be clearly separated from free functionality.
+
+**Status:** ⏳ Planned
+
+---
+
+# Phase 16 — Advanced AI Personalization
+
+Expand Visionix personalization across the platform.
+
+Includes:
+
+* Advanced recommendation engine
+* Cross-module personalization
+* Learning personalization
+* Career personalization
+* AI-generated insights
+* Personalized career planning
+* Adaptive recommendations
+* User progress-based recommendations
+* Context-aware AI experiences
+
+The system should use verified user data and existing platform information rather than inventing user attributes.
+
+**Status:** ⏳ Planned
+
+---
+
+# Phase 17 — Integration, Testing & Production Readiness
+
+Perform comprehensive integration and production preparation.
+
+Includes:
+
+* Frontend/backend integration testing
+* API verification
+* Database verification
+* Authentication testing
+* AI integration testing
+* YouTube API testing
+* Payment testing
+* Error handling
+* Performance testing
+* Responsive testing
+* Security review
+* Production build verification
+* Regression testing
+
+All major modules should work together without breaking previously completed functionality.
+
+**Status:** ⏳ Planned
+
+---
+
+# Phase 18 — Final End-to-End Verification & Production Launch
+
+Final Visionix verification and deployment phase.
+
+Includes:
+
+* Complete user-flow testing
+* Registration → onboarding → dashboard
+* Dashboard → career explorer
+* Career recommendation
+* Career match
+* Career comparison
+* Career roadmap
+* My Progress
+* Learning Hub
+* YouTube Learning
+* Quizzes & Assessments
+* Resume/interview preparation
+* Career tracking
+* Premium features
+* AI Assistant
+* Cross-module data consistency
+* Final UI/UX review
+* Accessibility review
+* Security review
+* Production build
+* Deployment verification
+* Final bug fixes
+* Final documentation synchronization
+
+Only after successful end-to-end verification should Visionix be considered production-ready.
+
+**Status:** ⏳ Planned
+
+---
+
+# 5. Phase Completion Policy
+
+A phase is considered **completed only when**:
+
+1. Implementation is finished.
+2. Existing functionality has not been unnecessarily broken.
+3. Required functionality has been manually verified.
+4. TypeScript/build checks pass where applicable.
+5. Lint checks pass where applicable.
+6. Major integration paths have been tested.
+7. The user explicitly confirms the phase is complete.
+
+Once confirmed, the phase becomes **locked** and should not be regenerated or reimplemented in later phases.
+
+---
+
+# 6. Current Project Status
+
+### Completed / Locked
+
+* ✅ Phase 1 — Project Foundation
+* ✅ Phase 2 — Landing Website
+* ✅ Phase 3 — Authentication & User Management
+* ✅ Phase 4 — AI User Onboarding
+* ✅ Phase 5 — Dashboard Foundation
+* ✅ Phase 7 — Career Explorer
+* ✅ Phase 8 — Career Recommendation
+* ✅ Phase 9 — Career Match & Multi-Career Comparison
+* 🔒 Phase 10 — Career Roadmap & My Progress
+
+### Planned / Future
+
+* ⏳ Phase 6 — AI Assistant
+* ⏳ Phase 11 — Learning Hub & Personalized Learning
+* ⏳ Phase 12 — Quizzes, Assessments & Skill Verification
+* ⏳ Phase 13 — Resume & Interview Preparation
+* ⏳ Phase 14 — Career Tracker
+* ⏳ Phase 15 — Premium Features & Payments
+* ⏳ Phase 16 — Advanced AI Personalization
+* ⏳ Phase 17 — Integration, Testing & Production Readiness
+* ⏳ Phase 18 — Final End-to-End Verification & Production Launch
+
+**Note:** The exact implementation order may be adjusted when necessary, but the project will continue to use this **18-phase modified roadmap**. Any approved changes must be documented rather than silently changing the roadmap.
+
+---
+
+# 7. Future Compatibility Requirements
+
+All future phases must remain compatible with:
+
+* Existing Career Explorer
+* Career Recommendation
+* Career Match
+* Multi-career comparison
+* Career Roadmap
+* My Progress
+* User profile/onboarding data
+* Existing dashboard architecture
+* Existing authentication
+* Existing backend APIs
+* Existing database structure
+
+Future modules should reuse existing data and services wherever appropriate rather than creating duplicate sources of truth.
+
+---
+
+# 8. Dashboard Redesign Policy
+
+The current dashboard content sections will receive a **future UI/UX redesign**.
+
+The redesign may improve:
+
+* Section layout
+* Spacing
+* Card organization
+* Information hierarchy
+* Responsiveness
+* Visual consistency
+* Content density
+* User experience
+* Premium appearance
+
+However:
+
+> **The sidebar/navigation is NOT included in this redesign.**
+
+The sidebar should remain unchanged unless a separate explicit decision is made to redesign it.
+
+---
+
+# 9. Documentation Synchronization
+
+This Official Development Roadmap is the master reference for Visionix's implementation phases.
+
+Whenever an approved architectural or functional change materially affects the roadmap:
+
+* Update the relevant documentation.
+* Preserve completed-phase history.
+* Do not silently rewrite completed work.
+* Keep phase status accurate.
+* Keep future phases synchronized with the actual project.
+
+The roadmap should always represent the **actual Visionix implementation**, not an outdated original plan.

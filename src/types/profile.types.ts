@@ -1,5 +1,14 @@
+export interface ICourseEntry {
+  stream?: string;
+  branchSpecialization?: string;
+  studyYear?: string;
+  institution?: string;
+}
+
 export interface IPersonalProfile {
   fullName?: string;
+  firstName?: string;
+  lastName?: string;
   dateOfBirth?: string | Date;
   gender?: string;
   country?: string;
@@ -16,6 +25,9 @@ export interface IEducationProfile {
   currentOccupation?: string;
   graduationYear?: number | string;
   higherEducationPlans?: string;
+  studyYear?: string;
+  currentClass?: string;
+  courses?: ICourseEntry[];
 }
 
 export interface IExperienceProfile {

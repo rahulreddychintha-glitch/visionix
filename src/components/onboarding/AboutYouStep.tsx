@@ -22,26 +22,43 @@ export const AboutYouStep: React.FC<AboutYouStepProps> = ({
 }) => {
   const personal = data.personal || {};
   
-  const nameInputRef = useRef<HTMLInputElement>(null);
+  const firstNameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Autofocus on mount
-    if (nameInputRef.current) {
-      nameInputRef.current.focus();
+    if (firstNameInputRef.current) {
+      firstNameInputRef.current.focus();
     }
   }, []);
 
-  const handlePersonalChange = (field: string, value: any) => {
-    onChange('personal', {
+  const handleFieldChange = (field: string, value: any) => {
+    const updated = {
       ...personal,
       [field]: value
-    });
+    };
+    if (field === 'firstName' || field === 'lastName') {
+      const first = field === 'firstName' ? value : (personal.firstName || '');
+      const last = field === 'lastName' ? value : (personal.lastName || '');
+      updated.fullName = `${first} ${last}`.trim();
+    }
+    onChange('personal', updated);
   };
 
-  // Step validation - only Full Name is required
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  // Helper to ensure date string is YYYY-MM-DD for input
+  const dobInputValue = personal.dateOfBirth
+    ? typeof personal.dateOfBirth === 'string'
+      ? personal.dateOfBirth.split('T')[0]
+      : new Date(personal.dateOfBirth).toISOString().split('T')[0]
+    : '';
+
+  // Step validation
+  const isDobValid = !!dobInputValue && dobInputValue <= todayStr;
   const isStepValid = 
-    !!personal.fullName?.trim() && 
-    personal.fullName.trim().length >= 2;
+    !!personal.firstName?.trim() && 
+    !!personal.lastName?.trim() && 
+    isDobValid;
 
   return (
     <motion.div
@@ -59,25 +76,69 @@ export const AboutYouStep: React.FC<AboutYouStepProps> = ({
       </div>
 
       <div className={styles.formGrid}>
-        {/* Full Name */}
-        <div className={styles.formGroupFull}>
-          <label htmlFor="fullName">Full Name *</label>
+        {/* First Name */}
+        <div className={styles.formGroup}>
+          <label htmlFor="firstName">First Name *</label>
           <input
-            ref={nameInputRef}
+            ref={firstNameInputRef}
             type="text"
-            id="fullName"
+            id="firstName"
             className={styles.input}
-            placeholder="John Doe"
-            value={personal.fullName || ''}
-            onChange={(e) => handlePersonalChange('fullName', e.target.value)}
+            placeholder="John"
+            value={personal.firstName || ''}
+            onChange={(e) => handleFieldChange('firstName', e.target.value)}
             disabled={isLoading}
-            aria-invalid={errors.fullName ? 'true' : 'false'}
-            aria-describedby={errors.fullName ? 'fullName-error' : undefined}
+            aria-invalid={errors.firstName ? 'true' : 'false'}
+            aria-describedby={errors.firstName ? 'firstName-error' : undefined}
             required
           />
-          {errors.fullName && (
-            <span id="fullName-error" role="alert" className={styles.fieldError}>
-              {errors.fullName}
+          {errors.firstName && (
+            <span id="firstName-error" role="alert" className={styles.fieldError}>
+              {errors.firstName}
+            </span>
+          )}
+        </div>
+
+        {/* Last Name */}
+        <div className={styles.formGroup}>
+          <label htmlFor="lastName">Last Name *</label>
+          <input
+            type="text"
+            id="lastName"
+            className={styles.input}
+            placeholder="Doe"
+            value={personal.lastName || ''}
+            onChange={(e) => handleFieldChange('lastName', e.target.value)}
+            disabled={isLoading}
+            aria-invalid={errors.lastName ? 'true' : 'false'}
+            aria-describedby={errors.lastName ? 'lastName-error' : undefined}
+            required
+          />
+          {errors.lastName && (
+            <span id="lastName-error" role="alert" className={styles.fieldError}>
+              {errors.lastName}
+            </span>
+          )}
+        </div>
+
+        {/* Date of Birth */}
+        <div className={styles.formGroupFull}>
+          <label htmlFor="dateOfBirth">Date of Birth *</label>
+          <input
+            type="date"
+            id="dateOfBirth"
+            className={styles.input}
+            max={todayStr}
+            value={dobInputValue}
+            onChange={(e) => handleFieldChange('dateOfBirth', e.target.value)}
+            disabled={isLoading}
+            aria-invalid={errors.dateOfBirth ? 'true' : 'false'}
+            aria-describedby={errors.dateOfBirth ? 'dateOfBirth-error' : undefined}
+            required
+          />
+          {errors.dateOfBirth && (
+            <span id="dateOfBirth-error" role="alert" className={styles.fieldError}>
+              {errors.dateOfBirth}
             </span>
           )}
         </div>

@@ -15,15 +15,38 @@ import { body } from 'express-validator';
  */
 export const saveProfileValidator = [
   // ─── Personal ───────────────────────────────────────────────────────────────
-  body('personal.fullName')
+  body('personal.firstName')
     .if((value, { req }) => req.body.onboarding?.completed === true)
     .notEmpty()
-    .withMessage('Full name is required')
-    .isLength({ min: 2 })
-    .withMessage('Full name must be at least 2 characters'),
+    .withMessage('First name is required')
+    .trim(),
+
+  body('personal.lastName')
+    .if((value, { req }) => req.body.onboarding?.completed === true)
+    .notEmpty()
+    .withMessage('Last name is required')
+    .trim(),
+
+  body('personal.fullName')
+    .optional({ checkFalsy: true })
+    .isString(),
 
   body('personal.dateOfBirth')
-    .optional({ checkFalsy: true }),
+    .if((value, { req }) => req.body.onboarding?.completed === true)
+    .notEmpty()
+    .withMessage('Date of birth is required')
+    .custom((val) => {
+      const dob = new Date(val);
+      if (isNaN(dob.getTime())) {
+        throw new Error('Please provide a valid date of birth');
+      }
+      const todayStr = new Date().toISOString().split('T')[0];
+      const dobStr = typeof val === 'string' ? val.split('T')[0] : dob.toISOString().split('T')[0];
+      if (dobStr > todayStr) {
+        throw new Error('Date of birth cannot be in the future');
+      }
+      return true;
+    }),
 
   body('personal.gender')
     .optional({ checkFalsy: true })
@@ -44,9 +67,16 @@ export const saveProfileValidator = [
 
   // ─── Education ─────────────────────────────────────────────────────────────
   body('education.level')
-    .optional({ checkFalsy: true })
+    .if((value, { req }) => req.body.onboarding?.completed === true)
+    .notEmpty()
+    .withMessage('Highest education level is required')
     .isString()
     .withMessage('Education level must be a string'),
+
+  body('education.currentClass')
+    .if((value, { req }) => req.body.onboarding?.completed === true && (req.body.education?.level?.toLowerCase() === 'school' || req.body.education?.level === 'School'))
+    .notEmpty()
+    .withMessage('Class is required for school students'),
 
   body('education.studentStatus')
     .optional({ checkFalsy: true })
@@ -58,9 +88,19 @@ export const saveProfileValidator = [
     .isString(),
 
   body('education.stream')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
+    .if((value, { req }) => req.body.onboarding?.completed === true && req.body.education?.level?.toLowerCase() !== 'school' && req.body.education?.level !== 'School')
     .notEmpty()
     .withMessage('Academic stream / field is required'),
+
+  body('education.studyYear')
+    .if((value, { req }) => req.body.onboarding?.completed === true && req.body.education?.level?.toLowerCase() !== 'school' && req.body.education?.level !== 'School')
+    .notEmpty()
+    .withMessage('Year / Current study year is required'),
+
+  body('education.courses')
+    .optional()
+    .isArray()
+    .withMessage('Courses must be an array'),
 
   body('education.branchSpecialization')
     .optional({ checkFalsy: true })
@@ -144,9 +184,9 @@ export const saveProfileValidator = [
 
   // ─── Career Goals ──────────────────────────────────────────────────────────
   body('careerGoals.dreamCareer')
-    .if((value, { req }) => req.body.onboarding?.completed === true)
-    .notEmpty()
-    .withMessage('Dream career is required'),
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage('Dream career must be a string'),
 
   body('careerGoals.preferredIndustries')
     .if((value, { req }) => req.body.onboarding?.completed === true)

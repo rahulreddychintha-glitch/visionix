@@ -1,0 +1,398 @@
+# VISIONIX — MASTER DEVELOPMENT INSTRUCTIONS
+
+## Official Source of Truth
+
+This document is the **master instruction for all future Visionix development chats and implementation work**.
+
+Visionix is a completely independent project. Do **not** mix Visionix requirements, architecture, files, terminology, code, or decisions with any other project.
+
+---
+
+## 1. STRICT DEVELOPMENT RULE
+
+For every Visionix implementation:
+
+1. Follow the current phase exactly.
+2. Modify only what is required for that phase.
+3. Do not add unrelated features.
+4. Do not remove existing working functionality unless the current phase explicitly requires it.
+5. Do not redesign unrelated pages.
+6. Do not silently change product decisions.
+7. Do not create mock/fake data where real data is required.
+8. Do not duplicate existing functionality.
+9. Reuse existing Visionix architecture where practical.
+10. Preserve backward compatibility unless the phase explicitly requires a breaking change.
+
+### IMPORTANT
+
+**Do not assume improvements.**
+
+If something is not specified in the current phase or this master source, do not implement it automatically.
+
+---
+
+# 2. IMPLEMENTATION WORKFLOW
+
+Before modifying code:
+
+1. Inspect the existing implementation.
+2. Identify the exact files involved.
+3. Understand existing data flow and dependencies.
+4. Check whether the requested functionality already exists partially.
+5. Make the smallest safe change required.
+6. Preserve existing functionality.
+7. Run appropriate validation/build/typecheck/lint tests.
+8. Report exactly what changed.
+9. Report files modified.
+10. Report tests performed and their results.
+11. Clearly report any remaining issue.
+
+Never claim something was implemented or tested if it was not actually done.
+
+---
+
+# 3. VISIONIX PRODUCT DIRECTION
+
+Visionix is an **AI-powered career guidance platform for students**, with particular attention to the Indian education system.
+
+The product should help a student move through:
+
+**Education → Career Discovery → Career Match → Career Choice → Skill Gap → Learning → Roadmap → Progress → Career Readiness**
+
+AI should be an integrated capability throughout this journey.
+
+Visionix should not feel like a generic AI chatbot.
+
+---
+
+# 4. INDIAN STUDENT FOCUS
+
+Visionix must use an education structure appropriate for India.
+
+Primary supported school journey:
+
+* Class 6
+* Class 7
+* Class 8
+* Class 9
+* Class 10
+
+Do not create detailed Visionix tracking for:
+
+* Nursery
+* LKG
+* UKG
+* Classes 1–5
+
+After Class 10, support relevant Indian pathways including:
+
+* Intermediate / +2 / PUC
+* Diploma / Polytechnic
+* Undergraduate
+* Other relevant higher-education pathways
+
+Use contextual education questions.
+
+General hierarchy:
+
+**Education Stage → Class/Year → Stream → Course/Degree → Branch/Specialization**
+
+Only display fields relevant to the selected education path.
+
+---
+
+# 5. CURRENT ONBOARDING REQUIREMENTS
+
+The following onboarding requirements have already been established and must remain supported:
+
+### About You
+
+Required:
+
+* First Name
+* Last Name
+* Date of Birth
+
+Future dates must not be accepted.
+
+Maintain backward compatibility with existing full-name data where necessary.
+
+### Education
+
+* Highest Education Level is required.
+* School students require current class.
+* Higher-education students require relevant course/degree and current year.
+* Multiple courses are supported where applicable.
+* Irrelevant fields must not be displayed.
+
+### Career
+
+* Dream Career is optional.
+
+Do not reintroduce Dream Career as a required field.
+
+---
+
+# 6. AI ASSISTANT DIRECTION
+
+The standalone AI Assistant is being removed.
+
+Remove:
+
+* AI Assistant navigation entry
+* Dedicated AI Assistant page
+* Standalone chatbot UI
+* Standalone dashboard AI Assistant section
+
+However, **AI functionality itself must remain** where it provides value inside Visionix.
+
+AI may continue supporting:
+
+* Career recommendations
+* Career explanations
+* Career matching
+* Roadmap generation
+* Skill-gap explanations
+* Resume analysis
+* Interview preparation
+* Learning recommendations
+* Contextual guidance
+
+AI must be contextual rather than a generic chatbot.
+
+---
+
+# 7. DASHBOARD DIRECTION
+
+The current dashboard is considered too cluttered.
+
+The target experience should prioritize:
+
+### Zone 1 — Current Direction
+
+* Greeting
+* Education stage
+* Career direction
+* Immediate next action
+
+### Zone 2 — Progress
+
+* Learning
+* Skills
+* Roadmap
+* Relevant progress
+
+### Zone 3 — Relevant Resources
+
+Only useful, populated, relevant resources.
+
+Do not simply move every existing card into three containers.
+
+Remove unnecessary duplication and empty/meaningless widgets.
+
+---
+
+# 8. PERFORMANCE REQUIREMENT
+
+The current application has approximately a **3–4 second delay when navigating between sections**.
+
+This is a priority problem.
+
+Before adding unnecessary optimization layers:
+
+* Measure the delay.
+* Identify the actual bottleneck.
+* Determine whether it is frontend, backend, API, database, rendering, bundle loading, or another cause.
+* Fix the actual cause.
+
+Potential areas to investigate include:
+
+* Repeated API requests
+* Repeated profile requests
+* `/api/personalization/data`
+* Career API calls
+* Component remounting
+* Route loading
+* Bundle size
+* Backend response time
+* MongoDB queries
+* AI calls
+* Asset loading
+
+Do not blindly introduce caching or architecture changes without understanding the bottleneck.
+
+---
+
+# 9. SECURITY REQUIREMENTS
+
+Visionix must be treated as a production application.
+
+Review and improve:
+
+* CORS configuration
+* Helmet/security headers
+* Rate limiting
+* Request-size limits
+* Authentication security
+* JWT storage
+* API authorization
+* Input validation
+* Unsafe HTML rendering
+* Environment variables
+* API-key protection
+* HTTPS/deployment security
+
+The current CORS configuration must not allow every origin by default.
+
+JWT storage must be evaluated carefully. Production authentication should prefer secure HTTP-only cookies/short-lived access tokens where compatible with the existing architecture.
+
+External content must not be rendered as unsafe HTML.
+
+---
+
+# 10. CODE QUALITY REQUIREMENTS
+
+Maintain:
+
+* TypeScript correctness
+* Clean architecture
+* Clear component responsibilities
+* Reusable services
+* Maintainable files
+* No unnecessary duplication
+
+Large files should be split only when doing so improves maintainability without changing behavior.
+
+Large datasets/constants should be separated from UI logic where appropriate.
+
+---
+
+# 11. TESTING REQUIREMENTS
+
+Important Visionix flows must eventually have automated coverage, especially:
+
+* Authentication
+* Protected routes
+* Onboarding
+* Profile validation
+* API validation
+* Critical career flows
+* Core data services
+
+Every implementation phase must run the appropriate existing checks.
+
+At minimum, use relevant:
+
+* Typecheck
+* Build
+* Lint
+* Automated tests
+
+---
+
+# 12. REAL DATA RULE
+
+Where Visionix displays external learning resources or course information:
+
+* Use real sources.
+* Do not create fake courses.
+* Do not fabricate providers.
+* Do not fabricate URLs.
+* Clearly identify the provider.
+* Preserve source information.
+
+---
+
+# 13. SCHOLARSHIPS AND UPCOMING EXAMS
+
+**Do not implement live scholarship or live upcoming-exam systems in the current roadmap.**
+
+Reason:
+
+These require continuously reliable/current information.
+
+Therefore, the following are explicitly outside the current roadmap:
+
+* Daily scholarship updates
+* Scholarship deadline tracking
+* Live scholarship eligibility database
+* Live upcoming exam calendar
+* Exam deadline tracking
+* Daily exam updates
+* Notifications based on continuously changing scholarship/exam deadlines
+
+These may only be reconsidered later if a reliable data-update architecture is established.
+
+---
+
+# 14. UX PRINCIPLES
+
+Visionix should be:
+
+* Simple
+* Clear
+* Fast
+* Student-friendly
+* Modern
+* Premium
+* Responsive
+* Contextual
+* Easy to scan
+
+Avoid:
+
+* Excessive cards
+* Excessive scrolling
+* Huge forms
+* Unnecessary chatbot interfaces
+* Repeated information
+* Confusing navigation
+* Empty placeholder sections
+* Corporate terminology that is inappropriate for school students
+
+---
+
+# 15. PHASE CONTROL
+
+Only work on the phase explicitly requested.
+
+If the user says:
+
+> Implement Phase 20
+
+implement **only Phase 20**.
+
+Do not automatically implement Phase 21, Phase 22, or unrelated improvements.
+
+If a required dependency from an earlier phase is missing, report it before making unrelated changes.
+
+---
+
+# 16. FINAL VERIFICATION
+
+After implementation:
+
+### Verify
+
+* Functionality
+* UI
+* Responsive behavior where applicable
+* Existing functionality
+* TypeScript
+* Build
+* Lint
+* Relevant automated tests
+
+Then provide:
+
+### Implementation Summary
+
+### Files Modified
+
+### Tests Performed
+
+### Results
+
+### Remaining Issues
+
+This source is the authoritative Visionix development guideline.

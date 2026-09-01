@@ -62,10 +62,8 @@ export const AboutCareerStep: React.FC<AboutCareerStepProps> = ({
     return (skills.technicalSkills || []).some((s: string) => s.toLowerCase() === skill.toLowerCase());
   };
 
-  // Step 3 Validation: Areas of Interest and Dream Career are required
-  const isStepValid =
-    (interests.careerInterests || []).length > 0 &&
-    !!careerGoals.dreamCareer;
+  // Step 3 Validation: Areas of Interest is required, Dream Career is optional
+  const isStepValid = (interests.careerInterests || []).length > 0;
 
   const filteredInterests = useMemo(() => {
     const stream = data.education?.stream || '';
@@ -317,19 +315,18 @@ export const AboutCareerStep: React.FC<AboutCareerStepProps> = ({
         )}
       </div>
 
-      {/* 2. Dream Career */}
+      {/* 2. Dream Career (Optional) */}
       <div className={styles.formGrid}>
         <div className={styles.formGroupFull}>
           <SearchableSelect
             id="dreamCareer"
-            label="Dream Career *"
+            label="Dream Career (Optional)"
             options={filteredDreamCareers}
             value={careerGoals.dreamCareer || ''}
             onChange={(val) => handleStateChange('careerGoals', 'dreamCareer', val)}
             placeholder="Search or type dream career..."
-            required={true}
+            required={false}
             disabled={isLoading}
-            error={errors.dreamCareer}
             allowOther={true}
           />
         </div>

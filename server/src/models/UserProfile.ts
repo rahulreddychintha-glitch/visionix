@@ -14,6 +14,8 @@ export interface IUserProfile {
   userId: mongoose.Types.ObjectId;
   personal: {
     fullName?: string;
+    firstName?: string;
+    lastName?: string;
     dateOfBirth?: Date;
     gender?: string;
     country?: string;
@@ -29,6 +31,14 @@ export interface IUserProfile {
     currentOccupation?: string;
     graduationYear?: number;
     higherEducationPlans?: string;
+    studyYear?: string;
+    currentClass?: string;
+    courses?: Array<{
+      stream?: string;
+      branchSpecialization?: string;
+      studyYear?: string;
+      institution?: string;
+    }>;
   };
   experience?: {
     yearsOfExperience?: string;
@@ -112,6 +122,14 @@ const UserProfileSchema = new Schema<IUserProfileDocument>(
         type: String,
         trim: true,
       },
+      firstName: {
+        type: String,
+        trim: true,
+      },
+      lastName: {
+        type: String,
+        trim: true,
+      },
       dateOfBirth: {
         type: Date,
       },
@@ -167,6 +185,27 @@ const UserProfileSchema = new Schema<IUserProfileDocument>(
         type: String,
         trim: true,
         default: '',
+      },
+      studyYear: {
+        type: String,
+        trim: true,
+        default: '',
+      },
+      currentClass: {
+        type: String,
+        trim: true,
+        default: '',
+      },
+      courses: {
+        type: [
+          {
+            stream: { type: String, trim: true },
+            branchSpecialization: { type: String, trim: true, default: '' },
+            studyYear: { type: String, trim: true, default: '' },
+            institution: { type: String, trim: true, default: '' },
+          },
+        ],
+        default: [],
       },
     },
     experience: {

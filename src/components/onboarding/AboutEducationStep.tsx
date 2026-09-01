@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Check } from 'lucide-react';
+import { Sparkles, Check, Plus, Trash2 } from 'lucide-react';
 import {
   STEP2_EDUCATION_LEVELS,
   STEP2_ACADEMIC_FIELDS
@@ -68,6 +68,31 @@ const DISCIPLINE_SPECIALIZATIONS_MAP: Record<string, { value: string; label: str
   ],
 };
 
+const SCHOOL_CLASSES = [
+  'Class 1',
+  'Class 2',
+  'Class 3',
+  'Class 4',
+  'Class 5',
+  'Class 6',
+  'Class 7',
+  'Class 8',
+  'Class 9',
+  'Class 10',
+  'Class 11',
+  'Class 12'
+];
+
+const STUDY_YEARS = [
+  '1st Year',
+  '2nd Year',
+  '3rd Year',
+  '4th Year',
+  '5th Year',
+  'Final Year',
+  'Graduated'
+];
+
 interface AboutEducationStepProps {
   data: any;
   onChange: (section: string, fields: any) => void;
@@ -86,20 +111,61 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
   isLoading
 }) => {
   const education = data.education || {};
+  const isSchool = education.level?.toLowerCase() === 'school' || education.level === 'School';
+
+  const additionalCourses = useMemo(() => {
+    if (education.courses && Array.isArray(education.courses) && education.courses.length > 1) {
+      return education.courses.slice(1);
+    }
+    return [];
+  }, [education.courses]);
 
   const handleEducationChange = (field: string, value: any) => {
-    onChange('education', {
+    const updated = {
       ...education,
       [field]: value
+    };
+    if (field === 'studyYear' || field === 'stream' || field === 'branchSpecialization') {
+      const rest = (education.courses && education.courses.length > 1) ? education.courses.slice(1) : [];
+      updated.courses = [
+        {
+          stream: field === 'stream' ? value : (education.stream || ''),
+          branchSpecialization: field === 'branchSpecialization' ? value : (education.branchSpecialization || ''),
+          studyYear: field === 'studyYear' ? value : (education.studyYear || ''),
+        },
+        ...rest
+      ];
+    }
+    onChange('education', updated);
+  };
+
+  const handleLevelChange = (val: string) => {
+    const isNowSchool = val?.toLowerCase() === 'school' || val === 'School';
+    onChange('education', {
+      ...education,
+      level: val,
+      currentClass: isNowSchool ? (education.currentClass || '') : '',
+      stream: isNowSchool ? '' : (education.stream || ''),
+      branchSpecialization: isNowSchool ? '' : (education.branchSpecialization || ''),
+      studyYear: isNowSchool ? '' : (education.studyYear || ''),
+      courses: isNowSchool ? [] : (education.courses || []),
     });
   };
 
   const handleStreamChange = (val: string) => {
-    // Reset specialization
+    const rest = (education.courses && education.courses.length > 1) ? education.courses.slice(1) : [];
     onChange('education', {
       ...education,
       stream: val,
       branchSpecialization: '',
+      courses: [
+        {
+          stream: val,
+          branchSpecialization: '',
+          studyYear: education.studyYear || '',
+        },
+        ...rest
+      ]
     });
     // Reset downstream interests and career goals
     onChange('interests', {
@@ -120,9 +186,18 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
   };
 
   const handleSpecializationChange = (val: string) => {
+    const rest = (education.courses && education.courses.length > 1) ? education.courses.slice(1) : [];
     onChange('education', {
       ...education,
       branchSpecialization: val,
+      courses: [
+        {
+          stream: education.stream || '',
+          branchSpecialization: val,
+          studyYear: education.studyYear || '',
+        },
+        ...rest
+      ]
     });
     // Reset downstream interests and career goals
     onChange('interests', {
@@ -142,9 +217,65 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
     });
   };
 
-  const specializationOptions = useMemo(() => {
-    const stream = education.stream || '';
-    const specs = DISCIPLINE_SPECIALIZATIONS_MAP[stream] || [];
+  // Multiple Courses handlers
+  const handleAddCourse = () => {
+    const primary = {
+      stream: education.stream || '',
+      branchSpecialization: education.branchSpecialization || '',
+      studyYear: education.studyYear || '',
+    };
+    const currentCourses = (education.courses && Array.isArray(education.courses) && education.courses.length > 0)
+      ? [...education.courses]
+      : [primary];
+    
+    const updated = [...currentCourses, { stream: '', branchSpecialization: '', studyYear: '' }];
+    onChange('education', {
+      ...education,
+      courses: updated
+    });
+  };
+
+  const handleUpdateAdditionalCourse = (idx: number, field: string, val: string) => {
+    const primary = {
+      stream: education.stream || '',
+      branchSpecialization: education.branchSpecialization || '',
+      studyYear: education.studyYear || '',
+    };
+    const currentCourses = (education.courses && Array.isArray(education.courses) && education.courses.length > 0)
+      ? [...education.courses]
+      : [primary];
+
+    const actualIdx = idx + 1;
+    const target = currentCourses[actualIdx] || { stream: '', branchSpecialization: '', studyYear: '' };
+    currentCourses[actualIdx] = { ...target, [field]: val };
+
+    onChange('education', {
+      ...education,
+      courses: currentCourses
+    });
+  };
+
+  const handleRemoveAdditionalCourse = (idx: number) => {
+    const primary = {
+      stream: education.stream || '',
+      branchSpecialization: education.branchSpecialization || '',
+      studyYear: education.studyYear || '',
+    };
+    const currentCourses = (education.courses && Array.isArray(education.courses) && education.courses.length > 0)
+      ? [...education.courses]
+      : [primary];
+
+    const actualIdx = idx + 1;
+    currentCourses.splice(actualIdx, 1);
+
+    onChange('education', {
+      ...education,
+      courses: currentCourses
+    });
+  };
+
+  const getSpecializationOptionsForStream = (streamName: string) => {
+    const specs = DISCIPLINE_SPECIALIZATIONS_MAP[streamName] || [];
     
     if (specs.length === 0) {
       const allSpecs: { value: string; label: string }[] = [];
@@ -183,15 +314,25 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
       })),
       OTHER_OPTION
     ];
+  };
+
+  const specializationOptions = useMemo(() => {
+    return getSpecializationOptionsForStream(education.stream || '');
   }, [education.stream]);
 
-  // Step 2 Validation: Only Course/Degree/Program (stream) is mandatory
-  const isStepValid = !!education.stream;
+  // Step 2 Validation
+  const isStepValid = isSchool
+    ? (!!education.level && !!education.currentClass?.trim())
+    : (!!education.level && !!education.stream && !!education.studyYear?.trim());
 
   // Dynamic AI Insight Text Resolver
   const dynamicInsightText = useMemo(() => {
     const stream = education.stream || '';
     const normalized = stream.toLowerCase();
+
+    if (isSchool) {
+      return "Visionix will recommend foundational learning paths, STEM concepts, academic streams, and future career explorations tailored for school students.";
+    }
 
     if (
       normalized.includes('engineering') ||
@@ -272,7 +413,7 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
     }
 
     return "Visionix will personalize career recommendations, learning paths, scholarships, certifications, and opportunities.";
-  }, [education.stream]);
+  }, [education.stream, isSchool]);
 
   const benefits = [
     'Recommend Careers',
@@ -299,51 +440,208 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
       </div>
 
       <div className={styles.formGrid}>
-        {/* Highest Education Level (Optional) */}
-        <div className={styles.formGroup}>
+        {/* Highest Education Level (Required) */}
+        <div className={styles.formGroupFull}>
           <SearchableSelect
             id="educationLevel"
-            label="Highest Education Level (Optional)"
+            label="Highest Education Level *"
             options={STEP2_EDUCATION_LEVELS}
             value={education.level || ''}
-            onChange={(val) => handleEducationChange('level', val)}
+            onChange={handleLevelChange}
             placeholder="Select education level..."
-            required={false}
+            required={true}
             disabled={isLoading}
+            error={errors.level}
             allowOther={false}
           />
         </div>
 
-        {/* Course / Degree / Program (Required) */}
-        <div className={styles.formGroup}>
-          <SearchableSelect
-            id="academicStream"
-            label="Course / Degree / Program *"
-            options={STEP2_ACADEMIC_FIELDS}
-            value={education.stream || ''}
-            onChange={handleStreamChange}
-            placeholder="Select or search course/degree..."
-            required={true}
-            disabled={isLoading}
-            error={errors.stream}
-            allowOther={true}
-          />
-        </div>
+        {/* Conditional Fields for School */}
+        {isSchool && (
+          <div className={styles.formGroupFull}>
+            <SearchableSelect
+              id="currentClass"
+              label="Class *"
+              options={SCHOOL_CLASSES}
+              value={education.currentClass || ''}
+              onChange={(val) => handleEducationChange('currentClass', val)}
+              placeholder="Select class (e.g. Class 10)..."
+              required={true}
+              disabled={isLoading}
+              error={errors.currentClass}
+              allowOther={true}
+            />
+          </div>
+        )}
 
-        {/* Specialization (Optional) */}
-        <div className={styles.formGroup}>
-          <SearchableSelect
-            id="specialization"
-            label="Specialization (Optional)"
-            options={specializationOptions}
-            value={education.branchSpecialization || ''}
-            onChange={handleSpecializationChange}
-            placeholder="Select or type specialization..."
-            required={false}
-            disabled={isLoading}
-            allowOther={true}
-          />
-        </div>
+        {/* Conditional Fields for Higher Education (non-School) */}
+        {!isSchool && education.level && (
+          <>
+            {/* Course / Degree / Program (Required) */}
+            <div className={styles.formGroup}>
+              <SearchableSelect
+                id="academicStream"
+                label="Course / Degree / Program *"
+                options={STEP2_ACADEMIC_FIELDS}
+                value={education.stream || ''}
+                onChange={handleStreamChange}
+                placeholder="Select or search course/degree..."
+                required={true}
+                disabled={isLoading}
+                error={errors.stream}
+                allowOther={true}
+              />
+            </div>
+
+            {/* Year / Current Study Year (Required) */}
+            <div className={styles.formGroup}>
+              <SearchableSelect
+                id="studyYear"
+                label="Year / Current Study Year *"
+                options={STUDY_YEARS}
+                value={education.studyYear || ''}
+                onChange={(val) => handleEducationChange('studyYear', val)}
+                placeholder="Select study year..."
+                required={true}
+                disabled={isLoading}
+                error={errors.studyYear}
+                allowOther={true}
+              />
+            </div>
+
+            {/* Specialization (Optional) */}
+            <div className={styles.formGroupFull}>
+              <SearchableSelect
+                id="specialization"
+                label="Specialization (Optional)"
+                options={specializationOptions}
+                value={education.branchSpecialization || ''}
+                onChange={handleSpecializationChange}
+                placeholder="Select or type specialization..."
+                required={false}
+                disabled={isLoading}
+                allowOther={true}
+              />
+            </div>
+
+            {/* Additional Courses Section */}
+            {additionalCourses.map((course: any, idx: number) => {
+              const specOpts = getSpecializationOptionsForStream(course.stream || '');
+              return (
+                <div
+                  key={idx}
+                  className={styles.formGroupFull}
+                  style={{
+                    padding: '16px',
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: 'var(--radius-md)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '16px',
+                    marginTop: '8px'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#c084fc' }}>
+                      Additional Course {idx + 2}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveAdditionalCourse(idx)}
+                      disabled={isLoading}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#f87171',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '0.75rem',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      <Trash2 size={14} /> Remove
+                    </button>
+                  </div>
+
+                  <div className={styles.formGrid}>
+                    <div className={styles.formGroup}>
+                      <SearchableSelect
+                        id={`additionalStream_${idx}`}
+                        label="Course / Degree / Program"
+                        options={STEP2_ACADEMIC_FIELDS}
+                        value={course.stream || ''}
+                        onChange={(val) => handleUpdateAdditionalCourse(idx, 'stream', val)}
+                        placeholder="Select course..."
+                        required={false}
+                        disabled={isLoading}
+                        allowOther={true}
+                      />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                      <SearchableSelect
+                        id={`additionalStudyYear_${idx}`}
+                        label="Year / Study Year (Optional)"
+                        options={STUDY_YEARS}
+                        value={course.studyYear || ''}
+                        onChange={(val) => handleUpdateAdditionalCourse(idx, 'studyYear', val)}
+                        placeholder="Select year..."
+                        required={false}
+                        disabled={isLoading}
+                        allowOther={true}
+                      />
+                    </div>
+
+                    <div className={styles.formGroupFull}>
+                      <SearchableSelect
+                        id={`additionalSpec_${idx}`}
+                        label="Specialization (Optional)"
+                        options={specOpts}
+                        value={course.branchSpecialization || ''}
+                        onChange={(val) => handleUpdateAdditionalCourse(idx, 'branchSpecialization', val)}
+                        placeholder="Select specialization..."
+                        required={false}
+                        disabled={isLoading}
+                        allowOther={true}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* + Add Course Button */}
+            <div className={styles.formGroupFull} style={{ marginTop: '4px' }}>
+              <button
+                type="button"
+                onClick={handleAddCourse}
+                disabled={isLoading}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '10px 16px',
+                  background: 'rgba(139, 92, 246, 0.08)',
+                  border: '1px dashed rgba(139, 92, 246, 0.3)',
+                  borderRadius: 'var(--radius-sm)',
+                  color: '#c084fc',
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  width: '100%',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <Plus size={16} /> Add Course
+              </button>
+            </div>
+          </>
+        )}
 
         {/* Premium AI Insight Card */}
         <div className={styles.formGroupFull} style={{ marginTop: '8px' }}>

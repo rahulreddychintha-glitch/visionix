@@ -1,0 +1,627 @@
+# VISIONIX — OFFICIAL UPDATED IMPROVEMENT ROADMAP
+
+## 🔒 LOCKED PHASES
+
+**Phase 14 → Phase 32**
+
+**19 phases total.**
+
+No additional phase should be inserted into this roadmap unless the roadmap itself is formally revised.
+
+---
+
+# PHASE 14 — PERFORMANCE & NAVIGATION OPTIMIZATION
+
+### Objective
+
+Fix the current approximately 3–4 second delay when moving between Visionix sections.
+
+### Scope
+
+* Measure navigation performance.
+* Identify the actual bottleneck.
+* Investigate repeated API requests.
+* Investigate repeated profile/personalization requests.
+* Investigate career-data requests.
+* Investigate unnecessary component remounting.
+* Investigate route loading.
+* Investigate frontend bundle loading.
+* Investigate backend response time.
+* Investigate MongoDB query performance.
+* Ensure AI calls are not triggered unnecessarily during navigation.
+* Optimize only confirmed bottlenecks.
+* Verify section-to-section navigation after optimization.
+
+### Bundle optimization
+
+* Introduce route-level lazy loading where appropriate.
+* Reduce unnecessary initial JavaScript.
+* Investigate the current large production bundle.
+* Do not sacrifice functionality for bundle size.
+
+### Success goal
+
+Visionix should feel significantly faster and smoother when navigating between sections.
+
+---
+
+# PHASE 15 — PRODUCTION SECURITY & API PROTECTION
+
+### Scope
+
+#### CORS
+
+* Replace permissive CORS behavior.
+* Allow only configured/approved frontend origins.
+* Ensure development and production environments work correctly.
+
+#### Security Middleware
+
+* Add appropriate security headers using Helmet.
+* Add request-rate limiting.
+* Add stricter request-size limits.
+
+#### Authentication Security
+
+* Review JWT handling.
+* Review token lifetime.
+* Review storage mechanism.
+* Evaluate secure HTTP-only cookie architecture where appropriate.
+* Preserve authentication functionality.
+
+#### Input/API Security
+
+* Review validation.
+* Review authorization.
+* Review public endpoints.
+* Protect expensive AI/API endpoints from abuse.
+
+#### Unsafe HTML
+
+* Remove unsafe rendering of external YouTube titles/content.
+* Render external text safely or sanitize it where genuinely required.
+
+### Success goal
+
+Visionix should have production-appropriate baseline API and browser security without breaking existing authentication.
+
+---
+
+# PHASE 16 — AUTHENTICATION & PASSWORD UX
+
+### Scope
+
+* Remove password strength meter.
+* Remove Weak/Medium/Strong/Hard visual scoring.
+* Keep actual password security requirements.
+* Keep backend password validation.
+* Provide simple understandable requirements.
+* Improve authentication error messages where necessary.
+* Preserve existing authentication functionality.
+
+---
+
+# PHASE 17 — INDIAN EDUCATION ARCHITECTURE & ONBOARDING
+
+### School
+
+Support:
+
+* Class 6
+* Class 7
+* Class 8
+* Class 9
+* Class 10
+
+Do not require detailed Visionix tracking for:
+
+* Nursery
+* LKG
+* UKG
+* Classes 1–5
+
+### Intermediate
+
+Support:
+
+* Class 11
+* Class 12
+* Appropriate Indian streams.
+
+### Diploma
+
+Support:
+
+* Polytechnic
+* Relevant diploma branches/pathways.
+
+### Undergraduate
+
+Support major Indian pathways such as:
+
+* B.Tech / B.E.
+* BCA
+* B.Sc
+* B.Com
+* BBA
+* BA
+* Pharmacy
+* Agriculture
+* Law
+* Design
+* Nursing
+* Other relevant degrees.
+
+### Hierarchy
+
+**Education Stage → Class/Year → Stream → Course/Degree → Specialization**
+
+### Dynamic behavior
+
+Only show fields relevant to the selected education level.
+
+---
+
+# PHASE 18 — REMOVE STANDALONE AI ASSISTANT
+
+### Remove
+
+* AI Assistant sidebar/navigation item.
+* Dedicated AI Assistant route/page.
+* Standalone chatbot.
+* Floating chatbot UI.
+* Dashboard AI Assistant card.
+* Redundant standalone AI chat interfaces.
+
+### Preserve
+
+AI functionality used by:
+
+* Career recommendations.
+* Career matching.
+* Career explanations.
+* Roadmap generation.
+* Skill-gap analysis.
+* Resume analysis.
+* Interview preparation.
+* Learning recommendations.
+
+### Important
+
+Do not remove the underlying AI services simply because the standalone interface is removed.
+
+---
+
+# PHASE 19 — DASHBOARD 2.0
+
+Complete dashboard restructuring.
+
+### Zone 1 — Current Direction
+
+* Greeting.
+* Education stage.
+* Career direction.
+* Immediate next action.
+
+### Zone 2 — Progress
+
+* Skills.
+* Learning.
+* Roadmap.
+* Relevant assessments/progress.
+
+### Zone 3 — Resources
+
+Show only useful and relevant resources.
+
+### Remove
+
+* Redundant widgets.
+* Empty placeholder widgets.
+* Excessive cards.
+* Unnecessary scrolling.
+* Duplicate information.
+
+### Goal
+
+The student should understand their current position and next action quickly.
+
+---
+
+# PHASE 20 — UNIFIED CAREER EXPERIENCE
+
+Connect the existing career functionality into a clear journey:
+
+**Discover → Explore → Match → Compare → Choose → Roadmap → Learn → Progress**
+
+### Scope
+
+* Improve career navigation.
+* Remove confusing duplicated controls.
+* Make Career Explorer easier to understand.
+* Connect recommendations and matching logically.
+* Connect selected careers to roadmaps.
+* Maintain existing career functionality.
+
+---
+
+# PHASE 21 — CAREER COMPARISON
+
+Allow students to compare careers.
+
+Compare:
+
+* Career overview.
+* Responsibilities.
+* Education.
+* Skills.
+* Subjects.
+* Career pathway.
+* Entrance requirements.
+* Learning requirements.
+* Relevant opportunities.
+
+Improve comparison beyond basic text-only comparison where practical.
+
+---
+
+# PHASE 22 — “WHAT CAN I DO AFTER THIS?”
+
+Create education-to-career pathway exploration.
+
+Examples:
+
+**Class 10 → What can I do next?**
+
+**MPC → What can I do next?**
+
+**BiPC → What can I do next?**
+
+**Diploma → What can I do next?**
+
+**B.Tech → What can I do next?**
+
+Show relevant:
+
+* Education pathways.
+* Courses.
+* Degrees.
+* Careers.
+* Skills.
+
+---
+
+# PHASE 23 — SKILL GAP ANALYSIS
+
+Connect:
+
+**Current Skills ↔ Target Career Requirements**
+
+Show:
+
+* Existing skills.
+* Required skills.
+* Missing skills.
+* Priority areas.
+* Recommended learning.
+* Roadmap relationship.
+* Progress.
+
+Avoid duplicating a generic AI chatbot.
+
+---
+
+# PHASE 24 — LEARNING HUB 2.0
+
+Redesign the Learning Hub.
+
+### Scope
+
+* Better organization.
+* Career-based learning.
+* Skill-based learning.
+* Education-level relevance.
+* Real learning resources.
+* Provider identification.
+* Resource quality information.
+* Better filtering.
+
+Potential credible sources can be evaluated and integrated where technically and legally appropriate.
+
+Do not fabricate course data.
+
+---
+
+# PHASE 25 — COURSE RECOMMENDATIONS
+
+Connect:
+
+**Career → Required Skills → Skill Gap → Course → Learning Progress**
+
+For each recommendation where data is available:
+
+* Course.
+* Provider.
+* Skill.
+* Career connection.
+* Reason for recommendation.
+* Learning status.
+
+Recommendations should be based on the student's actual profile and identified needs.
+
+---
+
+# PHASE 26 — UNIFIED PROGRESS SYSTEM
+
+Unify student progress across:
+
+* Skills.
+* Courses.
+* Roadmap.
+* Assessments.
+* Resume.
+* Interview preparation.
+
+The student should clearly understand:
+
+**Where am I?**
+
+**What have I completed?**
+
+**What should I do next?**
+
+Avoid creating multiple conflicting progress systems.
+
+---
+
+# PHASE 27 — CAREER READINESS
+
+Create a Career Readiness experience using relevant Visionix progress.
+
+Possible inputs:
+
+* Skills.
+* Learning.
+* Roadmap.
+* Assessments.
+* Resume.
+* Interview preparation.
+
+Present it as a **progress/readiness indicator**, not a guarantee of employment.
+
+Clearly explain what contributes to the result.
+
+---
+
+# PHASE 28 — ALTERNATIVE & BACKUP CAREER PATHS
+
+### Alternative Careers
+
+Show careers related to the student's primary direction.
+
+### Backup Pathways
+
+Show reasonable alternative pathways if the student changes direction.
+
+Consider:
+
+* Education.
+* Skills.
+* Transferable skills.
+* Courses.
+* Career direction.
+
+Do not present AI-generated alternatives as guaranteed predictions.
+
+---
+
+# PHASE 29 — PERSONALIZED NEXT STEP & STUDENT UX
+
+Create a clear:
+
+**Your Next Step**
+
+experience.
+
+Examples:
+
+* Complete an assessment.
+* Learn a missing skill.
+* Continue roadmap.
+* Explore another career.
+* Complete a course.
+* Improve resume.
+
+### Global UX cleanup
+
+* Reduce information overload.
+* Reduce unnecessary forms.
+* Improve terminology.
+* Improve navigation.
+* Improve empty states.
+* Improve error states.
+* Reduce unnecessary cards.
+* Make the interface easier for school students.
+
+---
+
+# PHASE 30 — MOBILE EXPERIENCE 2.0
+
+Review the complete mobile experience.
+
+### Scope
+
+* Navigation.
+* Dashboard.
+* Onboarding.
+* Career Explorer.
+* Career comparison.
+* Learning Hub.
+* Courses.
+* Skill Gap.
+* Roadmap.
+* Progress.
+* Forms.
+* Cards.
+* Tables.
+* Touch interactions.
+
+Ensure the core Visionix journey remains usable on smaller screens.
+
+---
+
+# PHASE 31 — CAREER ROADMAP VISUALIZATION
+
+Improve the existing roadmap experience.
+
+### Stage-based structure
+
+Instead of overwhelming students with a huge long-term roadmap, organize it into understandable stages.
+
+Example:
+
+**Current Stage**
+
+↓
+
+**Next 6–12 Months**
+
+↓
+
+**Skills**
+
+↓
+
+**Courses**
+
+↓
+
+**Projects**
+
+↓
+
+**Assessments**
+
+↓
+
+**Next Career Stage**
+
+Completed/current/upcoming stages must be visually clear.
+
+---
+
+# PHASE 32 — VISIONIX CAREER PATH EXPLORER
+
+Create the larger connected Visionix pathway experience:
+
+**Education**
+
+↓
+
+**Class / Year**
+
+↓
+
+**Stream**
+
+↓
+
+**Course / Degree**
+
+↓
+
+**Specialization**
+
+↓
+
+**Skills**
+
+↓
+
+**Careers**
+
+↓
+
+**Learning**
+
+↓
+
+**Roadmap**
+
+↓
+
+**Progress**
+
+The Career Path Explorer should become a major signature Visionix experience.
+
+---
+
+# 🚫 PERMANENTLY OUTSIDE THE CURRENT ROADMAP
+
+The following are intentionally removed from the active implementation roadmap:
+
+* Live scholarship database.
+* Daily scholarship updates.
+* Scholarship deadline tracking.
+* Scholarship deadline notifications.
+* Live upcoming-exam calendar.
+* Daily exam updates.
+* Exam deadline tracking.
+* Exam deadline notifications.
+* Any system that claims continuously current scholarship/exam information without a reliable update architecture.
+
+They may only be reconsidered in a future roadmap after a reliable data-update strategy is established.
+
+---
+
+# TECHNICAL QUALITY REQUIREMENTS ACROSS ALL PHASES
+
+These are **cross-phase requirements**, not additional phases.
+
+### Automated Testing
+
+Add/maintain tests for:
+
+* Authentication.
+* Protected routes.
+* Onboarding.
+* Profile validation.
+* API validation.
+* Critical services.
+
+### Code Quality
+
+* Clean lint warnings where practical.
+* Preserve TypeScript correctness.
+* Split oversized files when necessary.
+* Separate large datasets/constants from UI code where appropriate.
+
+### Documentation
+
+Maintain proper project documentation covering:
+
+* Setup.
+* Environment variables.
+* Development commands.
+* Build commands.
+* Architecture.
+* Deployment.
+* Important configuration.
+
+### CI / Monitoring
+
+Where infrastructure is available:
+
+* Install.
+* Lint.
+* Typecheck.
+* Build.
+* Test.
+
+Use CI to catch regressions.
+
+Maintain health checks and production monitoring where appropriate.
+
+### IMPORTANT
+
+These technical requirements must **not become excuses to expand the scope of an individual phase**. Implement them when they directly belong to the current phase or when the phase explicitly calls for them.

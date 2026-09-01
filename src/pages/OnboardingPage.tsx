@@ -18,13 +18,13 @@ import styles from './OnboardingPage.module.css';
 const initialState = {
   personal: {
     fullName: '',
+    firstName: '',
+    lastName: '',
     dateOfBirth: '',
     gender: '',
     country: '',
     state: '',
     city: '',
-    age: '',
-    preferredLanguage: '',
   },
   education: {
     level: '',
@@ -35,6 +35,9 @@ const initialState = {
     currentOccupation: '',
     graduationYear: '',
     higherEducationPlans: '',
+    studyYear: '',
+    currentClass: '',
+    courses: [],
   },
   experience: {
     yearsOfExperience: '',
@@ -113,20 +116,37 @@ export const OnboardingPage: React.FC = () => {
   // Sync profile values into local form state when loaded
   useEffect(() => {
     if (profile) {
-      const calculatedAge = profile.personal?.dateOfBirth && profile.personal?.dateOfBirth !== '2000-01-01T00:00:00.000Z'
-        ? String(new Date().getFullYear() - new Date(profile.personal.dateOfBirth).getFullYear())
-        : '';
+      let firstName = profile.personal?.firstName || '';
+      let lastName = profile.personal?.lastName || '';
+      if (!firstName && !lastName && profile.personal?.fullName) {
+        const parts = profile.personal.fullName.trim().split(' ');
+        firstName = parts[0] || '';
+        lastName = parts.slice(1).join(' ') || '';
+      }
+      const fullName = `${firstName} ${lastName}`.trim() || profile.personal?.fullName || '';
+
+      const courses = profile.education?.courses && profile.education.courses.length > 0
+        ? profile.education.courses
+        : (profile.education?.stream
+            ? [{ stream: profile.education.stream, branchSpecialization: profile.education.branchSpecialization || '', studyYear: profile.education.studyYear || '' }]
+            : []);
 
       setFormData((prev: any) => ({
         ...prev,
         personal: { 
           ...prev.personal, 
           ...(profile.personal || {}),
+          firstName,
+          lastName,
+          fullName,
+          dateOfBirth: profile.personal?.dateOfBirth || '',
           country: profile.personal?.country === 'Not Specified' ? '' : (profile.personal?.country || ''),
-          age: profile.personal?.age !== undefined ? profile.personal.age : calculatedAge,
-          preferredLanguage: profile.personal?.preferredLanguage || ''
         },
-        education: { ...prev.education, ...(profile.education || {}) },
+        education: { 
+          ...prev.education, 
+          ...(profile.education || {}),
+          courses,
+        },
         experience: { ...prev.experience, ...(profile.experience || {}) },
         interests: {
           careerInterests: profile.interests?.careerInterests || [],
@@ -232,19 +252,31 @@ export const OnboardingPage: React.FC = () => {
       return 'Build a solid foundation and establish a successful career path in my chosen field of study.';
     };
 
+    const fullName = [data.personal?.firstName, data.personal?.lastName].filter(Boolean).join(' ').trim() || data.personal?.fullName || '';
+    const isSchool = data.education?.level?.toLowerCase() === 'school' || data.education?.level === 'School';
+
+    const courses = data.education?.courses && data.education.courses.length > 0
+      ? data.education.courses
+      : (data.education?.stream ? [{ stream: data.education.stream, branchSpecialization: data.education.branchSpecialization || '', studyYear: data.education.studyYear || '' }] : []);
+
     return {
       ...data,
       personal: {
         ...data.personal,
-        dateOfBirth: data.personal?.dateOfBirth || '2000-01-01T00:00:00.000Z',
+        fullName: fullName || 'Candidate',
+        firstName: data.personal?.firstName || '',
+        lastName: data.personal?.lastName || '',
+        dateOfBirth: data.personal?.dateOfBirth,
         country: data.personal?.country || 'Not Specified',
         state: data.personal?.state || 'Not Specified',
         city: data.personal?.city || 'Not Specified',
       },
       education: {
         ...data.education,
-        studentStatus: data.education?.studentStatus || 'College / University Student',
+        studentStatus: data.education?.studentStatus || (isSchool ? 'School Student' : 'College / University Student'),
+        stream: isSchool ? (data.education?.stream || 'General Schooling') : (data.education?.stream || ''),
         graduationYear: data.education?.graduationYear || currentYear,
+        courses,
       },
       learningPreferences: {
         ...data.learningPreferences,
@@ -327,19 +359,10 @@ export const OnboardingPage: React.FC = () => {
   const handleStateChange = (section: string, fields: any) => {
     let updatedFields = { ...fields };
     if (section === 'personal') {
-      const ageVal = fields.age;
-      if (ageVal !== undefined) {
-        if (ageVal !== '') {
-          const ageNum = parseInt(ageVal, 10);
-          if (!isNaN(ageNum) && ageNum > 0) {
-            const dob = new Date(new Date().getFullYear() - ageNum, 0, 1);
-            updatedFields.dateOfBirth = dob.toISOString();
-          } else {
-            updatedFields.dateOfBirth = '';
-          }
-        } else {
-          updatedFields.dateOfBirth = '';
-        }
+      if (updatedFields.firstName !== undefined || updatedFields.lastName !== undefined) {
+        const first = updatedFields.firstName !== undefined ? updatedFields.firstName : (formData.personal?.firstName || '');
+        const last = updatedFields.lastName !== undefined ? updatedFields.lastName : (formData.personal?.lastName || '');
+        updatedFields.fullName = `${first} ${last}`.trim();
       }
     }
 
@@ -362,26 +385,56 @@ export const OnboardingPage: React.FC = () => {
 
     if (step === 1) {
       const p = formData.personal || {};
-      if (!p.fullName || p.fullName.trim().length < 2) {
-        errors.fullName = 'Full name must be at least 2 characters';
+      if (!p.firstName || !p.firstName.trim()) {
+        errors.firstName = 'First name is required';
         isValid = false;
+      }
+      if (!p.lastName || !p.lastName.trim()) {
+        errors.lastName = 'Last name is required';
+        isValid = false;
+      }
+      if (!p.dateOfBirth) {
+        errors.dateOfBirth = 'Date of birth is required';
+        isValid = false;
+      } else {
+        const dobStr = typeof p.dateOfBirth === 'string' ? p.dateOfBirth.split('T')[0] : new Date(p.dateOfBirth).toISOString().split('T')[0];
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (isNaN(new Date(p.dateOfBirth).getTime())) {
+          errors.dateOfBirth = 'Please enter a valid date of birth';
+          isValid = false;
+        } else if (dobStr > todayStr) {
+          errors.dateOfBirth = 'Date of birth cannot be in the future';
+          isValid = false;
+        }
       }
     }
 
     if (step === 2) {
       const e = formData.education || {};
-      if (!e.stream) {
-        errors.stream = 'Course / Degree / Program is required';
+      if (!e.level || !e.level.trim()) {
+        errors.level = 'Highest education level is required';
         isValid = false;
+      }
+      const isSchool = e.level?.toLowerCase() === 'school' || e.level === 'School';
+      if (isSchool) {
+        if (!e.currentClass || !e.currentClass.trim()) {
+          errors.currentClass = 'Class is required';
+          isValid = false;
+        }
+      } else {
+        if (!e.stream || !e.stream.trim()) {
+          errors.stream = 'Course / Degree / Program is required';
+          isValid = false;
+        }
+        if (!e.studyYear || !e.studyYear.trim()) {
+          errors.studyYear = 'Year / Current study year is required';
+          isValid = false;
+        }
       }
     }
 
     if (step === 3) {
-      const c = formData.careerGoals || {};
-      if (!c.dreamCareer || !c.dreamCareer.trim()) {
-        errors.dreamCareer = 'Dream career is required';
-        isValid = false;
-      }
+      // Dream career is optional
     }
 
     setLocalErrors(errors);
@@ -394,21 +447,54 @@ export const OnboardingPage: React.FC = () => {
 
     const p = formData.personal || {};
     const e = formData.education || {};
-    if (!p.fullName || p.fullName.trim().length < 2) {
-      errors.fullName = 'Full name must be at least 2 characters';
+
+    // Step 1: About You
+    if (!p.firstName || !p.firstName.trim()) {
+      errors.firstName = 'First name is required';
       allValid = false;
+    }
+    if (!p.lastName || !p.lastName.trim()) {
+      errors.lastName = 'Last name is required';
+      allValid = false;
+    }
+    if (!p.dateOfBirth) {
+      errors.dateOfBirth = 'Date of birth is required';
+      allValid = false;
+    } else {
+      const dobStr = typeof p.dateOfBirth === 'string' ? p.dateOfBirth.split('T')[0] : new Date(p.dateOfBirth).toISOString().split('T')[0];
+      const todayStr = new Date().toISOString().split('T')[0];
+      if (isNaN(new Date(p.dateOfBirth).getTime())) {
+        errors.dateOfBirth = 'Please enter a valid date of birth';
+        allValid = false;
+      } else if (dobStr > todayStr) {
+        errors.dateOfBirth = 'Date of birth cannot be in the future';
+        allValid = false;
+      }
     }
 
-    if (!e.stream) {
-      errors.stream = 'Course / Degree / Program is required';
+    // Step 2: Education
+    if (!e.level || !e.level.trim()) {
+      errors.level = 'Highest education level is required';
       allValid = false;
+    }
+    const isSchool = e.level?.toLowerCase() === 'school' || e.level === 'School';
+    if (isSchool) {
+      if (!e.currentClass || !e.currentClass.trim()) {
+        errors.currentClass = 'Class is required';
+        allValid = false;
+      }
+    } else {
+      if (!e.stream || !e.stream.trim()) {
+        errors.stream = 'Course / Degree / Program is required';
+        allValid = false;
+      }
+      if (!e.studyYear || !e.studyYear.trim()) {
+        errors.studyYear = 'Year / Current study year is required';
+        allValid = false;
+      }
     }
 
-    const c = formData.careerGoals || {};
-    if (!c.dreamCareer || !c.dreamCareer.trim()) {
-      errors.dreamCareer = 'Dream career is required';
-      allValid = false;
-    }
+    // Step 3: Dream career is optional
 
     setLocalErrors(errors);
     return allValid;

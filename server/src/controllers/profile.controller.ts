@@ -58,6 +58,8 @@ export class ProfileController {
         sendSuccess(res, 'Default profile pre-initialized.', {
           personal: {
             fullName: user ? user.fullName : '',
+            firstName: '',
+            lastName: '',
             dateOfBirth: null,
             gender: '',
             country: '',
@@ -73,6 +75,9 @@ export class ProfileController {
             currentOccupation: '',
             graduationYear: null,
             higherEducationPlans: '',
+            studyYear: '',
+            currentClass: '',
+            courses: [],
           },
           experience: {
             yearsOfExperience: '',
@@ -167,9 +172,16 @@ export class ProfileController {
 
       // Incremental updates: update only sections/subsections passed in the payload
       if (body.personal) {
+        const first = body.personal.firstName !== undefined ? body.personal.firstName : profile.personal.firstName;
+        const last = body.personal.lastName !== undefined ? body.personal.lastName : profile.personal.lastName;
+        let derivedFullName = profile.personal.fullName;
+        if (first !== undefined || last !== undefined) {
+          derivedFullName = [first, last].filter(Boolean).join(' ').trim();
+        }
         profile.personal = {
           ...profile.personal,
           ...body.personal,
+          fullName: derivedFullName || body.personal.fullName || profile.personal.fullName,
         };
       }
       if (body.education) {
@@ -250,7 +262,11 @@ export class ProfileController {
         profile.onboarding.completedAt = new Date();
         
         // Update user record state immediately
-        await User.findByIdAndUpdate(userId, { isOnboarded: true });
+        const updateData: any = { isOnboarded: true };
+        if (profile.personal?.fullName) {
+          updateData.fullName = profile.personal.fullName;
+        }
+        await User.findByIdAndUpdate(userId, updateData);
       }
 
       const savedProfile = await profile.save();
