@@ -4,6 +4,8 @@ import { Youtube, ExternalLink, AlertCircle, Clock, Film } from 'lucide-react';
 import styles from './DashboardWidgets.module.css';
 import { YoutubeApiService } from '../../services/youtube.service';
 import type { YouTubeVideo } from '../../services/youtube.service';
+import { decodeHtmlEntities } from '../../utils/textUtils';
+
 
 interface YouTubeLearningProps {
   videos?: any[]; // for backwards compatibility
@@ -296,11 +298,13 @@ export const YouTubeLearning: React.FC<YouTubeLearningProps> = () => {
                         color: 'var(--text-primary)', 
                         whiteSpace: 'nowrap', 
                         overflow: 'hidden', 
-                        textOverflow: 'ellipsis',
-                        margin: 0
+                        textOverflow: 'ellipsis', 
+                        margin: 0 
                       }}
-                      dangerouslySetInnerHTML={{ __html: video.title }}
-                    />
+                    >
+                      {decodeHtmlEntities(video.title)}
+                    </h4>
+
                     <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>
                       {video.channelTitle}
                     </div>

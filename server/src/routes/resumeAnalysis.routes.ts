@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { ResumeAnalysisController } from '../controllers/resumeAnalysis.controller';
 import { authenticate } from '../middleware/auth';
+import { aiRateLimiter } from '../middleware/rateLimit';
 import { resumeIdParamValidator } from '../validators/resume.validator';
 
 const router = Router();
@@ -9,7 +10,8 @@ const router = Router();
  * POST /api/resume-analysis/:id/analyze
  * Trigger AI analysis for the specified resume.
  */
-router.post('/:id/analyze', authenticate, resumeIdParamValidator, ResumeAnalysisController.analyzeResume);
+router.post('/:id/analyze', authenticate, aiRateLimiter, resumeIdParamValidator, ResumeAnalysisController.analyzeResume);
+
 
 /**
  * GET /api/resume-analysis/:id

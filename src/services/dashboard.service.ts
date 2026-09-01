@@ -28,14 +28,47 @@ const cleanCareerLabel = (val: string) => {
 };
 
 export class DashboardService {
+  private static dashboardCache = new Map<string, { timestamp: number; data: DashboardData }>();
+  private static dashboardPromises = new Map<string, Promise<DashboardData>>();
+  private static CACHE_TTL_MS = 30 * 1000; // 30 seconds cache TTL
+
   /**
    * Fetches dashboard details. Resolves details dynamically by pulling from
    * the backend personalization & recommendation services.
+   * Caches in memory and deduplicates concurrent in-flight calls.
    */
-  public static async getDashboardData(_userEmail: string): Promise<DashboardData> {
+  public static async getDashboardData(userEmail: string): Promise<DashboardData> {
+    const cacheKey = userEmail || '__default__';
+    const now = Date.now();
+    const cached = this.dashboardCache.get(cacheKey);
+    if (cached && now - cached.timestamp < this.CACHE_TTL_MS) {
+      return cached.data;
+    }
+
+    const pending = this.dashboardPromises.get(cacheKey);
+    if (pending) {
+      return pending;
+    }
+
+    const promise = (async () => {
+      try {
+        const data = await DashboardService.computeDashboardData(userEmail);
+        DashboardService.dashboardCache.set(cacheKey, { timestamp: Date.now(), data });
+        return data;
+      } finally {
+        DashboardService.dashboardPromises.delete(cacheKey);
+      }
+    })();
+
+    this.dashboardPromises.set(cacheKey, promise);
+    return promise;
+  }
+
+  private static async computeDashboardData(_userEmail: string): Promise<DashboardData> {
     try {
       // Fetch personalization data (context & recommendations) from backend API
       const personalization = await PersonalizationApiService.getPersonalizationData();
+
       const ctx = personalization.context;
       const recs = personalization.recommendations;
 
@@ -274,4 +307,13 @@ export class DashboardService {
       };
     }
   }
+
+  /**
+   * Clear in-memory dashboard cache.
+   */
+  public static clearCache(): void {
+    DashboardService.dashboardCache.clear();
+    DashboardService.dashboardPromises.clear();
+  }
 }
+

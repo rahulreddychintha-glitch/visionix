@@ -15,6 +15,8 @@ import {
 import { DashboardLayout } from '../components/DashboardLayout';
 import { LearningHubApiService } from '../services/learning.service';
 import type { LearningHubData } from '../types/learning.types';
+import { decodeHtmlEntities } from '../utils/textUtils';
+
 
 export const LearningHubPage: React.FC = () => {
   const [data, setData] = useState<LearningHubData | null>(null);
@@ -26,7 +28,6 @@ export const LearningHubPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      LearningHubApiService.clearCache();
       const res = await LearningHubApiService.getLearningHubData();
       setData(res);
     } catch (err: any) {
@@ -642,8 +643,10 @@ export const LearningHubPage: React.FC = () => {
                         <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
                           <h4 
                             style={{ fontSize: '0.78rem', fontWeight: 650, color: 'var(--text-primary)', margin: 0, lineHeight: 1.4, height: '40px', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
-                            dangerouslySetInnerHTML={{ __html: video.title }}
-                          />
+                          >
+                            {decodeHtmlEntities(video.title)}
+                          </h4>
+
                           <span style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>{video.channelTitle}</span>
                           <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', marginTop: 'auto' }}>Published {video.publishedAt}</span>
                           

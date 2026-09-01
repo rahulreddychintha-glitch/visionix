@@ -36,32 +36,111 @@ export interface CareerMatchResult {
 }
 
 export class CareerService {
+  private static careersCache = new Map<string, { timestamp: number; data: CareersListResponse }>();
+  private static careersPromises = new Map<string, Promise<CareersListResponse>>();
+
+  private static recsCache = new Map<string, { timestamp: number; data: CareersListResponse & { isProfileComplete: boolean } }>();
+  private static recsPromises = new Map<string, Promise<CareersListResponse & { isProfileComplete: boolean }>>();
+
+  private static savedCache: { timestamp: number; data: CareersListResponse } | null = null;
+  private static savedPromise: Promise<CareersListResponse> | null = null;
+
+  private static CACHE_TTL_MS = 30 * 1000; // 30 seconds cache TTL
+
   /**
    * Fetch all careers with optional search and category filters.
+   * Caches results in memory and deduplicates in-flight requests.
    */
   public static async getCareers(search?: string, category?: string): Promise<CareersListResponse> {
-    const response = await api.get('/careers', {
-      params: { search, category }
-    });
-    return response.data.data;
+    const cacheKey = `${search || ''}_${category || ''}`;
+    const now = Date.now();
+    const cached = this.careersCache.get(cacheKey);
+    if (cached && now - cached.timestamp < this.CACHE_TTL_MS) {
+      return cached.data;
+    }
+
+    const pending = this.careersPromises.get(cacheKey);
+    if (pending) {
+      return pending;
+    }
+
+    const promise = (async () => {
+      try {
+        const response = await api.get('/careers', {
+          params: { search, category }
+        });
+        const data = response.data.data;
+        CareerService.careersCache.set(cacheKey, { timestamp: Date.now(), data });
+        return data;
+      } finally {
+        CareerService.careersPromises.delete(cacheKey);
+      }
+    })();
+
+    this.careersPromises.set(cacheKey, promise);
+    return promise;
   }
 
   /**
    * Fetch all bookmarked careers for current user.
+   * Caches results in memory and deduplicates in-flight requests.
    */
   public static async getSavedCareers(): Promise<CareersListResponse> {
-    const response = await api.get('/careers/saved');
-    return response.data.data;
+    const now = Date.now();
+    if (this.savedCache && now - this.savedCache.timestamp < this.CACHE_TTL_MS) {
+      return this.savedCache.data;
+    }
+
+    if (this.savedPromise) {
+      return this.savedPromise;
+    }
+
+    this.savedPromise = (async () => {
+      try {
+        const response = await api.get('/careers/saved');
+        const data = response.data.data;
+        CareerService.savedCache = { timestamp: Date.now(), data };
+        return data;
+      } finally {
+        CareerService.savedPromise = null;
+      }
+    })();
+
+    return this.savedPromise;
   }
 
   /**
    * Fetch personalized career recommendations based on user profile.
+   * Caches results in memory and deduplicates in-flight requests.
    */
   public static async getRecommendations(search?: string, category?: string): Promise<CareersListResponse & { isProfileComplete: boolean }> {
-    const response = await api.get('/careers/recommended', {
-      params: { search, category }
-    });
-    return response.data.data;
+    const cacheKey = `${search || ''}_${category || ''}`;
+    const now = Date.now();
+    const cached = this.recsCache.get(cacheKey);
+    if (cached && now - cached.timestamp < this.CACHE_TTL_MS) {
+      return cached.data;
+    }
+
+    const pending = this.recsPromises.get(cacheKey);
+    if (pending) {
+      return pending;
+    }
+
+    const promise = (async () => {
+      try {
+        const response = await api.get('/careers/recommended', {
+          params: { search, category }
+        });
+        const data = response.data.data;
+        CareerService.recsCache.set(cacheKey, { timestamp: Date.now(), data });
+        return data;
+      } finally {
+        CareerService.recsPromises.delete(cacheKey);
+      }
+    })();
+
+    this.recsPromises.set(cacheKey, promise);
+    return promise;
   }
 
   /**
@@ -97,18 +176,33 @@ export class CareerService {
   }
 
   /**
-   * Bookmark a career.
+   * Bookmark a career and invalidate cache.
    */
   public static async saveCareer(id: string): Promise<{ careerId: string; saved: boolean }> {
+    CareerService.clearCache();
     const response = await api.post(`/careers/${id}/save`);
     return response.data.data;
   }
 
   /**
-   * Remove bookmark.
+   * Remove bookmark and invalidate cache.
    */
   public static async unsaveCareer(id: string): Promise<{ careerId: string; saved: boolean }> {
+    CareerService.clearCache();
     const response = await api.delete(`/careers/${id}/save`);
     return response.data.data;
   }
+
+  /**
+   * Invalidate in-memory career caches.
+   */
+  public static clearCache(): void {
+    CareerService.careersCache.clear();
+    CareerService.careersPromises.clear();
+    CareerService.recsCache.clear();
+    CareerService.recsPromises.clear();
+    CareerService.savedCache = null;
+    CareerService.savedPromise = null;
+  }
 }
+

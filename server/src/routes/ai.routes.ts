@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { body } from 'express-validator';
 import { AiController } from '../controllers/ai.controller';
 import { authenticate } from '../middleware/auth';
+import { aiRateLimiter } from '../middleware/rateLimit';
 
 const router = Router();
 
@@ -14,6 +15,8 @@ router.use(authenticate);
  */
 router.post(
   '/chat',
+  aiRateLimiter,
+
   [
     body('message')
       .isString()

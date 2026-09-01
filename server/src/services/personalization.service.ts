@@ -85,95 +85,139 @@ export interface IPersonalizationContext {
 }
 
 export class PersonalizationService {
+  private static contextCache = new Map<string, { timestamp: number; data: IPersonalizationContext }>();
+  private static contextPromises = new Map<string, Promise<IPersonalizationContext>>();
+  private static CACHE_TTL_MS = 30 * 1000; // 30 seconds server-side cache TTL
+
   /**
    * Constructs a normalized Personalization Context for a given user.
+   * Caches in-memory for 30s to prevent duplicate MongoDB queries across concurrent/sequential endpoints.
    */
   public static async getPersonalizationContext(userId: string | mongoose.Types.ObjectId): Promise<IPersonalizationContext> {
-    const userObjectId = typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId;
+    const userKey = userId.toString();
+    const now = Date.now();
+    const cached = this.contextCache.get(userKey);
+    if (cached && now - cached.timestamp < this.CACHE_TTL_MS) {
+      return cached.data;
+    }
 
-    const [user, profile, preferences, learningProgress, careerProgress] = await Promise.all([
-      User.findById(userObjectId),
-      UserProfile.findOne({ userId: userObjectId }),
-      UserPreferences.findOne({ userId: userObjectId }),
-      LearningProgress.findOne({ userId: userObjectId }),
-      CareerProgress.findOne({ userId: userObjectId }),
-    ]);
+    const pending = this.contextPromises.get(userKey);
+    if (pending) {
+      return pending;
+    }
 
-    const name = profile?.personal?.fullName || user?.fullName || 'User';
-    const stream = profile?.education?.stream || 'General Studies';
-    const level = profile?.education?.level || 'Undergraduate';
+    const promise = (async () => {
+      try {
+        const userObjectId = typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId;
 
-    return {
-      userId: userObjectId.toString(),
-      name,
-      discipline: stream,
-      specialization: profile?.education?.branchSpecialization || '',
-      educationLevel: level,
-      studentStatus: profile?.education?.studentStatus || 'Student',
-      institution: profile?.education?.institution || '',
-      dreamCareer: profile?.careerGoals?.dreamCareer || 'Career Explorer',
-      currentOccupation: profile?.education?.currentOccupation || '',
-      location: {
-        country: profile?.personal?.country || '',
-        state: profile?.personal?.state || '',
-        city: profile?.personal?.city || '',
-      },
-      skills: {
-        technicalSkills: profile?.skills?.technicalSkills || [],
-        softSkills: profile?.skills?.softSkills || [],
-        languages: profile?.skills?.languages || [],
-        certifications: profile?.skills?.certifications || [],
-        verifiedSkills: profile?.skills?.verifiedSkills || [],
-      },
-      interests: {
-        careerInterests: profile?.interests?.careerInterests || [],
-        favouriteSubjects: profile?.interests?.favouriteSubjects || [],
-        technologies: profile?.interests?.technologies || [],
-        industries: profile?.interests?.industries || [],
-      },
-      careerGoals: {
-        dreamCareer: profile?.careerGoals?.dreamCareer || '',
-        preferredIndustries: profile?.careerGoals?.preferredIndustries || [],
-        salaryGoal: profile?.careerGoals?.salaryGoal || '',
-        careerObjectives: profile?.careerGoals?.careerObjectives || '',
-        preferredJobType: profile?.careerGoals?.preferredJobType || '',
-        preferredLocation: profile?.careerGoals?.preferredLocation || '',
-        longTermAspirations: profile?.careerGoals?.longTermAspirations || '',
-      },
-      learningPreferences: {
-        learningStyle: profile?.learningPreferences?.learningStyle || 'Visual & Practical',
-        weeklyStudyTime: profile?.learningPreferences?.weeklyStudyTime || 10,
-        preferredResources: profile?.learningPreferences?.preferredResources || ['Courses', 'Projects', 'Interactive Modules'],
-      },
-      workPreferences: {
-        remoteHybridOffice: profile?.workPreferences?.remoteHybridOffice || 'Hybrid',
-        startupEnterprise: profile?.workPreferences?.startupEnterprise || 'Balanced',
-        teamSize: profile?.workPreferences?.teamSize || 'Medium',
-      },
-      userPreferences: {
-        theme: preferences?.theme || 'dark',
-        language: preferences?.language || 'en',
-        emailNotifications: preferences?.emailNotifications ?? true,
-        pushNotifications: preferences?.pushNotifications ?? true,
-        weeklyReport: preferences?.weeklyReport ?? true,
-      },
-      hasCompletedOnboarding: profile?.onboarding?.completed || user?.isOnboarded || false,
-      learningProgress: learningProgress ? {
-        completedResources: learningProgress.completedResources,
-        bookmarkedResources: learningProgress.bookmarkedResources,
-        streakDays: learningProgress.streakDays,
-        totalStudyMinutes: learningProgress.totalStudyMinutes,
-        lastStudyDate: learningProgress.lastStudyDate,
-      } : null,
-      careerProgress: careerProgress ? {
-        selectedCareer: careerProgress.selectedCareer,
-        currentPhase: careerProgress.currentPhase,
-        completedMilestones: careerProgress.completedMilestones,
-        totalMilestones: careerProgress.totalMilestones,
-        lastActivity: careerProgress.lastActivity,
-      } : null,
-    };
+        const [user, profile, preferences, learningProgress, careerProgress] = await Promise.all([
+          User.findById(userObjectId),
+          UserProfile.findOne({ userId: userObjectId }),
+          UserPreferences.findOne({ userId: userObjectId }),
+          LearningProgress.findOne({ userId: userObjectId }),
+          CareerProgress.findOne({ userId: userObjectId }),
+        ]);
+
+        const name = profile?.personal?.fullName || user?.fullName || 'User';
+        const stream = profile?.education?.stream || 'General Studies';
+        const level = profile?.education?.level || 'Undergraduate';
+
+        const data: IPersonalizationContext = {
+          userId: userObjectId.toString(),
+          name,
+          discipline: stream,
+          specialization: profile?.education?.branchSpecialization || '',
+          educationLevel: level,
+          studentStatus: profile?.education?.studentStatus || 'Student',
+          institution: profile?.education?.institution || '',
+          dreamCareer: profile?.careerGoals?.dreamCareer || 'Career Explorer',
+          currentOccupation: profile?.education?.currentOccupation || '',
+          location: {
+            country: profile?.personal?.country || '',
+            state: profile?.personal?.state || '',
+            city: profile?.personal?.city || '',
+          },
+          skills: {
+            technicalSkills: profile?.skills?.technicalSkills || [],
+            softSkills: profile?.skills?.softSkills || [],
+            languages: profile?.skills?.languages || [],
+            certifications: profile?.skills?.certifications || [],
+            verifiedSkills: profile?.skills?.verifiedSkills || [],
+          },
+          interests: {
+            careerInterests: profile?.interests?.careerInterests || [],
+            favouriteSubjects: profile?.interests?.favouriteSubjects || [],
+            technologies: profile?.interests?.technologies || [],
+            industries: profile?.interests?.industries || [],
+          },
+          careerGoals: {
+            dreamCareer: profile?.careerGoals?.dreamCareer || '',
+            preferredIndustries: profile?.careerGoals?.preferredIndustries || [],
+            salaryGoal: profile?.careerGoals?.salaryGoal || '',
+            careerObjectives: profile?.careerGoals?.careerObjectives || '',
+            preferredJobType: profile?.careerGoals?.preferredJobType || '',
+            preferredLocation: profile?.careerGoals?.preferredLocation || '',
+            longTermAspirations: profile?.careerGoals?.longTermAspirations || '',
+          },
+          learningPreferences: {
+            learningStyle: profile?.learningPreferences?.learningStyle || 'Visual & Practical',
+            weeklyStudyTime: profile?.learningPreferences?.weeklyStudyTime || 10,
+            preferredResources: profile?.learningPreferences?.preferredResources || ['Courses', 'Projects', 'Interactive Modules'],
+          },
+          workPreferences: {
+            remoteHybridOffice: profile?.workPreferences?.remoteHybridOffice || 'Hybrid',
+            startupEnterprise: profile?.workPreferences?.startupEnterprise || 'Balanced',
+            teamSize: profile?.workPreferences?.teamSize || 'Medium',
+          },
+          userPreferences: {
+            theme: preferences?.theme || 'dark',
+            language: preferences?.language || 'en',
+            emailNotifications: preferences?.emailNotifications ?? true,
+            pushNotifications: preferences?.pushNotifications ?? true,
+            weeklyReport: preferences?.weeklyReport ?? true,
+          },
+          hasCompletedOnboarding: profile?.onboarding?.completed || user?.isOnboarded || false,
+          learningProgress: learningProgress ? {
+            completedResources: learningProgress.completedResources,
+            bookmarkedResources: learningProgress.bookmarkedResources,
+            streakDays: learningProgress.streakDays,
+            totalStudyMinutes: learningProgress.totalStudyMinutes,
+            lastStudyDate: learningProgress.lastStudyDate,
+          } : null,
+          careerProgress: careerProgress ? {
+            selectedCareer: careerProgress.selectedCareer,
+            currentPhase: careerProgress.currentPhase,
+            completedMilestones: careerProgress.completedMilestones,
+            totalMilestones: careerProgress.totalMilestones,
+            lastActivity: careerProgress.lastActivity,
+          } : null,
+        };
+
+        PersonalizationService.contextCache.set(userKey, { timestamp: Date.now(), data });
+        return data;
+      } finally {
+        PersonalizationService.contextPromises.delete(userKey);
+      }
+    })();
+
+    this.contextPromises.set(userKey, promise);
+    return promise;
   }
+
+  /**
+   * Invalidate server personalization context cache for a specific user or globally.
+   */
+  public static invalidatePersonalizationCache(userId?: string | mongoose.Types.ObjectId): void {
+    if (userId) {
+      const key = userId.toString();
+      PersonalizationService.contextCache.delete(key);
+      PersonalizationService.contextPromises.delete(key);
+    } else {
+      PersonalizationService.contextCache.clear();
+      PersonalizationService.contextPromises.clear();
+    }
+  }
+
 
   /**
    * Helper to return clean, verified seed videos for different disciplines if YouTube API key is missing.

@@ -14,6 +14,8 @@ import type {
 import { CareerService } from '../services/career.service';
 import type { Career } from '../services/career.service';
 import { useAiModal } from '../contexts/AiModalContext';
+import { decodeHtmlEntities } from '../utils/textUtils';
+
 import { 
   GitFork, 
   Circle, 
@@ -1242,8 +1244,10 @@ export const CareerRoadmapPage: React.FC = () => {
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <span 
                             style={{ fontSize: '0.78rem', fontWeight: 650, color: 'var(--text-primary)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                            dangerouslySetInnerHTML={{ __html: video.title }}
-                          />
+                          >
+                            {decodeHtmlEntities(video.title)}
+                          </span>
+
                           <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>{video.channelTitle}</span>
                         </div>
                         <ExternalLink size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />

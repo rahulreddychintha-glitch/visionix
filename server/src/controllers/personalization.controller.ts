@@ -126,9 +126,11 @@ export class PersonalizationController {
       if (weeklyReport !== undefined) prefs.weeklyReport = weeklyReport;
 
       const savedPrefs = await prefs.save();
+      PersonalizationService.invalidatePersonalizationCache(userId);
       sendSuccess(res, 'User preferences updated successfully.', savedPrefs);
     } catch (error) {
       next(error);
     }
   };
 }
+

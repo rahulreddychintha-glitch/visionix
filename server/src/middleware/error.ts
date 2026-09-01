@@ -20,7 +20,9 @@ export const errorMiddleware = (
 ): void => {
   // Determine status code first
   let statusCode = err.statusCode ?? 500;
-  if (err.code === 11000) {
+  if (err.message && err.message.includes('not allowed by CORS')) {
+    statusCode = 403;
+  } else if (err.code === 11000) {
     statusCode = 409;
   } else if (err.name === 'ValidationError') {
     statusCode = 422;
@@ -30,6 +32,7 @@ export const errorMiddleware = (
 
   const message =
     statusCode === 500 ? 'An internal server error occurred.' : err.message;
+
 
   // Log only unexpected server failures (500+)
   if (statusCode >= 500) {

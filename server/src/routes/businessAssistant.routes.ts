@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { BusinessAssistantController } from '../controllers/businessAssistant.controller';
 import { authenticate } from '../middleware/auth';
+import { aiRateLimiter } from '../middleware/rateLimit';
 import {
   assistantChatValidator,
   validateIdeaValidator,
@@ -9,8 +10,10 @@ import {
 
 const router = Router();
 
-// All AI assistant routes require authentication
+// All AI assistant routes require authentication and AI rate limiting
 router.use(authenticate);
+router.use(aiRateLimiter);
+
 
 /**
  * POST /api/business/assistant/chat

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { RoadmapController } from '../controllers/roadmap.controller';
 import { authenticate } from '../middleware/auth';
+import { aiRateLimiter } from '../middleware/rateLimit';
 
 const router = Router();
 
@@ -41,7 +42,7 @@ router.post('/start-milestone', RoadmapController.startMilestone);
  * POST /api/roadmap/assessment/generate
  * Generates quiz questions for a milestone
  */
-router.post('/assessment/generate', RoadmapController.generateAssessment);
+router.post('/assessment/generate', aiRateLimiter, RoadmapController.generateAssessment);
 
 /**
  * POST /api/roadmap/assessment/submit
@@ -53,7 +54,8 @@ router.post('/assessment/submit', RoadmapController.submitAssessment);
  * POST /api/roadmap/assessment/skill/generate
  * Generates quiz questions for a standalone skill
  */
-router.post('/assessment/skill/generate', RoadmapController.generateSkillAssessment);
+router.post('/assessment/skill/generate', aiRateLimiter, RoadmapController.generateSkillAssessment);
+
 
 /**
  * POST /api/roadmap/assessment/skill/submit

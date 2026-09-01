@@ -53,7 +53,8 @@ export const DashboardPage: React.FC = () => {
           setDashboardLoading(false);
         });
     }
-  }, [user, profile]);
+  }, [user?.email]);
+
 
   const fullName = user?.fullName || 'Rahul';
   const interests = useMemo(() => profile?.interests?.careerInterests || [], [profile]);

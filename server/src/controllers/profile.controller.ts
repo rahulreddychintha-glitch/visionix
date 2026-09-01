@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import { UserProfile } from '../models/UserProfile';
 import { User } from '../models/User';
+import { PersonalizationService } from '../services/personalization.service';
 import { sendSuccess, sendError } from '../utils/response';
 
 export class ProfileController {
@@ -270,6 +271,7 @@ export class ProfileController {
       }
 
       const savedProfile = await profile.save();
+      PersonalizationService.invalidatePersonalizationCache(userId);
 
       sendSuccess(
         res,
@@ -281,3 +283,4 @@ export class ProfileController {
     }
   };
 }
+

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { InterviewController } from '../controllers/interview.controller';
 import { authenticate } from '../middleware/auth';
+import { aiRateLimiter } from '../middleware/rateLimit';
 import {
   generateInterviewValidator,
   evaluateInterviewValidator,
@@ -13,7 +14,7 @@ const router = Router();
  * POST /api/interview/generate
  * Generate an AI-powered interview session.
  */
-router.post('/generate', authenticate, generateInterviewValidator, InterviewController.generateInterview);
+router.post('/generate', authenticate, aiRateLimiter, generateInterviewValidator, InterviewController.generateInterview);
 
 /**
  * GET /api/interview
@@ -37,7 +38,8 @@ router.get('/:id', authenticate, interviewIdParamValidator, InterviewController.
  * POST /api/interview/:id/evaluate
  * Submit answers for AI evaluation and scoring.
  */
-router.post('/:id/evaluate', authenticate, evaluateInterviewValidator, InterviewController.evaluateInterview);
+router.post('/:id/evaluate', authenticate, aiRateLimiter, evaluateInterviewValidator, InterviewController.evaluateInterview);
+
 
 /**
  * POST /api/interview/:id/retry

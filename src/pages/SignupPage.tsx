@@ -6,8 +6,7 @@ import {
   validateName, 
   validateEmail, 
   validatePassword, 
-  validateConfirmPassword, 
-  getPasswordStrength 
+  validateConfirmPassword 
 } from '../utils/validation';
 import { extractErrorMessage } from '../utils/error';
 import styles from './AuthPage.module.css';
@@ -60,33 +59,6 @@ export const SignupPage = () => {
     setConfirmPassword(val);
     if (fieldErrors.confirmPassword) {
       setFieldErrors(prev => ({ ...prev, confirmPassword: undefined }));
-    }
-  };
-
-  const strength = getPasswordStrength(password);
-  
-  // Choose correct CSS class and label for strength meter
-  const getStrengthClass = () => {
-    switch (strength) {
-      case 'weak': return styles.strengthWeak;
-      case 'medium': return styles.strengthMedium;
-      case 'strong': return styles.strengthStrong;
-      case 'very-strong': return styles.strengthVeryStrong;
-      case 'very-weak':
-      default:
-        return styles.strengthVeryWeak;
-    }
-  };
-
-  const getStrengthLabel = () => {
-    switch (strength) {
-      case 'weak': return 'Weak';
-      case 'medium': return 'Medium';
-      case 'strong': return 'Strong';
-      case 'very-strong': return 'Very Strong';
-      case 'very-weak':
-      default:
-        return 'Very Weak';
     }
   };
 
@@ -303,16 +275,6 @@ export const SignupPage = () => {
               </span>
             )}
           </div>
-
-          {/* Password strength meter */}
-          {password && (
-            <div className={styles.strengthWrapper}>
-              <div className={styles.strengthTrack}>
-                <div className={`${styles.strengthBar} ${getStrengthClass()}`} />
-              </div>
-              <span className={styles.strengthText}>Strength: {getStrengthLabel()}</span>
-            </div>
-          )}
 
           <div className={styles.formGroup}>
             <label htmlFor="confirmPassword">Confirm Password</label>

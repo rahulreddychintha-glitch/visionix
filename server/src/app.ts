@@ -1,10 +1,19 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import config from './config/env';
 import routes from './routes/index';
 import { errorMiddleware } from './middleware/error';
+import { generalRateLimiter } from './middleware/rateLimit';
 
 const app = express();
+
+// ─── Security Headers (Helmet) ────────────────────────────────────────────────
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const configuredOrigins = (config.CLIENT_URL || '')
@@ -36,11 +45,17 @@ const isLocalOrPrivateNetwork = (origin: string): boolean => {
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || configuredOrigins.includes(origin) || isLocalOrPrivateNetwork(origin)) {
-        callback(null, true);
-      } else {
-        callback(null, true);
+      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+      if (!origin) {
+        return callback(null, true);
       }
+      if (
+        configuredOrigins.includes(origin) ||
+        (config.NODE_ENV !== 'production' && isLocalOrPrivateNetwork(origin))
+      ) {
+        return callback(null, true);
+      }
+      return callback(new Error(`Origin ${origin} not allowed by CORS`));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -48,9 +63,12 @@ app.use(
   })
 );
 
-// ─── Body Parsing ─────────────────────────────────────────────────────────────
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+// ─── Body Parsing & Size Limits ───────────────────────────────────────────────
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+
+// ─── Global Rate Limiting ─────────────────────────────────────────────────────
+app.use('/api', generalRateLimiter);
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api', routes);
@@ -68,3 +86,4 @@ app.use((_req, res) => {
 app.use(errorMiddleware);
 
 export default app;
+

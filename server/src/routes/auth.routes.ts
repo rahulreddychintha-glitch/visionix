@@ -3,6 +3,7 @@ import { AuthController } from '../controllers/auth.controller';
 import { registerValidator, loginValidator } from '../validators/auth.validator';
 import { validateRequest } from '../middleware/validate';
 import { authenticate } from '../middleware/auth';
+import { authRateLimiter } from '../middleware/rateLimit';
 
 const router = Router();
 
@@ -10,13 +11,14 @@ const router = Router();
  * POST /api/auth/register
  * Public route to register a new account.
  */
-router.post('/register', registerValidator, validateRequest, AuthController.register);
+router.post('/register', authRateLimiter, registerValidator, validateRequest, AuthController.register);
 
 /**
  * POST /api/auth/login
  * Public route to authenticate and retrieve a JWT.
  */
-router.post('/login', loginValidator, validateRequest, AuthController.login);
+router.post('/login', authRateLimiter, loginValidator, validateRequest, AuthController.login);
+
 
 /**
  * GET /api/auth/me
