@@ -90,9 +90,26 @@ export class RoadmapService {
     let targetCareerId = careerId;
     if (!targetCareerId) {
       const progress = await CareerProgress.findOne({ userId: new mongoose.Types.ObjectId(userId) });
-      if (progress && progress.selectedCareer) {
+      const selCareer = progress?.selectedCareer;
+      if (selCareer) {
         // Map the title back to an ID
-        const matchedCareer = CAREERS_DATA.find(c => c.title === progress.selectedCareer);
+        const matchedCareer = CAREERS_DATA.find(
+          c => c.title.toLowerCase() === selCareer.toLowerCase() || c.id.toLowerCase() === selCareer.toLowerCase()
+        );
+        if (matchedCareer) {
+          targetCareerId = matchedCareer.id;
+        }
+      }
+    }
+
+    // If still not found, check UserProfile dreamCareer
+    if (!targetCareerId) {
+      const profile = await UserProfile.findOne({ userId: new mongoose.Types.ObjectId(userId) });
+      const dreamCareer = profile?.careerGoals?.dreamCareer;
+      if (dreamCareer) {
+        const matchedCareer = CAREERS_DATA.find(
+          c => c.title.toLowerCase() === dreamCareer.toLowerCase() || c.id.toLowerCase() === dreamCareer.toLowerCase()
+        );
         if (matchedCareer) {
           targetCareerId = matchedCareer.id;
         }
@@ -105,6 +122,14 @@ export class RoadmapService {
       roadmap = await CareerRoadmap.findOne({ userId: new mongoose.Types.ObjectId(userId) }).sort({ updatedAt: -1 });
     } else {
       roadmap = await CareerRoadmap.findOne({ userId: new mongoose.Types.ObjectId(userId), careerId: targetCareerId });
+      // If user has a valid targetCareerId but no roadmap document exists yet, auto-generate initial roadmap!
+      if (!roadmap) {
+        try {
+          roadmap = await this.generateRoadmap(userId, targetCareerId);
+        } catch (genErr: any) {
+          console.warn('[RoadmapService] Could not auto-generate initial roadmap for target career:', genErr?.message || genErr);
+        }
+      }
     }
 
     // Apply on-the-fly status sanitization for backward compatibility

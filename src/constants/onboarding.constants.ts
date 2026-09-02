@@ -315,22 +315,124 @@ export const getContextualDreamCareers = (
   return DREAM_CAREERS;
 };
 
-// ─── Phase 4 Redesign Step 2 Taxonomy Constants ──────────────────────────────
+// ─── Phase 4 & Phase 17 Indian Education Architecture Constants ───────────────
 export const STEP2_EDUCATION_LEVELS: TaxonomyItem[] = [
-  { id: 'school', label: 'School', category: 'Basic', icon: 'BookOpen', description: 'Primary or middle school education', accentColor: '#3b82f6', keywords: ['school', 'primary', 'middle', 'education'] },
-  { id: 'high_school', label: 'High School', category: 'Secondary', icon: 'GraduationCap', description: 'Secondary school completion (10th/12th grade)', accentColor: '#6366f1', keywords: ['high school', 'secondary', 'hsc', 'ssc'] },
-  { id: 'intermediate', label: 'Intermediate', category: 'Secondary', icon: 'BookOpen', description: 'Pre-university intermediate studies', accentColor: '#3b82f6', keywords: ['intermediate', 'pre-university', '12th', 'junior college'] },
-  { id: 'diploma', label: 'Diploma', category: 'Technical', icon: 'Award', description: 'Technical or vocational diploma course', accentColor: '#f59e0b', keywords: ['diploma', 'technical', 'polytechnic'] },
-  { id: 'polytechnic', label: 'Polytechnic', category: 'Technical', icon: 'Award', description: 'Polytechnic engineering diploma program', accentColor: '#f59e0b', keywords: ['polytechnic', 'diploma', 'technical'] },
-  { id: 'iti', label: 'ITI', category: 'Vocational', icon: 'Briefcase', description: 'Industrial Training Institute certificate', accentColor: '#10b981', keywords: ['iti', 'industrial', 'trade', 'vocational'] },
-  { id: 'vocational_training', label: 'Vocational Training', category: 'Vocational', icon: 'Briefcase', description: 'Applied vocational skills or trade qualification', accentColor: '#10b981', keywords: ['vocational', 'trade', 'skills'] },
-  { id: 'certificate_program', label: 'Certificate Program', category: 'Certification', icon: 'Award', description: 'Short term certificate course or credential program', accentColor: '#6366f1', keywords: ['certificate', 'program', 'credential'] },
-  { id: 'bachelors_degree', label: "Bachelor's Degree", category: 'Higher Ed', icon: 'GraduationCap', description: 'Undergraduate university degree (B.Tech, B.S., B.A., B.Com)', accentColor: '#10b981', keywords: ['bachelor', 'undergraduate', 'btech', 'bs', 'ba', 'bcom'] },
-  { id: 'masters_degree', label: "Master's Degree", category: 'Higher Ed', icon: 'Award', description: 'Postgraduate university degree (M.Tech, M.S., M.A., M.Com)', accentColor: '#8b5cf6', keywords: ['master', 'postgraduate', 'mtech', 'ms', 'ma', 'mcom'] },
-  { id: 'mba', label: 'MBA', category: 'Management', icon: 'Briefcase', description: 'Master of Business Administration degree', accentColor: '#8b5cf6', keywords: ['mba', 'management', 'business'] },
-  { id: 'doctorate_phd', label: 'Doctorate (PhD)', category: 'Research', icon: 'Sparkles', description: 'Doctoral research degree (PhD)', accentColor: '#ec4899', keywords: ['phd', 'doctorate', 'research'] },
-  { id: 'post_doctorate', label: 'Post Doctorate', category: 'Research', icon: 'Sparkles', description: 'Postdoctoral research fellowship', accentColor: '#ec4899', keywords: ['postdoc', 'fellowship', 'research'] },
+  { id: 'school', label: 'School (Classes 6–10)', category: 'School', icon: 'BookOpen', description: 'Classes 6 to 10 education', accentColor: '#3b82f6', keywords: ['school', 'secondary', '10th', 'matric', 'high school'] },
+  { id: 'intermediate', label: 'Intermediate / +2 / PUC (Classes 11–12)', category: 'Secondary', icon: 'GraduationCap', description: 'Classes 11 & 12 / Pre-University / Junior College', accentColor: '#6366f1', keywords: ['intermediate', 'pre-university', 'puc', '11th', '12th', 'plus two', 'junior college', 'high_school'] },
+  { id: 'diploma', label: 'Diploma / Polytechnic', category: 'Technical', icon: 'Award', description: 'Technical polytechnic or vocational diploma course', accentColor: '#f59e0b', keywords: ['diploma', 'technical', 'polytechnic', 'vocational', 'iti'] },
+  { id: 'undergraduate', label: "Undergraduate (Bachelor's Degree)", category: 'Higher Ed', icon: 'GraduationCap', description: 'B.Tech, B.Sc, B.Com, BBA, BA, MBBS, BCA, Law', accentColor: '#10b981', keywords: ['bachelor', 'undergraduate', 'btech', 'bs', 'ba', 'bcom', 'bba', 'bca', 'mbbs', 'degree', 'bachelors_degree'] },
+  { id: 'postgraduate', label: "Postgraduate (Master's Degree)", category: 'Higher Ed', icon: 'Award', description: 'M.Tech, MBA, MCA, M.Sc, M.Com, M.A., MS degree', accentColor: '#8b5cf6', keywords: ['master', 'postgraduate', 'mtech', 'ms', 'ma', 'mcom', 'mba', 'mca', 'masters_degree'] },
+  { id: 'doctorate_phd', label: 'Doctorate (PhD)', category: 'Research', icon: 'Sparkles', description: 'Doctoral research degree & fellowship (PhD)', accentColor: '#ec4899', keywords: ['phd', 'doctorate', 'research', 'fellowship', 'postdoc'] },
   OTHER_OPTION
+];
+
+export const SCHOOL_CLASSES = [
+  'Class 6',
+  'Class 7',
+  'Class 8',
+  'Class 9',
+  'Class 10'
+];
+
+export const INTERMEDIATE_CLASSES = [
+  'Class 11 (1st Year)',
+  'Class 12 (2nd Year)'
+];
+
+export const INTERMEDIATE_STREAMS: TaxonomyItem[] = [
+  { id: 'mpc', label: 'Science: MPC (Maths, Physics, Chemistry)', category: 'Science', icon: 'Cpu', description: 'Engineering, Computing, Defense & Architecture stream', accentColor: '#3b82f6', keywords: ['mpc', 'pcm', 'science', 'maths', 'physics', 'chemistry', 'jee'] },
+  { id: 'bipc', label: 'Science: BiPC (Biology, Physics, Chemistry)', category: 'Science', icon: 'HeartPulse', description: 'Medicine, Pharmacy, Biotechnology & Agriculture stream', accentColor: '#ef4444', keywords: ['bipc', 'pcb', 'biology', 'medicine', 'neet', 'pharma'] },
+  { id: 'pcmb', label: 'Science: PCMB (Physics, Chem, Maths, Bio)', category: 'Science', icon: 'Microscope', description: 'Dual Track (Engineering & Medical pathways)', accentColor: '#8b5cf6', keywords: ['pcmb', 'dual', 'science', 'biology', 'maths'] },
+  { id: 'mec', label: 'Commerce: MEC (Maths, Economics, Commerce)', category: 'Commerce', icon: 'TrendingUp', description: 'Chartered Accountancy, Finance, BBA & Analytics stream', accentColor: '#10b981', keywords: ['mec', 'commerce', 'maths', 'economics', 'ca', 'finance'] },
+  { id: 'cec', label: 'Commerce: CEC (Civics, Economics, Commerce)', category: 'Commerce', icon: 'Briefcase', description: 'Business, Corporate Law, Accounting & Banking stream', accentColor: '#f59e0b', keywords: ['cec', 'commerce', 'civics', 'economics', 'business'] },
+  { id: 'hec', label: 'Humanities / Arts: HEC (History, Economics, Civics)', category: 'Arts', icon: 'BookOpen', description: 'Civil Services (UPSC), Law (CLAT), Design & Social Sciences', accentColor: '#ec4899', keywords: ['hec', 'humanities', 'arts', 'history', 'law', 'upsc'] },
+  { id: 'vocational_inter', label: 'Vocational Intermediate', category: 'Vocational', icon: 'Zap', description: 'IT, Paramedical, Electrical trades & Accounting', accentColor: '#06b6d4', keywords: ['vocational', 'trades', 'paramedical', 'skills'] },
+  OTHER_OPTION
+];
+
+export const DIPLOMA_BRANCHES: TaxonomyItem[] = [
+  { id: 'dip_mech', label: 'Mechanical Engineering', category: 'Engineering', icon: 'Cpu', description: 'Thermal, CAD/CAM, Automotive & Robotics', accentColor: '#64748b', keywords: ['mechanical', 'mech', 'polytechnic'] },
+  { id: 'dip_civil', label: 'Civil Engineering', category: 'Engineering', icon: 'Building', description: 'Structures, Surveying & Infrastructure', accentColor: '#f59e0b', keywords: ['civil', 'construction', 'polytechnic'] },
+  { id: 'dip_eee', label: 'Electrical & Electronics (EEE)', category: 'Engineering', icon: 'Zap', description: 'Power Systems, Circuits & Energy Grid', accentColor: '#eab308', keywords: ['eee', 'electrical', 'polytechnic'] },
+  { id: 'dip_ece', label: 'Electronics & Communication (ECE)', category: 'Engineering', icon: 'Cpu', description: 'VLSI, Embedded Systems & Telecommunications', accentColor: '#a855f7', keywords: ['ece', 'electronics', 'telecom'] },
+  { id: 'dip_cse', label: 'Computer Engineering / IT', category: 'Technology', icon: 'Code2', description: 'Software Development, Web & Networking', accentColor: '#3b82f6', keywords: ['cse', 'computer', 'it', 'software'] },
+  { id: 'dip_auto', label: 'Automobile Engineering', category: 'Engineering', icon: 'Cpu', description: 'Vehicle Dynamics, EV & Automotive Systems', accentColor: '#3b82f6', keywords: ['automobile', 'auto', 'ev'] },
+  { id: 'dip_chem', label: 'Chemical Engineering', category: 'Engineering', icon: 'Microscope', description: 'Petroleum, Plastics & Chemical Processing', accentColor: '#06b6d4', keywords: ['chemical', 'polytechnic'] },
+  { id: 'dip_pharm', label: 'D.Pharm (Diploma in Pharmacy)', category: 'Healthcare', icon: 'HeartPulse', description: 'Pharmacology, Dispensary & Drug Formulation', accentColor: '#ef4444', keywords: ['dpharm', 'pharmacy', 'drugs', 'chemist'] },
+  { id: 'dip_hotel', label: 'Hotel Management & Catering', category: 'Hospitality', icon: 'Briefcase', description: 'Hospitality Operations & Culinary Arts', accentColor: '#ec4899', keywords: ['hotel', 'hospitality', 'catering'] },
+  { id: 'dip_art', label: 'Commercial Art & Design', category: 'Design', icon: 'Palette', description: 'Visual Media, UI & Commercial Graphics', accentColor: '#f43f5e', keywords: ['art', 'design', 'commercial'] },
+  { id: 'dip_voc', label: 'Vocational / ITI Trades', category: 'Vocational', icon: 'Briefcase', description: 'Industrial, Tool & Die, Mechatronics trades', accentColor: '#10b981', keywords: ['iti', 'vocational', 'trades'] },
+  OTHER_OPTION
+];
+
+export const DIPLOMA_STUDY_YEARS = [
+  '1st Year',
+  '2nd Year',
+  '3rd Year / Final Year',
+  'Completed / Seeking Lateral Entry (LEET/ECET)'
+];
+
+export const UNDERGRADUATE_COURSES: TaxonomyItem[] = [
+  { id: 'btech_be', label: 'B.Tech / B.E. (Engineering & Tech)', category: 'Engineering', icon: 'Cpu', description: 'Computer Science, AI/ML, ECE, EEE, Mech, Civil', accentColor: '#3b82f6', keywords: ['btech', 'be', 'engineering', 'cs', 'it', 'mech', 'civil'] },
+  { id: 'bca', label: 'BCA (Computer Applications)', category: 'Technology', icon: 'Code2', description: 'Full Stack Web, Cloud, Databases & Mobile Apps', accentColor: '#06b6d4', keywords: ['bca', 'computer applications', 'software', 'programming'] },
+  { id: 'bsc_cs_it', label: 'B.Sc Computer Science / IT', category: 'Technology', icon: 'Code2', description: 'Algorithms, Data Science & Network Systems', accentColor: '#6366f1', keywords: ['bsc cs', 'bsc it', 'computer science'] },
+  { id: 'bsc_pure', label: 'B.Sc (Pure & Applied Sciences)', category: 'Science', icon: 'Microscope', description: 'Physics, Chemistry, Mathematics, Statistics', accentColor: '#06b6d4', keywords: ['bsc', 'physics', 'chemistry', 'maths', 'science'] },
+  { id: 'bsc_agri', label: 'B.Sc Agriculture / Biotechnology', category: 'Science', icon: 'Microscope', description: 'Agronomy, Horticulture, Genetics & BioSciences', accentColor: '#10b981', keywords: ['agriculture', 'agri', 'biotech', 'biotechnology'] },
+  { id: 'bcom', label: 'B.Com (General, Computers, Honours)', category: 'Commerce', icon: 'TrendingUp', description: 'Corporate Accounting, Taxation, Banking & Auditing', accentColor: '#10b981', keywords: ['bcom', 'commerce', 'accounting', 'tax'] },
+  { id: 'bba_bms', label: 'BBA / BMS (Business Administration)', category: 'Management', icon: 'Briefcase', description: 'Management Strategy, Marketing, HR & Startups', accentColor: '#8b5cf6', keywords: ['bba', 'bms', 'management', 'business', 'mba'] },
+  { id: 'mbbs', label: 'MBBS (Medicine & Surgery)', category: 'Healthcare', icon: 'HeartPulse', description: 'Clinical Diagnostics, General Surgery & Medicine', accentColor: '#ef4444', keywords: ['mbbs', 'doctor', 'medicine', 'medical', 'clinical'] },
+  { id: 'bds', label: 'BDS (Dental Surgery)', category: 'Healthcare', icon: 'HeartPulse', description: 'Oral Healthcare & Dental Surgery', accentColor: '#f43f5e', keywords: ['bds', 'dental', 'dentist'] },
+  { id: 'bpharm', label: 'B.Pharm / Pharm.D (Pharmacy)', category: 'Healthcare', icon: 'HeartPulse', description: 'Pharmaceutical Chemistry, Clinical Trials & Drug Design', accentColor: '#06b6d4', keywords: ['bpharm', 'pharmd', 'pharmacy', 'pharmacology'] },
+  { id: 'bsc_nursing', label: 'B.Sc Nursing / Allied Healthcare', category: 'Healthcare', icon: 'HeartPulse', description: 'Critical Care, Physiotherapy (BPT), Radiology & MLT', accentColor: '#ec4899', keywords: ['nursing', 'allied', 'physiotherapy', 'bpt', 'mlt'] },
+  { id: 'law_integrated', label: '5-Year Integrated LLB (BA/BBA LLB)', category: 'Law', icon: 'Scale', description: 'Corporate Law, Criminal Justice & Constitutional Law', accentColor: '#f97316', keywords: ['law', 'llb', 'ballb', 'bballb', 'clat', 'advocate'] },
+  { id: 'bdes_barch', label: 'B.Des / B.Arch (Design & Architecture)', category: 'Design', icon: 'Palette', description: 'UI/UX, Product Design, Fashion & Architectural Planning', accentColor: '#ec4899', keywords: ['bdes', 'barch', 'design', 'architecture', 'ui', 'ux'] },
+  { id: 'ba_humanities', label: 'BA (Humanities & Social Sciences)', category: 'Arts', icon: 'BookOpen', description: 'Economics, Psychology, Journalism, Literature & History', accentColor: '#3b82f6', keywords: ['ba', 'economics', 'psychology', 'journalism', 'humanities', 'literature'] },
+  { id: 'bhm', label: 'BHM (Hotel & Hospitality Management)', category: 'Hospitality', icon: 'Briefcase', description: 'Hotel Operations, Tourism & Culinary Arts', accentColor: '#f59e0b', keywords: ['bhm', 'hotel management', 'hospitality', 'tourism'] },
+  OTHER_OPTION
+];
+
+export const UNDERGRADUATE_STUDY_YEARS = [
+  '1st Year',
+  '2nd Year',
+  '3rd Year',
+  '4th Year / Final Year',
+  '5th Year (for 5-year degrees)',
+  'Graduated / Seeking Job'
+];
+
+export const POSTGRADUATE_COURSES: TaxonomyItem[] = [
+  { id: 'mtech_me', label: 'M.Tech / M.E. (Engineering)', category: 'Engineering', icon: 'Cpu', description: 'Advanced Computing, AI/ML, VLSI & Robotics', accentColor: '#3b82f6', keywords: ['mtech', 'me', 'engineering', 'gate'] },
+  { id: 'mba', label: 'MBA (Business Administration)', category: 'Management', icon: 'Briefcase', description: 'Executive Strategy, Finance, Marketing, Operations & HR', accentColor: '#8b5cf6', keywords: ['mba', 'management', 'cat', 'business', 'finance'] },
+  { id: 'mca', label: 'MCA (Computer Applications)', category: 'Technology', icon: 'Code2', description: 'Cloud Engineering, Distributed Systems & Enterprise Apps', accentColor: '#06b6d4', keywords: ['mca', 'software', 'dev', 'cloud'] },
+  { id: 'msc', label: 'M.Sc (Sciences / Computing)', category: 'Science', icon: 'Microscope', description: 'Data Science, Applied Physics, Chemistry, Mathematics', accentColor: '#10b981', keywords: ['msc', 'science', 'data science', 'maths'] },
+  { id: 'mcom', label: 'M.Com (Commerce & Finance)', category: 'Commerce', icon: 'TrendingUp', description: 'Corporate Finance, Banking & Advanced Accounting', accentColor: '#10b981', keywords: ['mcom', 'commerce', 'finance'] },
+  { id: 'ma', label: 'M.A. (Humanities / Social Sciences)', category: 'Arts', icon: 'BookOpen', description: 'Economics, Clinical Psychology, Political Science, English', accentColor: '#3b82f6', keywords: ['ma', 'economics', 'psychology', 'arts'] },
+  { id: 'ms', label: 'MS (Master of Science)', category: 'Technology', icon: 'Cpu', description: 'International or Research Master Degree', accentColor: '#6366f1', keywords: ['ms', 'master of science', 'research'] },
+  { id: 'md_ms_medical', label: 'MD / MS (Medical Postgrad)', category: 'Healthcare', icon: 'HeartPulse', description: 'Specialized Clinical Medicine & Surgery', accentColor: '#ef4444', keywords: ['md', 'ms', 'doctor', 'neet pg'] },
+  { id: 'mpharm', label: 'M.Pharm (Pharmacy Postgrad)', category: 'Healthcare', icon: 'HeartPulse', description: 'Advanced Pharmaceutics & Pharmacology', accentColor: '#06b6d4', keywords: ['mpharm', 'pharmacy'] },
+  { id: 'llm', label: 'LLM (Master of Laws)', category: 'Law', icon: 'Scale', description: 'Corporate Law, IPR, Cyber Law & International Arbitration', accentColor: '#f97316', keywords: ['llm', 'law', 'legal'] },
+  OTHER_OPTION
+];
+
+export const POSTGRADUATE_STUDY_YEARS = [
+  '1st Year',
+  '2nd Year / Final Year',
+  'Graduated'
+];
+
+export const DOCTORATE_COURSES: TaxonomyItem[] = [
+  { id: 'phd_eng', label: 'PhD in Engineering / Computer Science', category: 'Research', icon: 'Cpu', description: 'AI, Algorithms, Hardware & Systems Research', accentColor: '#3b82f6', keywords: ['phd', 'engineering', 'cs', 'ai'] },
+  { id: 'phd_sci', label: 'PhD in Sciences', category: 'Research', icon: 'Microscope', description: 'Physics, Chemistry, Biology & Materials Science', accentColor: '#06b6d4', keywords: ['phd', 'science', 'physics', 'chemistry'] },
+  { id: 'phd_mgmt', label: 'PhD in Management / Economics', category: 'Research', icon: 'TrendingUp', description: 'Corporate Strategy, Econometrics & Finance', accentColor: '#10b981', keywords: ['phd', 'management', 'economics'] },
+  { id: 'phd_hum', label: 'PhD in Humanities / Social Sciences', category: 'Research', icon: 'BookOpen', description: 'Sociology, Psychology, History & Literature', accentColor: '#ec4899', keywords: ['phd', 'humanities', 'psychology'] },
+  { id: 'phd_med', label: 'PhD in Medicine & Healthcare', category: 'Research', icon: 'HeartPulse', description: 'Genomics, Clinical Research & Therapeutics', accentColor: '#ef4444', keywords: ['phd', 'medicine', 'biotech'] },
+  OTHER_OPTION
+];
+
+export const DOCTORATE_STUDY_YEARS = [
+  '1st - 2nd Year (Coursework)',
+  '3rd - 4th Year (Research / Thesis)',
+  '5th Year+ / Completed'
 ];
 
 export const STEP2_CURRENT_STATUSES: TaxonomyItem[] = [

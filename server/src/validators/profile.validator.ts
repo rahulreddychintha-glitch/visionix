@@ -74,7 +74,11 @@ export const saveProfileValidator = [
     .withMessage('Education level must be a string'),
 
   body('education.currentClass')
-    .if((value, { req }) => req.body.onboarding?.completed === true && (req.body.education?.level?.toLowerCase() === 'school' || req.body.education?.level === 'School'))
+    .if((value, { req }) => {
+      if (req.body.onboarding?.completed !== true) return false;
+      const lvl = (req.body.education?.level || '').toLowerCase().trim();
+      return lvl === 'school' || lvl.startsWith('school');
+    })
     .notEmpty()
     .withMessage('Class is required for school students'),
 
@@ -88,12 +92,20 @@ export const saveProfileValidator = [
     .isString(),
 
   body('education.stream')
-    .if((value, { req }) => req.body.onboarding?.completed === true && req.body.education?.level?.toLowerCase() !== 'school' && req.body.education?.level !== 'School')
+    .if((value, { req }) => {
+      if (req.body.onboarding?.completed !== true) return false;
+      const lvl = (req.body.education?.level || '').toLowerCase().trim();
+      return lvl !== 'school' && !lvl.startsWith('school');
+    })
     .notEmpty()
-    .withMessage('Academic stream / field is required'),
+    .withMessage('Academic stream / course is required'),
 
   body('education.studyYear')
-    .if((value, { req }) => req.body.onboarding?.completed === true && req.body.education?.level?.toLowerCase() !== 'school' && req.body.education?.level !== 'School')
+    .if((value, { req }) => {
+      if (req.body.onboarding?.completed !== true) return false;
+      const lvl = (req.body.education?.level || '').toLowerCase().trim();
+      return lvl !== 'school' && !lvl.startsWith('school');
+    })
     .notEmpty()
     .withMessage('Year / Current study year is required'),
 

@@ -1,25 +1,21 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useProfile } from '../hooks/useProfile';
 import { DashboardLayout } from '../components/DashboardLayout';
-import { Loader2 } from 'lucide-react';
-import { WelcomeSection } from '../components/dashboard/WelcomeSection';
-import { StatsGrid } from '../components/dashboard/StatsGrid';
+import { Loader2, Sparkles, Compass } from 'lucide-react';
+import { Zone1DirectionHero } from '../components/dashboard/Zone1DirectionHero';
 import { RoadmapProgress } from '../components/dashboard/RoadmapProgress';
-import { AiAssistantCard } from '../components/dashboard/AiAssistantCard';
-import { RecommendedCareerCard } from '../components/dashboard/RecommendedCareerCard';
 import { ContinueLearning } from '../components/dashboard/ContinueLearning';
-import { UpcomingExams } from '../components/dashboard/UpcomingExams';
 import { RecommendedSkills } from '../components/dashboard/RecommendedSkills';
 import { YouTubeLearning } from '../components/dashboard/YouTubeLearning';
-import { Scholarships } from '../components/dashboard/Scholarships';
+import { QuickToolsHub } from '../components/dashboard/QuickToolsHub';
 import { TrendingCareers } from '../components/dashboard/TrendingCareers';
 import { DashboardService } from '../services/dashboard.service';
 import type { DashboardData } from '../types/dashboard.types';
 import layoutStyles from '../components/DashboardLayout.module.css';
 
 const cleanCareerLabel = (val?: string) => {
-  if (!val) return 'Career Explorer';
+  if (!val) return 'Software & AI Engineer';
   if (val.includes('_')) {
     return val.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   }
@@ -55,9 +51,9 @@ export const DashboardPage: React.FC = () => {
     }
   }, [user?.email]);
 
-
-  const fullName = user?.fullName || 'Rahul';
-  const interests = useMemo(() => profile?.interests?.careerInterests || [], [profile]);
+  const fullName = user?.fullName || profile?.personal?.fullName || 'Rahul';
+  const targetCareer = cleanCareerLabel(profile?.careerGoals?.dreamCareer || dashboardData?.careerRecommendation?.title);
+  const activeMilestone = dashboardData?.roadmap?.find(m => m.status === 'active') || dashboardData?.roadmap?.[0];
 
   const isLoading = profileLoading || dashboardLoading;
 
@@ -79,98 +75,141 @@ export const DashboardPage: React.FC = () => {
         .spin-animation {
           animation: spin 10s linear infinite;
         }
+        .zoneHeader {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 12px;
+          margin-top: 8px;
+        }
+        .zoneTitle {
+          font-size: 1.15rem;
+          font-weight: 700;
+          color: var(--text-primary);
+          letter-spacing: -0.01em;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin: 0;
+        }
+        .zoneSubtitle {
+          font-size: 0.8rem;
+          color: var(--text-secondary);
+          margin: 2px 0 0 0;
+        }
       `}</style>
 
       {/* Ambient background noise overlay */}
       <div className="ambient-noise" />
 
       {/* Glow background accent blobs */}
-      <div className="glow-accent-primary" style={{ width: '450px', height: '450px', top: '10%', left: '15%', opacity: 0.4 }}></div>
-      <div className="glow-accent-secondary" style={{ width: '500px', height: '500px', bottom: '15%', right: '10%', opacity: 0.4 }}></div>
-      <div className="glow-accent-tertiary" style={{ width: '400px', height: '400px', top: '40%', left: '45%', opacity: 0.3 }}></div>
+      <div className="glow-accent-primary" style={{ width: '450px', height: '450px', top: '10%', left: '15%', opacity: 0.35 }}></div>
+      <div className="glow-accent-secondary" style={{ width: '500px', height: '500px', bottom: '15%', right: '10%', opacity: 0.35 }}></div>
+      <div className="glow-accent-tertiary" style={{ width: '400px', height: '400px', top: '40%', left: '45%', opacity: 0.25 }}></div>
 
       <div style={{
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px',
+        gap: '20px',
         position: 'relative',
         zIndex: 1,
       }}>
-        {/* Welcome greeting */}
-        <WelcomeSection fullName={fullName} />
+        {/* ═══════════════════════════════════════════════════════════════════════
+            ZONE 1: WHAT SHOULD I DO NOW? (Current Direction & Immediate Action)
+        ═══════════════════════════════════════════════════════════════════════ */}
+        <section aria-label="Zone 1: Current Direction and Next Action">
+          <MemoizedZone1DirectionHero
+            fullName={fullName}
+            education={profile?.education}
+            careerRecommendation={dashboardData?.careerRecommendation ? {
+              ...dashboardData.careerRecommendation,
+              title: targetCareer,
+              description: dashboardData.careerRecommendation.description || `Tailored learning and career roadmap for ${targetCareer}.`,
+              matchPercentage: dashboardData.careerRecommendation.matchPercentage || 94,
+              salaryRange: dashboardData.careerRecommendation.salaryRange || '₹8L - ₹24L/yr',
+              difficulty: dashboardData.careerRecommendation.difficulty || 'Intermediate',
+              estimatedTime: dashboardData.careerRecommendation.estimatedTime || '6 Months',
+              expectedGrowth: dashboardData.careerRecommendation.expectedGrowth || '+32% Growth',
+              learningProgress: dashboardData.careerRecommendation.learningProgress || 25,
+            } : undefined}
+            activeMilestone={activeMilestone}
+          />
+        </section>
 
-        {/* Master Dashboard Grid (Row 1 and Row 2) */}
-        <div className={layoutStyles.dashboardMasterGrid} style={{ marginBottom: '0px' }}>
-          
-          {/* Row 1: Stats Grid (spans 9) & AI Assistant (spans 3) */}
-          <div className={layoutStyles.colSpan9}>
-            <MemoizedStatsGrid stats={dashboardData?.stats} />
-          </div>
-          <div className={layoutStyles.colSpan3}>
-            <MemoizedAiAssistantCard assistant={dashboardData?.assistant} />
+        {/* ═══════════════════════════════════════════════════════════════════════
+            ZONE 2: HOW AM I PROGRESSING? (Roadmap, Learning & Skills Readiness)
+        ═══════════════════════════════════════════════════════════════════════ */}
+        <section aria-label="Zone 2: Progress & Readiness">
+          <div className="zoneHeader">
+            <div>
+              <h2 className="zoneTitle">
+                <Sparkles size={18} style={{ color: '#c084fc' }} />
+                How Am I Progressing?
+              </h2>
+              <p className="zoneSubtitle">
+                Real-time tracking for roadmap milestones, active courses, and target skill mastery.
+              </p>
+            </div>
           </div>
 
-          {/* Row 2: Recommended Career (spans 9) & Career Roadmap (spans 3) */}
-          <div className={layoutStyles.colSpan9}>
-            <MemoizedRecommendedCareerCard 
-              dreamCareer={cleanCareerLabel(profile?.careerGoals?.dreamCareer || dashboardData?.careerRecommendation.title)} 
-              careerDescription={dashboardData?.careerRecommendation.description}
-              interests={interests} 
-              matchPercentage={dashboardData?.careerRecommendation.matchPercentage}
-              salaryRange={dashboardData?.careerRecommendation.salaryRange || 'Not Specified'}
-              difficulty={dashboardData?.careerRecommendation.difficulty}
-              estimatedTime={dashboardData?.careerRecommendation.estimatedTime}
-              expectedGrowth={dashboardData?.careerRecommendation.expectedGrowth}
-              learningProgress={dashboardData?.careerRecommendation.learningProgress}
-              topSkills={profile?.skills?.technicalSkills}
-            />
-          </div>
-          <div className={layoutStyles.colSpan3}>
+          <div className={layoutStyles.dashboardLowerGrid}>
+            {/* Card 2A: Career Roadmap & Milestones */}
             <MemoizedRoadmapProgress 
               milestones={dashboardData?.roadmap} 
-              trackName={`${cleanCareerLabel(profile?.careerGoals?.dreamCareer || dashboardData?.careerRecommendation.title)} Career Roadmap`}
-              currentPhaseName={
-                dashboardData?.roadmap?.find(m => m.status === 'active')?.title || 
-                dashboardData?.roadmap?.[0]?.title || 
-                'Phase 1'
-              }
-              overallProgressPercent={dashboardData?.careerRecommendation.learningProgress || 0}
-              estimatedCompletion={profile?.careerGoals?.dreamCareer ? '6 Months' : 'Not Specified'}
-              nextGoalName={dashboardData?.careerRecommendation?.topSkills?.[0] || 'Explore'}
-              hoursRemaining="0 Hours"
+              trackName={`${targetCareer} Roadmap`}
+              currentPhaseName={activeMilestone?.title || 'Phase 1: Core Foundations'}
+              overallProgressPercent={dashboardData?.careerRecommendation?.learningProgress || 25}
+              estimatedCompletion={profile?.careerGoals?.dreamCareer ? '6 Months' : '6 Months'}
+              nextGoalName={dashboardData?.careerRecommendation?.topSkills?.[0] || 'Core Foundations'}
+              hoursRemaining="18 Hours"
             />
+
+            {/* Card 2B: Active Course Learning Modules */}
+            <MemoizedContinueLearning courses={dashboardData?.continueLearning} />
+
+            {/* Card 2C: Target Skills & Verification */}
+            <MemoizedRecommendedSkills skills={dashboardData?.targetSkills} />
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════════
+            ZONE 3: RELEVANT RESOURCES & OPPORTUNITIES (Curated Learning & Tools)
+        ═══════════════════════════════════════════════════════════════════════ */}
+        <section aria-label="Zone 3: Relevant Resources and Opportunities">
+          <div className="zoneHeader">
+            <div>
+              <h2 className="zoneTitle">
+                <Compass size={18} style={{ color: '#60a5fa' }} />
+                Curated Resources & Career Accelerators
+              </h2>
+              <p className="zoneSubtitle">
+                High-yield video tutorials, career preparation tools, and high-growth industry insights.
+              </p>
+            </div>
           </div>
 
-        </div>
+          <div className={layoutStyles.dashboardLowerGrid}>
+            {/* Card 3A: YouTube Learning Hub */}
+            <MemoizedYouTubeLearning videos={dashboardData?.youtubeVideos} />
 
-        {/* Lower Dashboard Section - Strict 3-Column Grid */}
-        <div className={layoutStyles.dashboardLowerGrid} style={{ marginTop: '4px' }}>
-          
-          {/* ROW 1: Continue Learning, Target Skills, Trending Careers */}
-          <MemoizedContinueLearning courses={dashboardData?.continueLearning} />
-          <MemoizedRecommendedSkills skills={dashboardData?.targetSkills} />
-          <MemoizedTrendingCareers careers={dashboardData?.trendingCareers} />
+            {/* Card 3B: Visionix Career Suite & Quick Tools */}
+            <MemoizedQuickToolsHub />
 
-          {/* ROW 2: YouTube Learning, Scholarships, Upcoming Exams */}
-          <MemoizedYouTubeLearning videos={dashboardData?.youtubeVideos} />
-          <MemoizedScholarships scholarships={dashboardData?.scholarships} />
-          <MemoizedUpcomingExams exams={dashboardData?.upcomingExams} />
-
-        </div>
+            {/* Card 3C: Trending High-Growth Careers */}
+            <MemoizedTrendingCareers careers={dashboardData?.trendingCareers} />
+          </div>
+        </section>
       </div>
     </DashboardLayout>
   );
 };
 
-// Performance Optimizations: Memoize expensive sub-widgets to prevent unnecessary renders
-const MemoizedStatsGrid = React.memo(StatsGrid);
+// Memoize sub-widgets to prevent unnecessary re-renders
+const MemoizedZone1DirectionHero = React.memo(Zone1DirectionHero);
 const MemoizedRoadmapProgress = React.memo(RoadmapProgress);
-const MemoizedAiAssistantCard = React.memo(AiAssistantCard);
-const MemoizedRecommendedCareerCard = React.memo(RecommendedCareerCard);
 const MemoizedContinueLearning = React.memo(ContinueLearning);
-const MemoizedUpcomingExams = React.memo(UpcomingExams);
 const MemoizedRecommendedSkills = React.memo(RecommendedSkills);
 const MemoizedYouTubeLearning = React.memo(YouTubeLearning);
-const MemoizedScholarships = React.memo(Scholarships);
+const MemoizedQuickToolsHub = React.memo(QuickToolsHub);
 const MemoizedTrendingCareers = React.memo(TrendingCareers);

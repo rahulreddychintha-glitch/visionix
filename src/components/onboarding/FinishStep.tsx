@@ -9,6 +9,13 @@ import {
   STUDENT_STATUSES,
   EDUCATION_LEVELS,
   EDUCATION_DOMAINS,
+  STEP2_EDUCATION_LEVELS,
+  INTERMEDIATE_STREAMS,
+  DIPLOMA_BRANCHES,
+  UNDERGRADUATE_COURSES,
+  POSTGRADUATE_COURSES,
+  DOCTORATE_COURSES,
+  STEP2_ACADEMIC_FIELDS,
   STEP3_INTERESTS,
   SPECIALIZATIONS,
   DREAM_CAREERS,
@@ -53,6 +60,10 @@ export const FinishStep: React.FC<FinishStepProps> = ({
   const skills = data.skills || {};
   const careerGoals = data.careerGoals || {};
 
+  const lvl = (education.level || '').toLowerCase().trim();
+  const isSchool = lvl === 'school' || lvl.startsWith('school');
+  const isIntermediate = lvl === 'intermediate' || lvl.startsWith('intermediate');
+
   // Pure Utility Calculations
   const strength = useMemo(() => calculateProfileStrength(data), [data]);
   const previewRecommendations = useMemo(() => generateRecommendationPreview(data), [data]);
@@ -60,16 +71,23 @@ export const FinishStep: React.FC<FinishStepProps> = ({
 
   // Labels Resolving
   const roleLabel = isValidValue(education.studentStatus)
-    ? getTaxonomyLabel(STUDENT_STATUSES, education.studentStatus)
+    ? getTaxonomyLabel(STUDENT_STATUSES, education.studentStatus) || education.studentStatus
     : '';
   const levelLabel = isValidValue(education.level)
-    ? getTaxonomyLabel(EDUCATION_LEVELS, education.level)
+    ? getTaxonomyLabel(STEP2_EDUCATION_LEVELS, education.level) || getTaxonomyLabel(EDUCATION_LEVELS, education.level) || education.level
     : '';
   const streamLabel = isValidValue(education.stream)
-    ? getTaxonomyLabel(EDUCATION_DOMAINS, education.stream)
+    ? getTaxonomyLabel(INTERMEDIATE_STREAMS, education.stream) ||
+      getTaxonomyLabel(DIPLOMA_BRANCHES, education.stream) ||
+      getTaxonomyLabel(UNDERGRADUATE_COURSES, education.stream) ||
+      getTaxonomyLabel(POSTGRADUATE_COURSES, education.stream) ||
+      getTaxonomyLabel(DOCTORATE_COURSES, education.stream) ||
+      getTaxonomyLabel(STEP2_ACADEMIC_FIELDS, education.stream) ||
+      getTaxonomyLabel(EDUCATION_DOMAINS, education.stream) ||
+      education.stream
     : '';
   const specLabel = isValidValue(education.branchSpecialization)
-    ? getTaxonomyLabel(SPECIALIZATIONS, education.branchSpecialization)
+    ? getTaxonomyLabel(SPECIALIZATIONS, education.branchSpecialization) || education.branchSpecialization
     : '';
   const dreamCareerLabel = isValidValue(careerGoals.dreamCareer)
     ? getTaxonomyLabel(DREAM_CAREERS, careerGoals.dreamCareer)
@@ -211,10 +229,16 @@ export const FinishStep: React.FC<FinishStepProps> = ({
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               {isValidValue(levelLabel) && <div><span style={{ color: 'var(--text-muted)' }}>Highest Level:</span> {levelLabel}</div>}
-              {isValidValue(streamLabel) && <div><span style={{ color: 'var(--text-muted)' }}>Course/Degree:</span> {streamLabel}</div>}
-              {isValidValue(specLabel) && <div><span style={{ color: 'var(--text-muted)' }}>Specialization:</span> {specLabel}</div>}
+              {isSchool && isValidValue(education.currentClass) && <div><span style={{ color: 'var(--text-muted)' }}>Class:</span> {education.currentClass}</div>}
+              {!isSchool && isValidValue(streamLabel) && <div><span style={{ color: 'var(--text-muted)' }}>{isIntermediate ? 'Stream:' : 'Course/Degree:'}</span> {streamLabel}</div>}
+              {!isSchool && isValidValue(education.studyYear) && <div><span style={{ color: 'var(--text-muted)' }}>{isIntermediate ? 'Class/Year:' : 'Study Year:'}</span> {education.studyYear}</div>}
+              {!isSchool && !isIntermediate && isValidValue(specLabel) && <div><span style={{ color: 'var(--text-muted)' }}>Specialization:</span> {specLabel}</div>}
               {isValidValue(education.institution) && <div><span style={{ color: 'var(--text-muted)' }}>Institution:</span> {education.institution}</div>}
-              {isValidValue(education.currentOccupation) && <div><span style={{ color: 'var(--text-muted)' }}>Year/Semester:</span> {education.currentOccupation}</div>}
+              {education.courses && education.courses.length > 1 && (
+                <div style={{ marginTop: '4px', fontSize: '0.8rem', color: '#c084fc' }}>
+                  + {education.courses.length - 1} additional course(s) listed
+                </div>
+              )}
             </div>
           </div>
         </div>

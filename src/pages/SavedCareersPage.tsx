@@ -2,18 +2,21 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { CareerService } from '../services/career.service';
 import type { Career } from '../services/career.service';
+import { useProfile } from '../hooks/useProfile';
 import { 
   BookmarkCheck, 
   X, 
   GitCompare, 
   Loader2, 
-  ArrowUpRight 
+  ArrowUpRight,
+  ArrowLeft
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import styles from './CareerExplorerPage.module.css';
 import { CareerDetailsModal } from '../components/dashboard/CareerDetailsModal';
 
 export const SavedCareersPage: React.FC = () => {
+  const { profile, saveProfile } = useProfile();
   const [savedCareers, setSavedCareers] = useState<Career[]>([]);
   const [isMockMode, setIsMockMode] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -23,6 +26,13 @@ export const SavedCareersPage: React.FC = () => {
   const [selectedCareer, setSelectedCareer] = useState<Career | null>(null);
   const [compareList, setCompareList] = useState<Career[]>([]);
   const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
+
+  const targetCareerTitle = profile?.careerGoals?.dreamCareer || '';
+
+  const isTargetCareer = useCallback((c: Career) => {
+    if (!targetCareerTitle) return false;
+    return targetCareerTitle.toLowerCase() === c.title.toLowerCase() || targetCareerTitle.toLowerCase() === c.id.toLowerCase();
+  }, [targetCareerTitle]);
 
   const fetchSavedCareers = useCallback(async () => {
     try {
@@ -42,6 +52,23 @@ export const SavedCareersPage: React.FC = () => {
   useEffect(() => {
     fetchSavedCareers();
   }, [fetchSavedCareers]);
+
+  // Handle setting target career
+  const handleSetTargetCareer = async (career: Career) => {
+    try {
+      const updatedGoals = {
+        ...(profile?.careerGoals || {}),
+        dreamCareer: career.title,
+      };
+      await saveProfile({
+        ...(profile || {}),
+        careerGoals: updatedGoals,
+      });
+      CareerService.clearCache();
+    } catch (err) {
+      console.error('Error setting target career:', err);
+    }
+  };
 
   // Remove saved bookmark
   const handleRemoveBookmark = async (career: Career, e?: React.MouseEvent) => {
@@ -105,23 +132,25 @@ export const SavedCareersPage: React.FC = () => {
                 )}
               </h1>
               <p className="text-description" style={{ fontSize: '0.9rem' }}>
-                Manage your bookmarked career paths and compare their specifications.
+                Your saved career opportunities and bookmarks for quick reference.
               </p>
             </div>
-            <Link to="/explore" className={styles.savedLink} style={{ background: 'rgba(255, 255, 255, 0.02)', borderColor: 'var(--border-card)', color: 'var(--text-secondary)' }}>
+
+            <Link to="/explore" className="premiumButtonSecondary" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <ArrowLeft size={16} />
               <span>Back to Explorer</span>
             </Link>
           </div>
         </div>
 
-        {/* Saved Careers List or Empty States */}
+        {/* Loading and Error States */}
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
             <Loader2 className="spin-animation" size={36} style={{ color: 'var(--color-primary)' }} />
           </div>
         ) : error ? (
           <div className={styles.neutralState}>
-            <p className={styles.neutralTitle}>Error Encountered</p>
+            <p className={styles.neutralTitle}>Error Loading Bookmarks</p>
             <p className={styles.neutralText}>{error}</p>
             <button className="premiumButtonPrimary" onClick={fetchSavedCareers}>
               Retry Load
@@ -129,72 +158,105 @@ export const SavedCareersPage: React.FC = () => {
           </div>
         ) : savedCareers.length === 0 ? (
           <div className={styles.neutralState}>
-            <p className={styles.neutralTitle}>No Saved Careers</p>
+            <p className={styles.neutralTitle}>No Saved Careers Yet</p>
             <p className={styles.neutralText}>
-              You haven't saved any careers yet. Browse careers in the Career Explorer to bookmark your interests.
+              You haven't bookmarked any careers yet. Browse the Career Explorer and click the bookmark icon on any career to save it for later.
             </p>
-            <Link to="/explore" className="premiumButtonPrimary">
+            <Link to="/explore" className="premiumButtonPrimary" style={{ textDecoration: 'none' }}>
               Explore Careers
             </Link>
           </div>
         ) : (
+          /* Grid of Saved Careers */
           <div className={styles.grid}>
-            {savedCareers.map((career) => (
-              <div key={career.id} className={`${styles.card} premiumCard`}>
-                <div className={styles.cardHeader}>
-                  <p className={styles.cardCategory}>{career.category}</p>
-                  
-                  <button
-                    className={`${styles.bookmarkBtn} ${styles.bookmarked}`}
-                    onClick={(e) => handleRemoveBookmark(career, e)}
-                    aria-label="Remove bookmark"
-                  >
-                    <BookmarkCheck size={18} />
-                  </button>
-                </div>
+            {savedCareers.map((career) => {
+              const isTarget = isTargetCareer(career);
 
-                <div className={styles.cardBody}>
-                  <h3 className={styles.cardTitle}>{career.title}</h3>
-                  <p className="text-caption" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {career.description}
-                  </p>
-                  
-                  {career.skills.length > 0 && (
-                    <div className={styles.cardSkills}>
-                      {career.skills.slice(0, 3).map((skill) => (
-                        <span key={skill} className={styles.skillTag}>
-                          {skill}
+              return (
+                <div 
+                  key={career.id} 
+                  className={`${styles.card} premiumCard`}
+                  style={isTarget ? {
+                    border: '1px solid rgba(245, 158, 11, 0.35)',
+                    boxShadow: '0 0 20px rgba(245, 158, 11, 0.08)'
+                  } : undefined}
+                >
+                  <div className={styles.cardHeader}>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      {isTarget && (
+                        <span style={{
+                          fontSize: '0.72rem',
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          background: 'rgba(245, 158, 11, 0.15)',
+                          color: '#fbbf24',
+                          border: '1px solid rgba(245, 158, 11, 0.3)',
+                          fontWeight: 700,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px'
+                        }}>
+                          ⭐ Target Career
                         </span>
-                      ))}
-                      {career.skills.length > 3 && (
-                        <span className={styles.skillTag}>+{career.skills.length - 3}</span>
                       )}
+                      <span className={styles.relevanceBadge} style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
+                        Saved
+                      </span>
                     </div>
-                  )}
-                </div>
 
-                <div className={styles.cardFooter}>
-                  <label className={styles.compareLabel}>
-                    <input
-                      type="checkbox"
-                      className={styles.compareCheckbox}
-                      checked={compareList.some((c) => c.id === career.id)}
-                      onChange={() => handleToggleCompare(career)}
-                      disabled={compareList.length >= 3 && !compareList.some((c) => c.id === career.id)}
-                    />
-                    Compare
-                  </label>
+                    <button
+                      className={`${styles.bookmarkBtn} ${styles.bookmarked}`}
+                      onClick={(e) => handleRemoveBookmark(career, e)}
+                      aria-label="Remove bookmark"
+                    >
+                      <BookmarkCheck size={18} />
+                    </button>
+                  </div>
 
-                  <button
-                    className={styles.detailsBtn}
-                    onClick={() => setSelectedCareer(career)}
-                  >
-                    <span>View Details</span>
-                    <ArrowUpRight size={14} />
-                  </button>
+                  <div className={styles.cardBody}>
+                    <p className={styles.cardCategory}>{career.category}</p>
+                    <h3 className={styles.cardTitle}>{career.title}</h3>
+                    <p className="text-caption" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {career.description}
+                    </p>
+
+                    {career.skills.length > 0 && (
+                      <div className={styles.cardSkills}>
+                        {career.skills.slice(0, 3).map((skill) => (
+                          <span key={skill} className={styles.skillTag}>
+                            {skill}
+                          </span>
+                        ))}
+                        {career.skills.length > 3 && (
+                          <span className={styles.skillTag}>+{career.skills.length - 3}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={styles.cardFooter}>
+                    <label className={styles.compareLabel}>
+                      <input
+                        type="checkbox"
+                        className={styles.compareCheckbox}
+                        checked={compareList.some((c) => c.id === career.id)}
+                        onChange={() => handleToggleCompare(career)}
+                        disabled={compareList.length >= 3 && !compareList.some((c) => c.id === career.id)}
+                      />
+                      Compare
+                    </label>
+
+                    <button
+                      className={styles.detailsBtn}
+                      onClick={() => setSelectedCareer(career)}
+                    >
+                      <span>View Details</span>
+                      <ArrowUpRight size={14} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -235,6 +297,8 @@ export const SavedCareersPage: React.FC = () => {
             onToggleBookmark={handleRemoveBookmark}
             onToggleCompare={handleToggleCompare}
             compareList={compareList}
+            onSetTargetCareer={handleSetTargetCareer}
+            targetCareerTitle={targetCareerTitle}
           />
         )}
 
@@ -258,7 +322,21 @@ export const SavedCareersPage: React.FC = () => {
                     <tr>
                       <th className={styles.compareRowHeader}>Metrics</th>
                       {compareList.map((item) => (
-                        <th key={item.id}>{item.title}</th>
+                        <th key={item.id}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ fontWeight: 700 }}>{item.title}</span>
+                            <button
+                              className="premiumButtonPrimary"
+                              style={{ padding: '4px 8px', fontSize: '0.74rem' }}
+                              onClick={() => {
+                                setSelectedCareer(item);
+                                setShowCompareModal(false);
+                              }}
+                            >
+                              View Details
+                            </button>
+                          </div>
+                        </th>
                       ))}
                     </tr>
                   </thead>
@@ -266,7 +344,7 @@ export const SavedCareersPage: React.FC = () => {
                     <tr>
                       <td className={styles.compareRowHeader}>Category</td>
                       {compareList.map((item) => (
-                        <td key={item.id} style={{ color: 'var(--color-primary)', fontWeight: 600 }}>{item.category}</td>
+                        <td key={item.id}>{item.category}</td>
                       ))}
                     </tr>
                     <tr>
@@ -279,7 +357,7 @@ export const SavedCareersPage: React.FC = () => {
                       <td className={styles.compareRowHeader}>Skills</td>
                       {compareList.map((item) => (
                         <td key={item.id}>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', justifyContent: 'center' }}>
                             {item.skills.map((s) => (
                               <span key={s} className={styles.skillTag}>{s}</span>
                             ))}
@@ -302,7 +380,7 @@ export const SavedCareersPage: React.FC = () => {
                     <tr>
                       <td className={styles.compareRowHeader}>Job Growth</td>
                       {compareList.map((item) => (
-                        <td key={item.id} className="text-caption">{item.growthRate}</td>
+                        <td key={item.id} className="text-caption" style={{ color: '#34d399', fontWeight: 600 }}>{item.growthRate}</td>
                       ))}
                     </tr>
                     <tr>

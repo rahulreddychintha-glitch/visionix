@@ -98,8 +98,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalStep
           { label: 'About You', step: 1 },
           { label: 'Education', step: 2 },
           { label: 'Career', step: 3 },
-          { label: 'AI Assistant', step: 4 },
-          { label: 'Review', step: 5 }
+          { label: 'Review', step: 4 }
         ].map((s, idx) => {
           const isCompleted = currentStep > s.step;
           const isCurrent = currentStep === s.step;

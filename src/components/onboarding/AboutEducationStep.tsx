@@ -3,87 +3,146 @@ import { motion } from 'framer-motion';
 import { Sparkles, Check, Plus, Trash2 } from 'lucide-react';
 import {
   STEP2_EDUCATION_LEVELS,
-  STEP2_ACADEMIC_FIELDS
+  SCHOOL_CLASSES,
+  INTERMEDIATE_CLASSES,
+  INTERMEDIATE_STREAMS,
+  DIPLOMA_BRANCHES,
+  DIPLOMA_STUDY_YEARS,
+  UNDERGRADUATE_COURSES,
+  UNDERGRADUATE_STUDY_YEARS,
+  POSTGRADUATE_COURSES,
+  POSTGRADUATE_STUDY_YEARS,
+  DOCTORATE_COURSES,
+  DOCTORATE_STUDY_YEARS,
+  STEP2_ACADEMIC_FIELDS,
+  OTHER_OPTION,
+  type TaxonomyItem
 } from '../../constants/onboarding.constants';
 import { SearchableSelect } from './SearchableSelect';
 import { NavigationButtons } from './NavigationButtons';
 import styles from '../../pages/OnboardingPage.module.css';
-import { OTHER_OPTION } from '../../constants/onboarding.constants';
 
 const DISCIPLINE_SPECIALIZATIONS_MAP: Record<string, { value: string; label: string }[]> = {
-  civil_eng: [
-    { value: 'structural_engineering', label: 'Structural Engineering' },
-    { value: 'transportation_engineering', label: 'Transportation Engineering' },
-    { value: 'geotechnical_engineering', label: 'Geotechnical Engineering' },
-    { value: 'environmental_engineering', label: 'Environmental Engineering' },
-    { value: 'construction_management', label: 'Construction Management' },
-  ],
-  engineering: [
+  // Engineering / CS
+  btech_be: [
     { value: 'artificial_intelligence', label: 'Artificial Intelligence & ML' },
     { value: 'data_science', label: 'Data Science & Analytics' },
     { value: 'cyber_security', label: 'Cyber Security & Cryptography' },
     { value: 'software_engineering', label: 'Software Development' },
     { value: 'cloud_computing', label: 'Cloud Computing & DevOps' },
+    { value: 'vlsi_embedded', label: 'VLSI & Embedded Systems' },
+    { value: 'robotics_automation', label: 'Robotics & Automation' },
+    { value: 'structural_engineering', label: 'Structural Engineering' },
+    { value: 'thermal_automotive', label: 'Thermal & Automotive Systems' },
   ],
-  medicine: [
+  bca: [
+    { value: 'fullstack_web', label: 'Full Stack Web Development' },
+    { value: 'cloud_devops', label: 'Cloud Computing & DevOps' },
+    { value: 'mobile_app_dev', label: 'Mobile Application Development' },
+    { value: 'data_analytics', label: 'Data Analytics & Database Admin' },
+    { value: 'cyber_security', label: 'Cyber Security & Network Defense' },
+  ],
+  bsc_cs_it: [
+    { value: 'artificial_intelligence', label: 'Artificial Intelligence & ML' },
+    { value: 'data_science', label: 'Data Science & Analytics' },
+    { value: 'cloud_computing', label: 'Cloud Infrastructure & Networks' },
+    { value: 'cyber_security', label: 'Information Security & Cryptography' },
+  ],
+  // Diploma
+  dip_cse: [
+    { value: 'web_development', label: 'Web & App Development' },
+    { value: 'networking_cloud', label: 'Computer Networks & Cloud' },
+    { value: 'cyber_security', label: 'Cyber Security & Systems' },
+  ],
+  dip_mech: [
+    { value: 'cad_cam_design', label: 'CAD/CAM & Product Design' },
+    { value: 'automotive_ev', label: 'Automobile & EV Engineering' },
+    { value: 'robotics_automation', label: 'Industrial Automation & Robotics' },
+  ],
+  dip_civil: [
+    { value: 'structural_design', label: 'Structural Drafting & Surveying' },
+    { value: 'construction_mgmt', label: 'Construction Management' },
+  ],
+  dip_eee: [
+    { value: 'power_systems', label: 'Power Systems & EV Charging' },
+    { value: 'control_systems', label: 'Industrial Control Systems' },
+  ],
+  dip_ece: [
+    { value: 'embedded_systems', label: 'Embedded Systems & IoT' },
+    { value: 'telecom_networks', label: 'Telecommunication Networks' },
+  ],
+  // Medicine & Healthcare
+  mbbs: [
     { value: 'cardiology', label: 'Cardiology' },
     { value: 'neurology', label: 'Neurology' },
     { value: 'pediatrics', label: 'Pediatrics' },
     { value: 'oncology', label: 'Oncology' },
     { value: 'general_surgery', label: 'General Surgery' },
+    { value: 'orthopedics', label: 'Orthopedics' },
   ],
-  business: [
+  bds: [
+    { value: 'orthodontics', label: 'Orthodontics' },
+    { value: 'oral_surgery', label: 'Oral & Maxillofacial Surgery' },
+    { value: 'prosthodontics', label: 'Prosthodontics' },
+  ],
+  bpharm: [
+    { value: 'pharmacology', label: 'Clinical Pharmacology' },
+    { value: 'pharmaceutics', label: 'Pharmaceutics & Drug Design' },
+    { value: 'clinical_trials', label: 'Clinical Trials & Regulatory Affairs' },
+  ],
+  // Business & Commerce
+  bcom: [
+    { value: 'accounting_audit', label: 'Accounting & Auditing' },
+    { value: 'taxation_compliance', label: 'Taxation & Regulatory Compliance' },
+    { value: 'banking_insurance', label: 'Banking & Financial Services' },
     { value: 'corporate_finance', label: 'Corporate Finance' },
-    { value: 'investment_banking', label: 'Investment Banking' },
-    { value: 'accounting_audit', label: 'Accounting & Audit' },
-    { value: 'marketing_strategy', label: 'Marketing Strategy' },
-    { value: 'operations_management', label: 'Operations Management' },
   ],
-  management: [
-    { value: 'corporate_finance', label: 'Corporate Finance' },
-    { value: 'investment_banking', label: 'Investment Banking' },
-    { value: 'marketing_strategy', label: 'Marketing Strategy' },
-    { value: 'human_resources_mgmt', label: 'Human Resources' },
+  bba_bms: [
+    { value: 'marketing_strategy', label: 'Marketing Strategy & Digital Ads' },
+    { value: 'corporate_finance', label: 'Corporate Finance & Investment Banking' },
+    { value: 'human_resources', label: 'Human Resources & Talent Management' },
+    { value: 'operations_supply_chain', label: 'Operations & Supply Chain Management' },
+    { value: 'business_analytics', label: 'Business Analytics & Growth Strategy' },
   ],
-  commerce: [
-    { value: 'accounting_audit', label: 'Accounting & Audit' },
-    { value: 'taxation', label: 'Taxation & Compliance' },
-    { value: 'banking_finance', label: 'Banking & Insurance' },
+  // Postgrad
+  mba: [
+    { value: 'finance_investment', label: 'Finance & Investment Banking' },
+    { value: 'marketing_growth', label: 'Marketing, Brand & Growth Strategy' },
+    { value: 'operations_supply', label: 'Operations & Supply Chain' },
+    { value: 'business_analytics', label: 'Business Analytics & Data-Driven Strategy' },
+    { value: 'product_management', label: 'Product Management & Tech Strategy' },
   ],
-  finance: [
-    { value: 'corporate_finance', label: 'Corporate Finance' },
-    { value: 'investment_banking', label: 'Investment Banking' },
-    { value: 'portfolio_management', label: 'Portfolio Management' },
+  mtech_me: [
+    { value: 'artificial_intelligence', label: 'AI, Machine Learning & Deep Learning' },
+    { value: 'data_engineering', label: 'Big Data & Distributed Computing' },
+    { value: 'vlsi_microelectronics', label: 'VLSI Design & Microelectronics' },
+    { value: 'robotics_mechatronics', label: 'Robotics, Autonomous Systems & Mechatronics' },
   ],
-  accounting: [
-    { value: 'accounting_audit', label: 'Accounting & Audit' },
-    { value: 'taxation', label: 'Taxation & Compliance' },
+  // Law
+  law_integrated: [
+    { value: 'corporate_law', label: 'Corporate & Commercial Law' },
+    { value: 'cyber_law_ipr', label: 'Cyber Law & Intellectual Property (IPR)' },
+    { value: 'criminal_law', label: 'Criminal Justice & Litigation' },
+    { value: 'constitutional_law', label: 'Constitutional & Human Rights Law' },
   ],
-  fine_arts: [
-    { value: 'ui_ux_design', label: 'UI/UX Design' },
-    { value: 'graphic_design', label: 'Graphic Design' },
-    { value: 'fashion_design', label: 'Fashion Design' },
-    { value: 'interior_design', label: 'Interior Design' },
-    { value: 'animation_vfx', label: 'Animation & VFX' },
+  // Design
+  bdes_barch: [
+    { value: 'ui_ux_design', label: 'UI/UX & Product Design' },
+    { value: 'graphic_branding', label: 'Graphic Design & Visual Branding' },
+    { value: 'fashion_design', label: 'Fashion & Textile Design' },
+    { value: 'interior_architecture', label: 'Interior Architecture & Spatial Planning' },
+    { value: 'animation_vfx', label: '3D Animation, Game Art & VFX' },
   ],
+  // Humanities
+  ba_humanities: [
+    { value: 'economics_policy', label: 'Economics & Public Policy' },
+    { value: 'psychology_counseling', label: 'Psychology & Behavioral Sciences' },
+    { value: 'journalism_media', label: 'Journalism & Digital Media Communication' },
+    { value: 'english_literature', label: 'English Literature & Creative Writing' },
+  ]
 };
 
-const SCHOOL_CLASSES = [
-  'Class 1',
-  'Class 2',
-  'Class 3',
-  'Class 4',
-  'Class 5',
-  'Class 6',
-  'Class 7',
-  'Class 8',
-  'Class 9',
-  'Class 10',
-  'Class 11',
-  'Class 12'
-];
-
-const STUDY_YEARS = [
+const FALLBACK_STUDY_YEARS = [
   '1st Year',
   '2nd Year',
   '3rd Year',
@@ -111,7 +170,57 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
   isLoading
 }) => {
   const education = data.education || {};
-  const isSchool = education.level?.toLowerCase() === 'school' || education.level === 'School';
+  const currentLevelId = (education.level || '').toLowerCase().trim();
+
+  // Categorize Education Level for Dynamic Fields
+  const isSchool = currentLevelId === 'school' || currentLevelId.startsWith('school');
+  const isIntermediate = currentLevelId === 'intermediate' || currentLevelId.startsWith('intermediate');
+  const isDiploma = currentLevelId === 'diploma' || currentLevelId.startsWith('diploma') || currentLevelId === 'polytechnic';
+  const isUndergraduate = currentLevelId === 'undergraduate' || currentLevelId.startsWith('undergraduate') || currentLevelId === 'bachelors_degree';
+  const isPostgraduate = currentLevelId === 'postgraduate' || currentLevelId.startsWith('postgraduate') || currentLevelId === 'masters_degree' || currentLevelId === 'mba';
+  const isDoctorate = currentLevelId === 'doctorate_phd' || currentLevelId === 'post_doctorate';
+
+  // Determine dynamic course / stream list based on level
+  const courseOptions: TaxonomyItem[] = useMemo(() => {
+    if (isIntermediate) return INTERMEDIATE_STREAMS;
+    if (isDiploma) return DIPLOMA_BRANCHES;
+    if (isUndergraduate) return UNDERGRADUATE_COURSES;
+    if (isPostgraduate) return POSTGRADUATE_COURSES;
+    if (isDoctorate) return DOCTORATE_COURSES;
+    return STEP2_ACADEMIC_FIELDS;
+  }, [isIntermediate, isDiploma, isUndergraduate, isPostgraduate, isDoctorate]);
+
+  // Determine dynamic year / class list based on level
+  const yearOptions: string[] = useMemo(() => {
+    if (isIntermediate) return INTERMEDIATE_CLASSES;
+    if (isDiploma) return DIPLOMA_STUDY_YEARS;
+    if (isUndergraduate) return UNDERGRADUATE_STUDY_YEARS;
+    if (isPostgraduate) return POSTGRADUATE_STUDY_YEARS;
+    if (isDoctorate) return DOCTORATE_STUDY_YEARS;
+    return FALLBACK_STUDY_YEARS;
+  }, [isIntermediate, isDiploma, isUndergraduate, isPostgraduate, isDoctorate]);
+
+  // Field Labels tailored to stage
+  const courseFieldLabel = useMemo(() => {
+    if (isIntermediate) return 'Stream / Combination *';
+    if (isDiploma) return 'Diploma Branch / Program *';
+    if (isUndergraduate) return 'Degree / Course *';
+    if (isPostgraduate) return 'Degree / Program *';
+    if (isDoctorate) return 'Research Domain / PhD Program *';
+    return 'Course / Degree / Program *';
+  }, [isIntermediate, isDiploma, isUndergraduate, isPostgraduate, isDoctorate]);
+
+  const yearFieldLabel = useMemo(() => {
+    if (isIntermediate) return 'Class / Year *';
+    if (isDiploma) return 'Study Year *';
+    if (isUndergraduate) return 'Study Year *';
+    if (isPostgraduate) return 'Study Year *';
+    if (isDoctorate) return 'Stage / Year *';
+    return 'Year / Current Study Year *';
+  }, [isIntermediate, isDiploma, isUndergraduate, isPostgraduate, isDoctorate]);
+
+  const showSpecialization = !isSchool && !isIntermediate && !!education.level;
+  const showAdditionalCourses = !isSchool && !!education.level;
 
   const additionalCourses = useMemo(() => {
     if (education.courses && Array.isArray(education.courses) && education.courses.length > 1) {
@@ -140,15 +249,16 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
   };
 
   const handleLevelChange = (val: string) => {
-    const isNowSchool = val?.toLowerCase() === 'school' || val === 'School';
+    if (val === education.level) return;
+
     onChange('education', {
       ...education,
       level: val,
-      currentClass: isNowSchool ? (education.currentClass || '') : '',
-      stream: isNowSchool ? '' : (education.stream || ''),
-      branchSpecialization: isNowSchool ? '' : (education.branchSpecialization || ''),
-      studyYear: isNowSchool ? '' : (education.studyYear || ''),
-      courses: isNowSchool ? [] : (education.courses || []),
+      currentClass: '',
+      stream: '',
+      branchSpecialization: '',
+      studyYear: '',
+      courses: [],
     });
   };
 
@@ -167,22 +277,6 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
         ...rest
       ]
     });
-    // Reset downstream interests and career goals
-    onChange('interests', {
-      careerInterests: [],
-      favouriteSubjects: [],
-      technologies: [],
-      industries: [],
-    });
-    onChange('careerGoals', {
-      dreamCareer: '',
-      preferredIndustries: [],
-      salaryGoal: '',
-      careerObjectives: '',
-      preferredJobType: '',
-      preferredLocation: '',
-      longTermAspirations: '',
-    });
   };
 
   const handleSpecializationChange = (val: string) => {
@@ -198,22 +292,6 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
         },
         ...rest
       ]
-    });
-    // Reset downstream interests and career goals
-    onChange('interests', {
-      careerInterests: [],
-      favouriteSubjects: [],
-      technologies: [],
-      industries: [],
-    });
-    onChange('careerGoals', {
-      dreamCareer: '',
-      preferredIndustries: [],
-      salaryGoal: '',
-      careerObjectives: '',
-      preferredJobType: '',
-      preferredLocation: '',
-      longTermAspirations: '',
     });
   };
 
@@ -275,7 +353,27 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
   };
 
   const getSpecializationOptionsForStream = (streamName: string) => {
-    const specs = DISCIPLINE_SPECIALIZATIONS_MAP[streamName] || [];
+    const streamNorm = streamName.toLowerCase();
+    
+    // Check direct key or sub-match
+    let matchKey = Object.keys(DISCIPLINE_SPECIALIZATIONS_MAP).find(k => streamNorm.includes(k) || k.includes(streamNorm));
+    if (!matchKey) {
+      if (streamNorm.includes('engineering') || streamNorm.includes('technology') || streamNorm.includes('b.tech') || streamNorm.includes('b.e')) matchKey = 'btech_be';
+      else if (streamNorm.includes('bca') || streamNorm.includes('computer application')) matchKey = 'bca';
+      else if (streamNorm.includes('computer science') || streamNorm.includes('bsc cs')) matchKey = 'bsc_cs_it';
+      else if (streamNorm.includes('mbbs') || streamNorm.includes('medicine')) matchKey = 'mbbs';
+      else if (streamNorm.includes('bds') || streamNorm.includes('dental')) matchKey = 'bds';
+      else if (streamNorm.includes('pharmacy') || streamNorm.includes('b.pharm')) matchKey = 'bpharm';
+      else if (streamNorm.includes('b.com') || streamNorm.includes('commerce') || streamNorm.includes('accounting')) matchKey = 'bcom';
+      else if (streamNorm.includes('bba') || streamNorm.includes('management')) matchKey = 'bba_bms';
+      else if (streamNorm.includes('mba')) matchKey = 'mba';
+      else if (streamNorm.includes('m.tech') || streamNorm.includes('m.e')) matchKey = 'mtech_me';
+      else if (streamNorm.includes('law') || streamNorm.includes('llb')) matchKey = 'law_integrated';
+      else if (streamNorm.includes('design') || streamNorm.includes('b.des') || streamNorm.includes('architecture')) matchKey = 'bdes_barch';
+      else if (streamNorm.includes('humanities') || streamNorm.includes('ba ') || streamNorm.includes('psychology') || streamNorm.includes('economics')) matchKey = 'ba_humanities';
+    }
+
+    const specs = matchKey ? (DISCIPLINE_SPECIALIZATIONS_MAP[matchKey] || []) : [];
     
     if (specs.length === 0) {
       const allSpecs: { value: string; label: string }[] = [];
@@ -321,9 +419,16 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
   }, [education.stream]);
 
   // Step 2 Validation
-  const isStepValid = isSchool
-    ? (!!education.level && !!education.currentClass?.trim())
-    : (!!education.level && !!education.stream && !!education.studyYear?.trim());
+  const isStepValid = useMemo(() => {
+    if (!education.level) return false;
+    if (isSchool) {
+      return !!education.currentClass?.trim();
+    }
+    if (isIntermediate) {
+      return !!education.stream?.trim() && !!education.studyYear?.trim();
+    }
+    return !!education.stream?.trim() && !!education.studyYear?.trim();
+  }, [education.level, education.currentClass, education.stream, education.studyYear, isSchool, isIntermediate]);
 
   // Dynamic AI Insight Text Resolver
   const dynamicInsightText = useMemo(() => {
@@ -331,89 +436,74 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
     const normalized = stream.toLowerCase();
 
     if (isSchool) {
-      return "Visionix will recommend foundational learning paths, STEM concepts, academic streams, and future career explorations tailored for school students.";
+      return "Visionix will recommend foundational learning paths, STEM concepts, stream guidance (MPC vs BiPC vs MEC after Class 10), and career exploration tailored for school students.";
+    }
+
+    if (isIntermediate) {
+      return "Visionix will personalize entrance exam preparation (JEE, NEET, CA Foundation, CLAT), college admissions, degree roadmaps, and career pathways tailored for your intermediate stream.";
+    }
+
+    if (isDiploma) {
+      return "Visionix will personalize technical skill roadmaps, lateral entry admissions (B.Tech 2nd year via ECET/LEET), industry certifications, and engineering technician pathways.";
     }
 
     if (
       normalized.includes('engineering') ||
-      normalized.includes('mechanical') ||
-      normalized.includes('civil') ||
-      normalized.includes('electrical') ||
-      normalized.includes('electronics') ||
-      normalized.includes('aerospace') ||
-      normalized.includes('robotics') ||
-      normalized.includes('automobile')
+      normalized.includes('b.tech') ||
+      normalized.includes('b.e') ||
+      normalized.includes('computer') ||
+      normalized.includes('software') ||
+      normalized.includes('bca') ||
+      normalized.includes('cs')
     ) {
-      return "Visionix will recommend engineering careers, certifications, internships, and industry skills.";
-    }
-    if (
-      normalized.includes('computer science') ||
-      normalized.includes('information technology') ||
-      normalized.includes('artificial intelligence') ||
-      normalized.includes('data science') ||
-      normalized.includes('cyber security') ||
-      normalized.includes('cloud') ||
-      normalized.includes('blockchain') ||
-      normalized.includes('game') ||
-      normalized.includes('ui ux') ||
-      normalized.includes('software')
-    ) {
-      return "Visionix will recommend software engineering, AI/ML research, cloud architectures, certifications, and developer portfolios.";
+      return "Visionix will recommend software engineering, AI/ML research, cloud architectures, developer portfolios, internships, and industry certifications.";
     }
     if (
       normalized.includes('medicine') ||
-      normalized.includes('healthcare') ||
+      normalized.includes('mbbs') ||
       normalized.includes('dentistry') ||
-      normalized.includes('nursing') ||
+      normalized.includes('bds') ||
       normalized.includes('pharmacy') ||
-      normalized.includes('veterinary') ||
-      normalized.includes('psychology') ||
-      normalized.includes('biology') ||
-      normalized.includes('biotechnology')
+      normalized.includes('b.pharm') ||
+      normalized.includes('nursing') ||
+      normalized.includes('healthcare')
     ) {
-      return "Visionix will personalize medical specializations, entrance exams, certifications, and healthcare opportunities.";
+      return "Visionix will personalize medical specializations, clinical skills, entrance exams, certifications, and healthcare opportunities.";
     }
     if (
       normalized.includes('commerce') ||
+      normalized.includes('b.com') ||
       normalized.includes('finance') ||
       normalized.includes('accounting') ||
-      normalized.includes('economics') ||
       normalized.includes('banking')
     ) {
-      return "Visionix will recommend finance, accounting, banking, investment and business career paths.";
+      return "Visionix will recommend corporate finance, accounting, taxation, CA/CFA pathways, banking, and business analytics careers.";
     }
     if (
       normalized.includes('business') ||
+      normalized.includes('bba') ||
+      normalized.includes('bms') ||
       normalized.includes('management') ||
-      normalized.includes('mba') ||
-      normalized.includes('marketing') ||
-      normalized.includes('human resources') ||
-      normalized.includes('entrepreneur')
+      normalized.includes('mba')
     ) {
-      return "Visionix will personalize entrepreneurship, leadership, consulting, and management pathways.";
+      return "Visionix will personalize management consulting, marketing strategy, operations, product management, and startup entrepreneurship.";
     }
     if (
+      normalized.includes('design') ||
+      normalized.includes('b.des') ||
+      normalized.includes('b.arch') ||
       normalized.includes('arts') ||
       normalized.includes('humanities') ||
-      normalized.includes('design') ||
-      normalized.includes('fashion') ||
-      normalized.includes('animation') ||
-      normalized.includes('film') ||
-      normalized.includes('music') ||
-      normalized.includes('literature') ||
-      normalized.includes('languages') ||
-      normalized.includes('history') ||
-      normalized.includes('political science') ||
-      normalized.includes('geography')
+      normalized.includes('animation')
     ) {
-      return "Visionix will personalize creative careers, higher education opportunities, galleries, portfolios, and skill development.";
+      return "Visionix will personalize creative design portfolios, UI/UX systems, architectural pathways, and cultural skill development.";
     }
-    if (normalized.includes('law') || normalized.includes('legal')) {
-      return "Visionix will recommend legal career paths, corporate law, certifications, bar prep, and higher studies.";
+    if (normalized.includes('law') || normalized.includes('llb') || normalized.includes('legal')) {
+      return "Visionix will recommend corporate law, litigation, intellectual property, bar prep, and international legal careers.";
     }
 
-    return "Visionix will personalize career recommendations, learning paths, scholarships, certifications, and opportunities.";
-  }, [education.stream, isSchool]);
+    return "Visionix will personalize career recommendations, learning paths, scholarships, certifications, and high-growth opportunities.";
+  }, [education.stream, isSchool, isIntermediate, isDiploma]);
 
   const benefits = [
     'Recommend Careers',
@@ -435,7 +525,7 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
       <div>
         <h2 className={styles.title}>Education & Academic Background</h2>
         <p className={styles.subtitle}>
-          Tell us about your education so Visionix can personalize your learning journey.
+          Tell us about your education so Visionix can personalize your learning and career roadmap.
         </p>
       </div>
 
@@ -448,7 +538,7 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
             options={STEP2_EDUCATION_LEVELS}
             value={education.level || ''}
             onChange={handleLevelChange}
-            placeholder="Select education level..."
+            placeholder="Select education level (e.g. School, Intermediate, Undergraduate)..."
             required={true}
             disabled={isLoading}
             error={errors.level}
@@ -456,12 +546,12 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
           />
         </div>
 
-        {/* Conditional Fields for School */}
+        {/* ─── 1. Conditional Fields for School (Classes 6–10) ──────────────── */}
         {isSchool && (
           <div className={styles.formGroupFull}>
             <SearchableSelect
               id="currentClass"
-              label="Class *"
+              label="Current Class *"
               options={SCHOOL_CLASSES}
               value={education.currentClass || ''}
               onChange={(val) => handleEducationChange('currentClass', val)}
@@ -469,20 +559,72 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
               required={true}
               disabled={isLoading}
               error={errors.currentClass}
-              allowOther={true}
+              allowOther={false}
             />
           </div>
         )}
 
-        {/* Conditional Fields for Higher Education (non-School) */}
-        {!isSchool && education.level && (
+        {/* ─── 2. Conditional Fields for Intermediate / +2 / PUC (Classes 11–12) ─── */}
+        {isIntermediate && (
           <>
-            {/* Course / Degree / Program (Required) */}
+            {/* Stream / Combination (Required) */}
             <div className={styles.formGroup}>
               <SearchableSelect
                 id="academicStream"
-                label="Course / Degree / Program *"
-                options={STEP2_ACADEMIC_FIELDS}
+                label={courseFieldLabel}
+                options={courseOptions}
+                value={education.stream || ''}
+                onChange={handleStreamChange}
+                placeholder="Select stream (e.g. Science: MPC, Commerce: MEC)..."
+                required={true}
+                disabled={isLoading}
+                error={errors.stream}
+                allowOther={true}
+              />
+            </div>
+
+            {/* Class / Year (Required) */}
+            <div className={styles.formGroup}>
+              <SearchableSelect
+                id="studyYear"
+                label={yearFieldLabel}
+                options={yearOptions}
+                value={education.studyYear || ''}
+                onChange={(val) => {
+                  const rest = (education.courses && education.courses.length > 1) ? education.courses.slice(1) : [];
+                  onChange('education', {
+                    ...education,
+                    studyYear: val,
+                    currentClass: val,
+                    courses: [
+                      {
+                        stream: education.stream || '',
+                        branchSpecialization: education.branchSpecialization || '',
+                        studyYear: val,
+                      },
+                      ...rest
+                    ]
+                  });
+                }}
+                placeholder="Select year (e.g. Class 11, Class 12)..."
+                required={true}
+                disabled={isLoading}
+                error={errors.studyYear}
+                allowOther={true}
+              />
+            </div>
+          </>
+        )}
+
+        {/* ─── 3. Conditional Fields for Higher Ed (Diploma, Undergraduate, Postgraduate, Doctorate) ─── */}
+        {!isSchool && !isIntermediate && education.level && (
+          <>
+            {/* Course / Degree / Branch (Required) */}
+            <div className={styles.formGroup}>
+              <SearchableSelect
+                id="academicStream"
+                label={courseFieldLabel}
+                options={courseOptions}
                 value={education.stream || ''}
                 onChange={handleStreamChange}
                 placeholder="Select or search course/degree..."
@@ -493,12 +635,12 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
               />
             </div>
 
-            {/* Year / Current Study Year (Required) */}
+            {/* Study Year (Required) */}
             <div className={styles.formGroup}>
               <SearchableSelect
                 id="studyYear"
-                label="Year / Current Study Year *"
-                options={STUDY_YEARS}
+                label={yearFieldLabel}
+                options={yearOptions}
                 value={education.studyYear || ''}
                 onChange={(val) => handleEducationChange('studyYear', val)}
                 placeholder="Select study year..."
@@ -510,22 +652,24 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
             </div>
 
             {/* Specialization (Optional) */}
-            <div className={styles.formGroupFull}>
-              <SearchableSelect
-                id="specialization"
-                label="Specialization (Optional)"
-                options={specializationOptions}
-                value={education.branchSpecialization || ''}
-                onChange={handleSpecializationChange}
-                placeholder="Select or type specialization..."
-                required={false}
-                disabled={isLoading}
-                allowOther={true}
-              />
-            </div>
+            {showSpecialization && (
+              <div className={styles.formGroupFull}>
+                <SearchableSelect
+                  id="specialization"
+                  label="Specialization (Optional)"
+                  options={specializationOptions}
+                  value={education.branchSpecialization || ''}
+                  onChange={handleSpecializationChange}
+                  placeholder="Select or type specialization (e.g. Artificial Intelligence & ML)..."
+                  required={false}
+                  disabled={isLoading}
+                  allowOther={true}
+                />
+              </div>
+            )}
 
             {/* Additional Courses Section */}
-            {additionalCourses.map((course: any, idx: number) => {
+            {showAdditionalCourses && additionalCourses.map((course: any, idx: number) => {
               const specOpts = getSpecializationOptionsForStream(course.stream || '');
               return (
                 <div
@@ -572,7 +716,7 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
                       <SearchableSelect
                         id={`additionalStream_${idx}`}
                         label="Course / Degree / Program"
-                        options={STEP2_ACADEMIC_FIELDS}
+                        options={courseOptions}
                         value={course.stream || ''}
                         onChange={(val) => handleUpdateAdditionalCourse(idx, 'stream', val)}
                         placeholder="Select course..."
@@ -586,7 +730,7 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
                       <SearchableSelect
                         id={`additionalStudyYear_${idx}`}
                         label="Year / Study Year (Optional)"
-                        options={STUDY_YEARS}
+                        options={yearOptions}
                         value={course.studyYear || ''}
                         onChange={(val) => handleUpdateAdditionalCourse(idx, 'studyYear', val)}
                         placeholder="Select year..."
@@ -615,31 +759,33 @@ export const AboutEducationStep: React.FC<AboutEducationStepProps> = ({
             })}
 
             {/* + Add Course Button */}
-            <div className={styles.formGroupFull} style={{ marginTop: '4px' }}>
-              <button
-                type="button"
-                onClick={handleAddCourse}
-                disabled={isLoading}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  padding: '10px 16px',
-                  background: 'rgba(139, 92, 246, 0.08)',
-                  border: '1px dashed rgba(139, 92, 246, 0.3)',
-                  borderRadius: 'var(--radius-sm)',
-                  color: '#c084fc',
-                  fontSize: '0.85rem',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  width: '100%',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <Plus size={16} /> Add Course
-              </button>
-            </div>
+            {showAdditionalCourses && (
+              <div className={styles.formGroupFull} style={{ marginTop: '4px' }}>
+                <button
+                  type="button"
+                  onClick={handleAddCourse}
+                  disabled={isLoading}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '10px 16px',
+                    background: 'rgba(139, 92, 246, 0.08)',
+                    border: '1px dashed rgba(139, 92, 246, 0.3)',
+                    borderRadius: 'var(--radius-sm)',
+                    color: '#c084fc',
+                    fontSize: '0.85rem',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    width: '100%',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <Plus size={16} /> Add Course
+                </button>
+              </div>
+            )}
           </>
         )}
 

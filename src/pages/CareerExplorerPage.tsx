@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { CareerService } from '../services/career.service';
 import type { Career } from '../services/career.service';
+import { useProfile } from '../hooks/useProfile';
 import { 
   Search, 
   Bookmark, 
@@ -11,9 +12,10 @@ import {
   Loader2, 
   ArrowUpRight,
   Sparkles,
-  Heart
+  Heart,
+  Compass
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './CareerExplorerPage.module.css';
 import { CareerDetailsModal } from '../components/dashboard/CareerDetailsModal';
 
@@ -37,6 +39,8 @@ const CATEGORIES = [
 ];
 
 export const CareerExplorerPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { profile, saveProfile } = useProfile();
   const [careers, setCareers] = useState<Career[]>([]);
   const [isMockMode, setIsMockMode] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -55,6 +59,14 @@ export const CareerExplorerPage: React.FC = () => {
   const [selectedCareer, setSelectedCareer] = useState<Career | null>(null);
   const [compareList, setCompareList] = useState<Career[]>([]);
   const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
+
+  // Target Career state
+  const targetCareerTitle = profile?.careerGoals?.dreamCareer || '';
+
+  const isTargetCareer = useCallback((c: Career) => {
+    if (!targetCareerTitle) return false;
+    return targetCareerTitle.toLowerCase() === c.title.toLowerCase() || targetCareerTitle.toLowerCase() === c.id.toLowerCase();
+  }, [targetCareerTitle]);
 
   // Fetch careers from API
   const fetchCareers = useCallback(async () => {
@@ -100,6 +112,23 @@ export const CareerExplorerPage: React.FC = () => {
   useEffect(() => {
     fetchCareers();
   }, [fetchCareers]);
+
+  // Handle setting target career
+  const handleSetTargetCareer = async (career: Career) => {
+    try {
+      const updatedGoals = {
+        ...(profile?.careerGoals || {}),
+        dreamCareer: career.title,
+      };
+      await saveProfile({
+        ...(profile || {}),
+        careerGoals: updatedGoals,
+      });
+      CareerService.clearCache();
+    } catch (err) {
+      console.error('Error setting target career:', err);
+    }
+  };
 
   // Handle bookmark toggle
   const handleToggleBookmark = async (career: Career, e?: React.MouseEvent) => {
@@ -153,7 +182,7 @@ export const CareerExplorerPage: React.FC = () => {
   // Filter local careers array for relevance filtering
   const displayedCareers = careers.filter((c) => {
     if (relevanceFilter === 'All') return true;
-    if (relevanceFilter === 'Dream Career') return c.relevanceTag === 'Dream Career';
+    if (relevanceFilter === 'Dream Career') return c.relevanceTag === 'Dream Career' || isTargetCareer(c);
     if (relevanceFilter === 'Interested') return c.relevanceTag === 'Interested';
     if (relevanceFilter === 'Relevant') return c.relevanceTag === 'Relevant';
     return true;
@@ -189,15 +218,33 @@ export const CareerExplorerPage: React.FC = () => {
                 )}
               </h1>
               <p className="text-description" style={{ fontSize: '0.9rem' }}>
-                Discover career pathways across various disciplines and match them to your goals.
+                Discover career pathways, evaluate profile compatibility, and build your personalized learning roadmap.
               </p>
             </div>
             
+            {/* Student-Friendly Mode Switcher Tabs */}
             <div className={styles.headerPills}>
               <button 
+                type="button"
+                className={`${styles.headerPill} ${!showRecommended && !showCareerMatch ? styles.headerPillActive : ''}`}
+                onClick={() => {
+                  setShowRecommended(false);
+                  setShowCareerMatch(false);
+                  setSelectedCategory('All');
+                }}
+              >
+                <Compass size={16} />
+                <div style={{ textAlign: 'left' }}>
+                  <div className={styles.pillTitle}>All Careers</div>
+                  <div className={styles.pillSubtitle}>Browse & Search</div>
+                </div>
+              </button>
+
+              <button 
+                type="button"
                 className={`${styles.headerPill} ${showRecommended ? styles.headerPillActive : ''}`}
                 onClick={() => {
-                  setShowRecommended(prev => !prev);
+                  setShowRecommended(true);
                   setShowCareerMatch(false);
                   setSelectedCategory('All');
                 }}
@@ -205,14 +252,15 @@ export const CareerExplorerPage: React.FC = () => {
                 <Sparkles size={16} />
                 <div style={{ textAlign: 'left' }}>
                   <div className={styles.pillTitle}>Recommended for You</div>
-                  <div className={styles.pillSubtitle}>Phase 8</div>
+                  <div className={styles.pillSubtitle}>Profile Picks</div>
                 </div>
               </button>
               
               <button 
+                type="button"
                 className={`${styles.headerPill} ${showCareerMatch ? styles.headerPillActive : ''}`}
                 onClick={() => {
-                  setShowCareerMatch(prev => !prev);
+                  setShowCareerMatch(true);
                   setShowRecommended(false);
                   setSelectedCategory('All');
                 }}
@@ -221,7 +269,7 @@ export const CareerExplorerPage: React.FC = () => {
                 <Heart size={16} style={{ color: showCareerMatch ? '#a78bfa' : '#ec4899' }} />
                 <div style={{ textAlign: 'left' }}>
                   <div className={styles.pillTitle}>Career Match</div>
-                  <div className={styles.pillSubtitle}>Phase 9</div>
+                  <div className={styles.pillSubtitle}>Ranked by Fit</div>
                 </div>
               </button>
               
@@ -236,8 +284,34 @@ export const CareerExplorerPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Unified Journey Step Guide */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 16px',
+          background: 'rgba(255, 255, 255, 0.02)',
+          border: '1px solid rgba(255, 255, 255, 0.05)',
+          borderRadius: '10px',
+          fontSize: '0.78rem',
+          color: 'var(--text-muted)',
+          flexWrap: 'wrap'
+        }}>
+          <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>1. Discover & Explore</span>
+          <span style={{ color: 'var(--text-muted)', opacity: 0.6 }}>→</span>
+          <span style={{ color: showCareerMatch ? 'var(--color-primary)' : 'var(--text-secondary)', fontWeight: showCareerMatch ? 700 : 500 }}>2. Match & Fit</span>
+          <span style={{ color: 'var(--text-muted)', opacity: 0.6 }}>→</span>
+          <span style={{ color: compareList.length > 0 ? 'var(--color-primary)' : 'var(--text-secondary)', fontWeight: compareList.length > 0 ? 700 : 500 }}>3. Compare</span>
+          <span style={{ color: 'var(--text-muted)', opacity: 0.6 }}>→</span>
+          <span style={{ color: targetCareerTitle ? '#fbbf24' : 'var(--text-secondary)', fontWeight: targetCareerTitle ? 700 : 500 }}>4. Choose Target Career</span>
+          <span style={{ color: 'var(--text-muted)', opacity: 0.6 }}>→</span>
+          <span style={{ color: 'var(--text-secondary)' }}>5. Roadmap & Skills</span>
+          <span style={{ color: 'var(--text-muted)', opacity: 0.6 }}>→</span>
+          <span style={{ color: 'var(--text-secondary)' }}>6. Learn & Progress</span>
+        </div>
+
         {showCareerMatch && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(236, 72, 153, 0.08)', border: '1px solid rgba(236, 72, 153, 0.2)', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(236, 72, 153, 0.08)', border: '1px solid rgba(236, 72, 153, 0.2)', padding: '12px 16px', borderRadius: '8px' }}>
             <p style={{ margin: 0, fontSize: '0.88rem', color: '#f472b6' }}>
               <strong>Career Match Mode Active:</strong> Showing careers ranked by compatibility score with your profile.
             </p>
@@ -272,7 +346,7 @@ export const CareerExplorerPage: React.FC = () => {
               aria-label="Filter by profile relevance"
             >
               <option value="All">All Careers</option>
-              <option value="Dream Career">⭐ Dream Careers</option>
+              <option value="Dream Career">⭐ Target Career</option>
               <option value="Interested">💜 Interested Careers</option>
               <option value="Relevant">📚 Relevant to Degree</option>
             </select>
@@ -347,119 +421,148 @@ export const CareerExplorerPage: React.FC = () => {
         ) : (
           /* Grid of Careers */
           <div className={styles.grid}>
-            {displayedCareers.map((career) => (
-              <div key={career.id} className={`${styles.card} premiumCard`}>
-                <div className={styles.cardHeader}>
-                  <div>
-                    {career.relevanceTag === 'Dream Career' && (
-                      <span className={`${styles.relevanceBadge} ${styles.dreamCareerBadge}`}>⭐ Dream Career</span>
+            {displayedCareers.map((career) => {
+              const isTarget = isTargetCareer(career);
+
+              return (
+                <div 
+                  key={career.id} 
+                  className={`${styles.card} premiumCard`}
+                  style={isTarget ? {
+                    border: '1px solid rgba(245, 158, 11, 0.35)',
+                    boxShadow: '0 0 20px rgba(245, 158, 11, 0.08)'
+                  } : undefined}
+                >
+                  <div className={styles.cardHeader}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                      {isTarget && (
+                        <span style={{
+                          fontSize: '0.72rem',
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          background: 'rgba(245, 158, 11, 0.15)',
+                          color: '#fbbf24',
+                          border: '1px solid rgba(245, 158, 11, 0.3)',
+                          fontWeight: 700,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px'
+                        }}>
+                          ⭐ Target Career
+                        </span>
+                      )}
+                      {!isTarget && career.relevanceTag === 'Dream Career' && (
+                        <span className={`${styles.relevanceBadge} ${styles.dreamCareerBadge}`}>⭐ Dream Career</span>
+                      )}
+                      {career.relevanceTag === 'Interested' && (
+                        <span className={`${styles.relevanceBadge} ${styles.interestedBadge}`}>💜 Interested</span>
+                      )}
+                      {career.relevanceTag === 'Relevant' && (
+                        <span className={`${styles.relevanceBadge} ${styles.relevantBadge}`}>📚 Relevant</span>
+                      )}
+                    </div>
+                    
+                    <button
+                      className={`${styles.bookmarkBtn} ${career.saved ? styles.bookmarked : ''}`}
+                      onClick={(e) => handleToggleBookmark(career, e)}
+                      aria-label={career.saved ? 'Unsaved bookmark' : 'Save bookmark'}
+                    >
+                      {career.saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+                    </button>
+                  </div>
+
+                  <div className={styles.cardBody}>
+                    <p className={styles.cardCategory}>{career.category}</p>
+                    <h3 className={styles.cardTitle}>{career.title}</h3>
+                    <p className="text-caption" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {career.description}
+                    </p>
+                    
+                    {career.skills.length > 0 && (
+                      <div className={styles.cardSkills}>
+                        {career.skills.slice(0, 3).map((skill) => (
+                          <span key={skill} className={styles.skillTag}>
+                            {skill}
+                          </span>
+                        ))}
+                        {career.skills.length > 3 && (
+                          <span className={styles.skillTag}>+{career.skills.length - 3}</span>
+                        )}
+                      </div>
                     )}
-                    {career.relevanceTag === 'Interested' && (
-                      <span className={`${styles.relevanceBadge} ${styles.interestedBadge}`}>💜 Interested</span>
+
+                    {showRecommended && career.recommendationReason && (
+                      <div style={{
+                        marginTop: '12px',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        background: 'rgba(124, 58, 237, 0.05)',
+                        border: '1px solid rgba(124, 58, 237, 0.15)'
+                      }}>
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: '#a78bfa', lineHeight: '1.4' }}>
+                          <strong>Relevance:</strong> {career.recommendationReason}
+                        </p>
+                      </div>
                     )}
-                    {career.relevanceTag === 'Relevant' && (
-                      <span className={`${styles.relevanceBadge} ${styles.relevantBadge}`}>📚 Relevant</span>
+
+                    {showCareerMatch && career.match && (
+                      <div style={{
+                        marginTop: '12px',
+                        padding: '10px 12px',
+                        borderRadius: '6px',
+                        background: 'rgba(236, 72, 153, 0.04)',
+                        border: '1px solid rgba(236, 72, 153, 0.15)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f472b6' }}>
+                            {career.match.isProfileComplete ? `${career.match.matchScore}% Match` : 'Not Specified'}
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: career.match.isProfileComplete && career.match.matchScore >= 75 ? '#10b981' : '#f59e0b', fontWeight: 600 }}>
+                            {career.match.isProfileComplete ? `${career.match.matchLevel} Alignment` : 'Incomplete Profile'}
+                          </span>
+                        </div>
+                        {career.match.isProfileComplete && (
+                          <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                            <p style={{ margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              <strong>Strength:</strong> {career.match.strengths[0] || 'Domain exposure'}
+                            </p>
+                            <p style={{ margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              <strong>Gap:</strong> {career.match.skillGaps[0]?.replace(/^(Missing verified skill: |Missing career skill: |Missing skill: )/, '') || 'None'}
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
-                  
-                  <button
-                    className={`${styles.bookmarkBtn} ${career.saved ? styles.bookmarked : ''}`}
-                    onClick={(e) => handleToggleBookmark(career, e)}
-                    aria-label={career.saved ? 'Unsaved bookmark' : 'Save bookmark'}
-                  >
-                    {career.saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
-                  </button>
-                </div>
 
-                <div className={styles.cardBody}>
-                  <p className={styles.cardCategory}>{career.category}</p>
-                  <h3 className={styles.cardTitle}>{career.title}</h3>
-                  <p className="text-caption" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {career.description}
-                  </p>
-                  
-                  {career.skills.length > 0 && (
-                    <div className={styles.cardSkills}>
-                      {career.skills.slice(0, 3).map((skill) => (
-                        <span key={skill} className={styles.skillTag}>
-                          {skill}
-                        </span>
-                      ))}
-                      {career.skills.length > 3 && (
-                        <span className={styles.skillTag}>+{career.skills.length - 3}</span>
-                      )}
+                  <div className={styles.cardFooter}>
+                    <label className={styles.compareLabel}>
+                      <input
+                        type="checkbox"
+                        className={styles.compareCheckbox}
+                        checked={compareList.some((c) => c.id === career.id)}
+                        onChange={() => handleToggleCompare(career)}
+                        disabled={compareList.length >= 3 && !compareList.some((c) => c.id === career.id)}
+                      />
+                      Compare
+                    </label>
+
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button
+                        className={styles.detailsBtn}
+                        onClick={() => setSelectedCareer(career)}
+                      >
+                        <span>View Details</span>
+                        <ArrowUpRight size={14} />
+                      </button>
                     </div>
-                  )}
-
-                  {showRecommended && career.recommendationReason && (
-                    <div style={{
-                      marginTop: '12px',
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      background: 'rgba(124, 58, 237, 0.05)',
-                      border: '1px solid rgba(124, 58, 237, 0.15)'
-                    }}>
-                      <p style={{ margin: 0, fontSize: '0.78rem', color: '#a78bfa', lineHeight: '1.4' }}>
-                        <strong>Relevance:</strong> {career.recommendationReason}
-                      </p>
-                    </div>
-                  )}
-
-                  {showCareerMatch && career.match && (
-                    <div style={{
-                      marginTop: '12px',
-                      padding: '10px 12px',
-                      borderRadius: '6px',
-                      background: 'rgba(236, 72, 153, 0.04)',
-                      border: '1px solid rgba(236, 72, 153, 0.15)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '8px'
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f472b6' }}>
-                          {career.match.isProfileComplete ? `${career.match.matchScore}% Match` : 'Not Specified'}
-                        </span>
-                        <span style={{ fontSize: '0.72rem', color: career.match.isProfileComplete && career.match.matchScore >= 75 ? '#10b981' : '#f59e0b', fontWeight: 600 }}>
-                          {career.match.isProfileComplete ? `${career.match.matchLevel} Alignment` : 'Incomplete Profile'}
-                        </span>
-                      </div>
-                      {career.match.isProfileComplete && (
-                        <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                          <p style={{ margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            <strong>Strength:</strong> {career.match.strengths[0] || 'Domain exposure'}
-                          </p>
-                          <p style={{ margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            <strong>Gap:</strong> {career.match.skillGaps[0]?.replace(/^(Missing verified skill: |Missing career skill: |Missing skill: )/, '') || 'None'}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  </div>
                 </div>
-
-                <div className={styles.cardFooter}>
-                  <label className={styles.compareLabel}>
-                    <input
-                      type="checkbox"
-                      className={styles.compareCheckbox}
-                      checked={compareList.some((c) => c.id === career.id)}
-                      onChange={() => handleToggleCompare(career)}
-                      disabled={compareList.length >= 3 && !compareList.some((c) => c.id === career.id)}
-                    />
-                    Compare
-                  </label>
-
-                  <button
-                    className={styles.detailsBtn}
-                    onClick={() => setSelectedCareer(career)}
-                  >
-                    <span>View Details</span>
-                    <ArrowUpRight size={14} />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -492,7 +595,7 @@ export const CareerExplorerPage: React.FC = () => {
           </div>
         )}
 
-        {/* Career Details Modal */}
+        {/* Career Details Modal with Unified Journey Connections */}
         {selectedCareer && (
           <CareerDetailsModal
             career={selectedCareer}
@@ -500,6 +603,8 @@ export const CareerExplorerPage: React.FC = () => {
             onToggleBookmark={handleToggleBookmark}
             onToggleCompare={handleToggleCompare}
             compareList={compareList}
+            onSetTargetCareer={handleSetTargetCareer}
+            targetCareerTitle={targetCareerTitle}
           />
         )}
 
@@ -522,23 +627,40 @@ export const CareerExplorerPage: React.FC = () => {
                   <thead>
                     <tr>
                       <th className={styles.compareRowHeader}>Metrics</th>
-                      {compareList.map((item) => (
-                        <th key={item.id}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', justifyContent: 'center' }}>
-                            <span style={{ fontWeight: 700 }}>{item.title}</span>
-                            <button
-                              className="premiumButtonPrimary"
-                              style={{ padding: '4px 8px', fontSize: '0.74rem', minWidth: '90px' }}
-                              onClick={() => {
-                                setSelectedCareer(item);
-                                setShowCompareModal(false);
-                              }}
-                            >
-                              View Details
-                            </button>
-                          </div>
-                        </th>
-                      ))}
+                      {compareList.map((item) => {
+                        const isTarget = isTargetCareer(item);
+                        return (
+                          <th key={item.id}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', justifyContent: 'center' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontWeight: 700 }}>{item.title}</span>
+                                {isTarget && <span style={{ color: '#fbbf24', fontSize: '0.8rem' }}>⭐</span>}
+                              </div>
+                              <div style={{ display: 'flex', gap: '6px' }}>
+                                <button
+                                  className="premiumButtonPrimary"
+                                  style={{ padding: '4px 8px', fontSize: '0.74rem' }}
+                                  onClick={() => {
+                                    setSelectedCareer(item);
+                                    setShowCompareModal(false);
+                                  }}
+                                >
+                                  View Details
+                                </button>
+                                {!isTarget && (
+                                  <button
+                                    className="premiumButtonSecondary"
+                                    style={{ padding: '4px 8px', fontSize: '0.74rem' }}
+                                    onClick={() => handleSetTargetCareer(item)}
+                                  >
+                                    Set Target
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </th>
+                        );
+                      })}
                     </tr>
                   </thead>
                   <tbody>
@@ -551,167 +673,75 @@ export const CareerExplorerPage: React.FC = () => {
                       ))}
                     </tr>
                     <tr>
-                      <td className={styles.compareRowHeader} style={{ color: '#f472b6', fontWeight: 700 }}>Match Level</td>
-                      {compareList.map((item) => (
-                        <td key={item.id} style={{ fontWeight: 700, color: item.match?.isProfileComplete && item.match.matchScore >= 75 ? '#10b981' : '#f59e0b' }}>
-                          {item.match?.isProfileComplete ? `${item.match.matchLevel} Alignment` : 'Incomplete Profile'}
-                        </td>
-                      ))}
-                    </tr>
-                    <tr>
-                      <td className={styles.compareRowHeader}>Education Compatibility</td>
-                      {compareList.map((item) => {
-                        const aligned = item.match?.strengths.some(s => s.toLowerCase().includes('alignment') || s.toLowerCase().includes('relevance'));
-                        return (
-                          <td key={item.id} className="text-caption">
-                            {aligned ? '✓ Directly Aligned' : 'General Compatibility'}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                    <tr>
-                      <td className={styles.compareRowHeader}>Skills Match</td>
-                      {compareList.map((item) => (
-                        <td key={item.id} className="text-caption">
-                          {item.match?.isProfileComplete ? `${item.match.skillsYouHave.length} / ${item.skills.length} skills owned` : 'Not Specified'}
-                        </td>
-                      ))}
-                    </tr>
-                    <tr>
-                      <td className={styles.compareRowHeader}>Interest Fit</td>
-                      {compareList.map((item) => {
-                        const aligned = item.match?.strengths.some(s => s.toLowerCase().includes('interest'));
-                        return (
-                          <td key={item.id} className="text-caption">
-                            {aligned ? '✓ Profile Interest Fit' : 'No Direct Fit'}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                    <tr>
-                      <td className={styles.compareRowHeader}>Dream Career Fit</td>
-                      {compareList.map((item) => {
-                        const aligned = item.match?.strengths.some(s => s.toLowerCase().includes('dream'));
-                        return (
-                          <td key={item.id} className="text-caption">
-                            {aligned ? '✓ Target Dream Career' : 'Alternative Target'}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                    <tr>
-                      <td className={styles.compareRowHeader}>Strengths</td>
-                      {compareList.map((item) => (
-                        <td key={item.id}>
-                          <ul style={{ margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            {item.match?.isProfileComplete && item.match.strengths.map((str, idx) => (
-                              <li key={idx} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{str}</li>
-                            ))}
-                            {(!item.match?.isProfileComplete || !item.match?.strengths?.length) && (
-                              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Not Specified</span>
-                            )}
-                          </ul>
-                        </td>
-                      ))}
-                    </tr>
-                    <tr>
-                      <td className={styles.compareRowHeader}>Skill Gaps</td>
-                      {compareList.map((item) => (
-                        <td key={item.id}>
-                          <ul style={{ margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            {item.match?.isProfileComplete && item.match.skillGaps.map((sg, idx) => (
-                              <li key={idx} style={{ fontSize: '0.8rem', color: '#ef4444' }}>{sg.replace(/^(Missing verified skill: |Missing career skill: |Missing skill: )/, '')}</li>
-                            ))}
-                            {item.match?.isProfileComplete && item.match.skillGaps.length === 0 && (
-                              <span style={{ fontSize: '0.8rem', color: '#10b981' }}>✓ No skill gaps!</span>
-                            )}
-                            {!item.match?.isProfileComplete && (
-                              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Not Specified</span>
-                            )}
-                          </ul>
-                        </td>
-                      ))}
-                    </tr>
-                    <tr>
-                      <td className={styles.compareRowHeader}>Improvement Areas</td>
-                      {compareList.map((item) => (
-                        <td key={item.id}>
-                          <ul style={{ margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            {item.match?.isProfileComplete && item.match.improvementSuggestions.map((sugg, idx) => (
-                              <li key={idx} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{sugg}</li>
-                            ))}
-                            {(!item.match?.isProfileComplete || !item.match?.improvementSuggestions?.length) && (
-                              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Not Specified</span>
-                            )}
-                          </ul>
-                        </td>
-                      ))}
-                    </tr>
-                    <tr>
                       <td className={styles.compareRowHeader}>Category</td>
                       {compareList.map((item) => (
-                        <td key={item.id} style={{ color: 'var(--color-primary)', fontWeight: 600 }}>{item.category}</td>
+                        <td key={item.id}>{item.category}</td>
                       ))}
                     </tr>
                     <tr>
-                      <td className={styles.compareRowHeader}>Description</td>
+                      <td className={styles.compareRowHeader}>Salary Range</td>
                       {compareList.map((item) => (
-                        <td key={item.id} className="text-caption">{item.description}</td>
+                        <td key={item.id}>{item.salaryRange}</td>
                       ))}
                     </tr>
                     <tr>
-                      <td className={styles.compareRowHeader}>Skills Required</td>
+                      <td className={styles.compareRowHeader}>Growth Outlook</td>
+                      {compareList.map((item) => (
+                        <td key={item.id} style={{ color: '#34d399', fontWeight: 600 }}>{item.growthRate}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td className={styles.compareRowHeader}>Demand Level</td>
+                      {compareList.map((item) => (
+                        <td key={item.id}>{item.demandLevel}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td className={styles.compareRowHeader}>Education</td>
+                      {compareList.map((item) => (
+                        <td key={item.id} style={{ fontSize: '0.8rem' }}>{item.education}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td className={styles.compareRowHeader}>Skills</td>
                       {compareList.map((item) => (
                         <td key={item.id}>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', justifyContent: 'center' }}>
                             {item.skills.map((s) => (
-                              <span key={s} className={styles.skillTag}>{s}</span>
+                              <span key={s} className={styles.skillTag} style={{ fontSize: '0.7rem' }}>
+                                {s}
+                              </span>
                             ))}
                           </div>
                         </td>
                       ))}
                     </tr>
                     <tr>
-                      <td className={styles.compareRowHeader}>Education Pathway</td>
+                      <td className={styles.compareRowHeader}>Action</td>
                       {compareList.map((item) => (
-                        <td key={item.id} className="text-caption">{item.education}</td>
-                      ))}
-                    </tr>
-                    <tr>
-                      <td className={styles.compareRowHeader}>Salary Outlook</td>
-                      {compareList.map((item) => (
-                        <td key={item.id} className="text-caption">{item.salaryRange}</td>
-                      ))}
-                    </tr>
-                    <tr>
-                      <td className={styles.compareRowHeader}>Job Growth</td>
-                      {compareList.map((item) => (
-                        <td key={item.id} className="text-caption">{item.growthRate}</td>
-                      ))}
-                    </tr>
-                    <tr>
-                      <td className={styles.compareRowHeader}>Market Demand</td>
-                      {compareList.map((item) => (
-                        <td key={item.id} className="text-caption">{item.demandLevel}</td>
+                        <td key={item.id}>
+                          <button
+                            className="premiumButtonPrimary"
+                            style={{ 
+                              padding: '6px 12px', 
+                              fontSize: '0.76rem',
+                              background: 'linear-gradient(135deg, #059669, #10b981)',
+                              border: 'none',
+                              color: '#fff',
+                              margin: '0 auto'
+                            }}
+                            onClick={() => {
+                              navigate('/roadmap', { state: { selectedCareer: item } });
+                              setShowCompareModal(false);
+                            }}
+                          >
+                            Create Roadmap →
+                          </button>
+                        </td>
                       ))}
                     </tr>
                   </tbody>
                 </table>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>
-                <button
-                  className="premiumButtonSecondary"
-                  onClick={() => setCompareList([])}
-                >
-                  Clear Selection
-                </button>
-                <button
-                  className="premiumButtonPrimary"
-                  onClick={() => setShowCompareModal(false)}
-                >
-                  Close Comparison
-                </button>
               </div>
             </div>
           </div>

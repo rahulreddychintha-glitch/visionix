@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Layers,
@@ -28,6 +29,7 @@ import { SkillProgressHistory } from '../components/skillNavigator/SkillProgress
 import styles from './SkillNavigatorPage.module.css';
 
 export const SkillNavigatorPage: React.FC = () => {
+  const location = useLocation();
   const [analysis, setAnalysis] = useState<ISkillGapAnalysis | null>(null);
   const [comparisons, setComparisons] = useState<ICareerComparisonItem[]>([]);
   const [history, setHistory] = useState<ISkillGapAnalysis[]>([]);
@@ -38,12 +40,7 @@ export const SkillNavigatorPage: React.FC = () => {
     'gap_analysis' | 'priorities_next_steps' | 'career_comparison' | 'skill_coach' | 'history'
   >('gap_analysis');
 
-  // Initial load
-  useEffect(() => {
-    loadInitialData();
-  }, []);
-
-  const loadInitialData = async () => {
+  const loadInitialData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -62,24 +59,39 @@ export const SkillNavigatorPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const handleSelectCareer = async (careerId: string) => {
+  const handleSelectCareer = useCallback(async (careerId: string) => {
     setIsAnalyzing(true);
     setError(null);
     try {
       const updated = await SkillNavigatorService.analyzeSkills(careerId, false);
       setAnalysis(updated);
-      // Refresh history in background
-      const hist = await SkillNavigatorService.getAnalysisHistory();
+      const [comparisonsData, hist] = await Promise.all([
+        SkillNavigatorService.getCareerComparisons(),
+        SkillNavigatorService.getAnalysisHistory(),
+      ]);
+      setComparisons(comparisonsData);
       setHistory(hist);
     } catch (err: any) {
       console.error('[SkillNavigatorPage] Failed to switch career analysis:', err);
       setError(err?.response?.data?.message || 'Failed to analyze selected career.');
     } finally {
       setIsAnalyzing(false);
+      setIsLoading(false);
     }
-  };
+  }, []);
+
+  // Initial load or route state trigger
+  useEffect(() => {
+    const passedCareerId = location.state?.careerId;
+    if (passedCareerId) {
+      handleSelectCareer(passedCareerId);
+      window.history.replaceState({}, document.title);
+    } else {
+      loadInitialData();
+    }
+  }, [location.state, handleSelectCareer, loadInitialData]);
 
   const handleRecalculate = async (includeAi: boolean = true) => {
     if (!analysis) return;

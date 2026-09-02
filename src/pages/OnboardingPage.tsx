@@ -9,7 +9,6 @@ import { AboutEducationStep } from '../components/onboarding/AboutEducationStep'
 // import { InterestsStep } from '../components/onboarding/InterestsStep';
 import { AboutCareerStep } from '../components/onboarding/AboutCareerStep';
 // import { CareerGoalsStep } from '../components/onboarding/CareerGoalsStep';
-import { AIAssistantStep } from '../components/onboarding/AIAssistantStep';
 import { FinishStep } from '../components/onboarding/FinishStep';
 import { UserService } from '../services/user.service';
 import { Check, AlertCircle } from 'lucide-react';
@@ -253,11 +252,21 @@ export const OnboardingPage: React.FC = () => {
     };
 
     const fullName = [data.personal?.firstName, data.personal?.lastName].filter(Boolean).join(' ').trim() || data.personal?.fullName || '';
-    const isSchool = data.education?.level?.toLowerCase() === 'school' || data.education?.level === 'School';
+    const lvl = (data.education?.level || '').toLowerCase().trim();
+    const isSchool = lvl === 'school' || lvl.startsWith('school');
+    const isIntermediate = lvl === 'intermediate' || lvl.startsWith('intermediate');
+    const isDiploma = lvl === 'diploma' || lvl.startsWith('diploma') || lvl === 'polytechnic';
 
     const courses = data.education?.courses && data.education.courses.length > 0
       ? data.education.courses
       : (data.education?.stream ? [{ stream: data.education.stream, branchSpecialization: data.education.branchSpecialization || '', studyYear: data.education.studyYear || '' }] : []);
+
+    const studentStatus = data.education?.studentStatus || (
+      isSchool ? 'School Student' :
+      isIntermediate ? 'Junior College / Intermediate Student' :
+      isDiploma ? 'Diploma / Polytechnic Student' :
+      'College / University Student'
+    );
 
     return {
       ...data,
@@ -273,7 +282,7 @@ export const OnboardingPage: React.FC = () => {
       },
       education: {
         ...data.education,
-        studentStatus: data.education?.studentStatus || (isSchool ? 'School Student' : 'College / University Student'),
+        studentStatus,
         stream: isSchool ? (data.education?.stream || 'General Schooling') : (data.education?.stream || ''),
         graduationYear: data.education?.graduationYear || currentYear,
         courses,
@@ -415,19 +424,30 @@ export const OnboardingPage: React.FC = () => {
         errors.level = 'Highest education level is required';
         isValid = false;
       }
-      const isSchool = e.level?.toLowerCase() === 'school' || e.level === 'School';
+      const lvl = (e.level || '').toLowerCase().trim();
+      const isSchool = lvl === 'school' || lvl.startsWith('school');
+      const isIntermediate = lvl === 'intermediate' || lvl.startsWith('intermediate');
       if (isSchool) {
         if (!e.currentClass || !e.currentClass.trim()) {
           errors.currentClass = 'Class is required';
           isValid = false;
         }
-      } else {
+      } else if (isIntermediate) {
         if (!e.stream || !e.stream.trim()) {
-          errors.stream = 'Course / Degree / Program is required';
+          errors.stream = 'Intermediate stream is required';
           isValid = false;
         }
         if (!e.studyYear || !e.studyYear.trim()) {
-          errors.studyYear = 'Year / Current study year is required';
+          errors.studyYear = 'Class / Year is required';
+          isValid = false;
+        }
+      } else {
+        if (!e.stream || !e.stream.trim()) {
+          errors.stream = 'Course / Degree / Branch is required';
+          isValid = false;
+        }
+        if (!e.studyYear || !e.studyYear.trim()) {
+          errors.studyYear = 'Year / Study year is required';
           isValid = false;
         }
       }
@@ -477,19 +497,30 @@ export const OnboardingPage: React.FC = () => {
       errors.level = 'Highest education level is required';
       allValid = false;
     }
-    const isSchool = e.level?.toLowerCase() === 'school' || e.level === 'School';
+    const lvl = (e.level || '').toLowerCase().trim();
+    const isSchool = lvl === 'school' || lvl.startsWith('school');
+    const isIntermediate = lvl === 'intermediate' || lvl.startsWith('intermediate');
     if (isSchool) {
       if (!e.currentClass || !e.currentClass.trim()) {
         errors.currentClass = 'Class is required';
         allValid = false;
       }
-    } else {
+    } else if (isIntermediate) {
       if (!e.stream || !e.stream.trim()) {
-        errors.stream = 'Course / Degree / Program is required';
+        errors.stream = 'Intermediate stream is required';
         allValid = false;
       }
       if (!e.studyYear || !e.studyYear.trim()) {
-        errors.studyYear = 'Year / Current study year is required';
+        errors.studyYear = 'Class / Year is required';
+        allValid = false;
+      }
+    } else {
+      if (!e.stream || !e.stream.trim()) {
+        errors.stream = 'Course / Degree / Branch is required';
+        allValid = false;
+      }
+      if (!e.studyYear || !e.studyYear.trim()) {
+        errors.studyYear = 'Year / Study year is required';
         allValid = false;
       }
     }
@@ -507,7 +538,7 @@ export const OnboardingPage: React.FC = () => {
       return;
     }
 
-    if (currentStep === 5) {
+    if (currentStep === 4) {
       if (!validateAllSteps()) {
         setApiError('Onboarding contains incomplete fields. Please verify all sections.');
         return;
@@ -617,16 +648,6 @@ export const OnboardingPage: React.FC = () => {
         );
       case 4:
         return (
-          <AIAssistantStep
-            data={formData}
-            onChange={handleStateChange}
-            onNext={handleNext}
-            onPrev={handlePrev}
-            isLoading={submitLoading}
-          />
-        );
-      case 5:
-        return (
           <FinishStep
             data={formData}
             onGoToStep={handleGoToStep}
@@ -713,7 +734,7 @@ export const OnboardingPage: React.FC = () => {
           </div>
         )}
 
-        {currentStep > 0 && <ProgressBar currentStep={currentStep} totalSteps={5} formData={formData} />}
+        {currentStep > 0 && <ProgressBar currentStep={currentStep} totalSteps={4} formData={formData} />}
         {renderActiveStep()}
       </div>
     </div>

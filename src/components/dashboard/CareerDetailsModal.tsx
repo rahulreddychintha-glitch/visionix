@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Send, Sparkles, Loader2, ArrowLeft, Rocket } from 'lucide-react';
+import { 
+  X, 
+  Send, 
+  Sparkles, 
+  Loader2, 
+  ArrowLeft, 
+  Rocket, 
+  Award, 
+  Target, 
+  Check, 
+  ArrowRight
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CareerService } from '../../services/career.service';
 import type { Career, CareerMatchResult } from '../../services/career.service';
@@ -13,6 +24,8 @@ interface CareerDetailsModalProps {
   onToggleBookmark: (career: Career) => void;
   onToggleCompare: (career: Career) => void;
   compareList: Career[];
+  onSetTargetCareer?: (career: Career) => void | Promise<void>;
+  targetCareerTitle?: string;
 }
 
 export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
@@ -20,9 +33,15 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
   onClose,
   onToggleBookmark,
   onToggleCompare,
-  compareList
+  compareList,
+  onSetTargetCareer,
+  targetCareerTitle
 }) => {
   const isInCompare = career ? compareList.some((c) => c.id === career.id) : false;
+  const isCurrentTarget = career && targetCareerTitle 
+    ? targetCareerTitle.toLowerCase() === career.title.toLowerCase() || targetCareerTitle.toLowerCase() === career.id.toLowerCase()
+    : false;
+
   const navigate = useNavigate();
   const [isChatActive, setIsChatActive] = useState<boolean>(false);
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'model' | 'system'; content: string; timestamp: string | Date }>>([]);
@@ -37,6 +56,8 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
   const [loadingMatch, setLoadingMatch] = useState<boolean>(false);
   const [matchExplanation, setMatchExplanation] = useState<string | null>(null);
   const [loadingMatchExplanation, setLoadingMatchExplanation] = useState<boolean>(false);
+  const [isSettingTarget, setIsSettingTarget] = useState<boolean>(false);
+  const [targetSuccessMsg, setTargetSuccessMsg] = useState<string | null>(null);
 
   // Reset explanation and tabs when career changes
   useEffect(() => {
@@ -46,6 +67,7 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
     setMatchData(null);
     setMatchExplanation(null);
     setLoadingMatchExplanation(false);
+    setTargetSuccessMsg(null);
   }, [career?.id]);
 
   useEffect(() => {
@@ -79,6 +101,19 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
     }
   };
 
+  const handleSetTarget = async () => {
+    if (!career || !onSetTargetCareer || isSettingTarget) return;
+    try {
+      setIsSettingTarget(true);
+      await onSetTargetCareer(career);
+      setTargetSuccessMsg(`"${career.title}" is now your active target career!`);
+    } catch (err) {
+      console.error('Error setting target career:', err);
+    } finally {
+      setIsSettingTarget(false);
+    }
+  };
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -96,7 +131,6 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
         if (response.activeSession && response.activeSession.messages.length > 0) {
           setMessages(response.activeSession.messages);
         } else {
-          // Add system/welcome message
           setMessages([
             {
               role: 'model',
@@ -107,7 +141,6 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
         }
       } catch (err) {
         console.error('Error fetching career session history:', err);
-        // Fallback to welcome message
         setMessages([
           {
             role: 'model',
@@ -123,7 +156,6 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
     fetchHistory();
   }, [career, isChatActive]);
 
-  // Auto-scroll on new messages
   useEffect(() => {
     if (isChatActive && messages.length > 0) {
       const timer = setTimeout(() => {
@@ -142,7 +174,6 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
     setInputText('');
     setIsSending(true);
 
-    // Append user message locally
     const userMessage = {
       role: 'user' as const,
       content: textToSend,
@@ -188,7 +219,25 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
         {/* Modal Header */}
         <div className={styles.modalHeader}>
           <div className={styles.modalTitleWrapper}>
-            <p className={styles.cardCategory} style={{ marginBottom: '2px' }}>{career.category}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <span className={styles.cardCategory}>{career.category}</span>
+              {isCurrentTarget && (
+                <span style={{
+                  fontSize: '0.72rem',
+                  padding: '2px 8px',
+                  borderRadius: '9999px',
+                  background: 'rgba(245, 158, 11, 0.15)',
+                  color: '#fbbf24',
+                  border: '1px solid rgba(245, 158, 11, 0.3)',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  ⭐ Active Target Career
+                </span>
+              )}
+            </div>
             <h2 className="text-heading" style={{ fontSize: '1.45rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
               {isChatActive && (
                 <button 
@@ -206,6 +255,47 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
             <X size={20} />
           </button>
         </div>
+
+        {/* Target Career Confirmation Banner */}
+        {targetSuccessMsg && (
+          <div style={{
+            margin: '0 24px 12px 24px',
+            padding: '10px 16px',
+            borderRadius: '8px',
+            background: 'rgba(16, 185, 129, 0.12)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Check size={16} style={{ color: '#34d399' }} />
+              <span style={{ fontSize: '0.85rem', color: '#34d399', fontWeight: 600 }}>{targetSuccessMsg}</span>
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  navigate('/roadmap', { state: { selectedCareer: career } });
+                  onClose();
+                }}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  background: '#10b981',
+                  border: 'none',
+                  color: '#fff',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                View Roadmap
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Modal Body: Split view or single details view */}
         <div className={isChatActive ? styles.splitLayout : styles.modalBody}>
@@ -227,7 +317,7 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
                 }}
                 onClick={() => setActiveTab('details')}
               >
-                Details
+                Overview & Details
               </button>
               <button
                 style={{
@@ -246,7 +336,7 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
                 onClick={() => setActiveTab('match')}
               >
                 <Sparkles size={14} style={{ color: '#a78bfa' }} />
-                Career Match
+                Career Match & Fit
               </button>
             </div>
 
@@ -300,14 +390,54 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
                   </div>
                 )}
 
+                {/* Typical Skills Required with direct Skill Gap link */}
                 <div className={styles.infoSection}>
-                  <p className={styles.infoLabel}>Typical Skills Required</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <p className={styles.infoLabel} style={{ margin: 0 }}>Typical Skills Required</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigate('/skill-gap', { state: { careerId: career.id, selectedCareer: career } });
+                        onClose();
+                      }}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--color-primary)',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <span>Check Skill Gaps</span>
+                      <ArrowRight size={12} />
+                    </button>
+                  </div>
                   {career.skills.length > 0 ? (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
                       {career.skills.map((skill) => (
-                        <span key={skill} className={styles.skillTag} style={{ fontSize: '0.78rem', padding: '4px 10px' }}>
+                        <button
+                          key={skill}
+                          type="button"
+                          onClick={() => {
+                            navigate('/skill-gap', { state: { careerId: career.id, selectedCareer: career } });
+                            onClose();
+                          }}
+                          className={styles.skillTag}
+                          style={{
+                            fontSize: '0.78rem',
+                            padding: '4px 10px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            border: '1px solid rgba(255, 255, 255, 0.08)'
+                          }}
+                          title="Click to analyze in Skill Navigator"
+                        >
                           {skill}
-                        </span>
+                        </button>
                       ))}
                     </div>
                   ) : (
@@ -327,7 +457,7 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
                   </div>
                   <div className={styles.infoSection}>
                     <p className={styles.infoLabel}>Growth Outlook</p>
-                    <p className={styles.infoVal}>{career.growthRate}</p>
+                    <p className={styles.infoVal} style={{ color: '#34d399', fontWeight: 600 }}>{career.growthRate}</p>
                   </div>
                 </div>
 
@@ -347,7 +477,7 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Could not compute match data.</p>
                 ) : !matchData.isProfileComplete ? (
                   <div style={{ padding: '16px', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                    <p className="text-heading" style={{ fontSize: '1rem', marginBottom: '8px' }}>Not Enough Profile Data</p>
+                    <p className="text-heading" style={{ fontSize: '1rem', marginBottom: '8px' }}>Personalize Your Profile</p>
                     <p className="text-description" style={{ fontSize: '0.85rem', lineHeight: '1.45', margin: '0 0 14px 0' }}>
                       Complete more of your profile or onboarding details to receive a personalized Career Match compatibility score.
                     </p>
@@ -449,8 +579,8 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
                       <p className={styles.infoLabel}>Your Strengths</p>
                       <ul style={{ margin: '6px 0 0 0', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {matchData.strengths.map((str, idx) => (
-                          <li key={idx} style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', listStyleType: 'checkmark' }}>
-                            {str}
+                          <li key={idx} style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                            ✓ {str}
                           </li>
                         ))}
                       </ul>
@@ -585,20 +715,101 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
         </div>
 
         {/* Modal Footer Controls */}
-        <div style={{ display: 'flex', gap: '12px', marginTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '16px', flexWrap: 'wrap', width: '100%' }}>
+        <div style={{ display: 'flex', gap: '10px', marginTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '16px', flexWrap: 'wrap', width: '100%', alignItems: 'center' }}>
+          
+          {/* Target Career Selection Button */}
+          {onSetTargetCareer && (
+            <button
+              type="button"
+              className={isCurrentTarget ? "premiumButtonSecondary" : "premiumButtonPrimary"}
+              style={{
+                flex: 1.2,
+                minWidth: '150px',
+                background: isCurrentTarget ? 'rgba(245, 158, 11, 0.12)' : 'linear-gradient(135deg, #f59e0b, #d97706)',
+                borderColor: isCurrentTarget ? 'rgba(245, 158, 11, 0.3)' : 'transparent',
+                color: isCurrentTarget ? '#fbbf24' : '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                fontWeight: 600
+              }}
+              onClick={handleSetTarget}
+              disabled={isSettingTarget}
+            >
+              {isSettingTarget ? (
+                <Loader2 className="spin-animation" size={15} />
+              ) : isCurrentTarget ? (
+                <Check size={15} />
+              ) : (
+                <Target size={15} />
+              )}
+              <span>{isCurrentTarget ? 'Target Career Active' : 'Set as Target Career'}</span>
+            </button>
+          )}
+
+          {/* Create / View Roadmap */}
           <button
-            className={career.saved ? 'premiumButtonSecondary' : 'premiumButtonPrimary'}
-            style={{ flex: 1, minWidth: '130px' }}
+            type="button"
+            className="premiumButtonPrimary"
+            style={{ 
+              flex: 1.2, 
+              minWidth: '140px',
+              background: 'linear-gradient(135deg, #059669, #10b981)',
+              border: 'none',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
+            onClick={() => {
+              navigate('/roadmap', { state: { selectedCareer: career } });
+              onClose();
+            }}
+          >
+            <Rocket size={15} />
+            <span>View Roadmap</span>
+          </button>
+
+          {/* Skill Gap Analysis Link */}
+          <button
+            type="button"
+            className="premiumButtonSecondary"
+            style={{
+              flex: 1,
+              minWidth: '120px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
+            onClick={() => {
+              navigate('/skill-gap', { state: { careerId: career.id, selectedCareer: career } });
+              onClose();
+            }}
+          >
+            <Award size={15} style={{ color: '#8b5cf6' }} />
+            <span>Skill Gaps</span>
+          </button>
+
+          {/* Bookmark / Save */}
+          <button
+            type="button"
+            className={career.saved ? 'premiumButtonSecondary' : 'premiumButtonSecondary'}
+            style={{ flex: 0.8, minWidth: '100px' }}
             onClick={() => onToggleBookmark(career)}
           >
-            {career.saved ? 'Remove Bookmark' : 'Save Career'}
+            {career.saved ? 'Unsave' : 'Save'}
           </button>
           
+          {/* Compare */}
           <button
+            type="button"
             className={isInCompare ? "premiumButtonPrimary" : "premiumButtonSecondary"}
             style={{ 
-              flex: 1, 
-              minWidth: '130px',
+              flex: 0.9, 
+              minWidth: '110px',
               background: isInCompare ? 'rgba(236, 72, 153, 0.15)' : '',
               border: isInCompare ? '1px solid rgba(236, 72, 153, 0.4)' : '',
               color: isInCompare ? '#ec4899' : ''
@@ -611,59 +822,40 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
             disabled={!isInCompare && compareList.length >= 3}
             title={!isInCompare && compareList.length >= 3 ? "You can compare up to 3 careers max." : ""}
           >
-            {isInCompare ? 'Remove Compare' : 'Add to Compare'}
+            {isInCompare ? 'In Compare' : 'Compare'}
           </button>
 
+          {/* AI Mentor Chat toggle */}
           {!isChatActive ? (
             <button
+              type="button"
               className="premiumButtonPrimary"
               style={{ 
-                flex: 1.2, 
-                minWidth: '160px',
+                flex: 1.1, 
+                minWidth: '130px',
                 background: 'linear-gradient(135deg, #7c3aed, #db2777)',
                 border: 'none',
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px'
+                gap: '6px'
               }}
               onClick={() => setIsChatActive(true)}
             >
-              <Sparkles size={16} />
-              <span>Ask AI About Career</span>
+              <Sparkles size={15} />
+              <span>Ask AI</span>
             </button>
           ) : (
             <button
+              type="button"
               className="premiumButtonSecondary"
-              style={{ flex: 1, minWidth: '130px' }}
+              style={{ flex: 1, minWidth: '120px' }}
               onClick={() => setIsChatActive(false)}
             >
               Back to Details
             </button>
           )}
-
-          <button
-            className="premiumButtonPrimary"
-            style={{ 
-              flex: 1.2, 
-              minWidth: '160px',
-              background: 'linear-gradient(135deg, #059669, #10b981)',
-              border: 'none',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
-            }}
-            onClick={() => {
-              navigate('/roadmap', { state: { selectedCareer: career } });
-              onClose();
-            }}
-          >
-            <Rocket size={16} />
-            <span>Create Roadmap</span>
-          </button>
         </div>
       </div>
     </div>

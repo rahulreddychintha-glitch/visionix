@@ -14,6 +14,7 @@ import type {
 import { CareerService } from '../services/career.service';
 import type { Career } from '../services/career.service';
 import { useAiModal } from '../contexts/AiModalContext';
+import { useAuth } from '../hooks/useAuth';
 import { decodeHtmlEntities } from '../utils/textUtils';
 
 import { 
@@ -22,7 +23,7 @@ import {
   RefreshCw, 
   ChevronRight, 
   AlertCircle, 
-  Check,
+  Check, 
   ListTodo,
   Play,
   CheckCircle,
@@ -39,6 +40,7 @@ export const CareerRoadmapPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { openAiModal } = useAiModal();
+  const { isLoading: authLoading } = useAuth();
 
   // Roadmap State
   const [roadmap, setRoadmap] = useState<CareerRoadmap | null>(null);
@@ -80,14 +82,36 @@ export const CareerRoadmapPage: React.FC = () => {
   }>({ show: false, careerId: '', careerTitle: '', isRegen: false });
 
   // 1. Fetch user's saved careers for the "Switch Career" selector
-  const fetchSavedCareers = async () => {
+  const fetchSavedCareers = useCallback(async () => {
     try {
       const response = await CareerService.getSavedCareers();
       setSavedCareers(response.careers);
     } catch (err) {
       console.warn('Error fetching saved careers for roadmap selector:', err);
     }
-  };
+  }, []);
+
+  const selectFirstOrCurrentMilestone = useCallback((rm: CareerRoadmap) => {
+    // Find the first uncompleted milestone as "current"
+    let foundCurrent: Milestone | null = null;
+    for (const stage of rm.stages) {
+      const uncompleted = stage.milestones.find(m => m.status === 'Upcoming' || m.status === 'In Progress');
+      if (uncompleted) {
+        foundCurrent = uncompleted;
+        break;
+      }
+    }
+    
+    // Fallback to the first milestone if all are completed
+    if (!foundCurrent && rm.stages.length > 0 && rm.stages[0].milestones.length > 0) {
+      foundCurrent = rm.stages[0].milestones[0];
+    }
+    
+    setSelectedMilestone(foundCurrent);
+    // Reset quiz state
+    setQuizActive(false);
+    setQuizResult(null);
+  }, []);
 
   // 2. Fetch or generate a roadmap based on route location state or active settings
   const loadRoadmapData = useCallback(async (careerIdInput?: string) => {
@@ -110,32 +134,68 @@ export const CareerRoadmapPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectFirstOrCurrentMilestone]);
 
-  const selectFirstOrCurrentMilestone = (rm: CareerRoadmap) => {
-    // Find the first uncompleted milestone as "current"
-    let foundCurrent: Milestone | null = null;
-    for (const stage of rm.stages) {
-      const uncompleted = stage.milestones.find(m => m.status === 'Upcoming' || m.status === 'In Progress');
-      if (uncompleted) {
-        foundCurrent = uncompleted;
-        break;
+  // 3. AI Generation steps trigger
+  const startAiGeneration = useCallback(async (careerId: string, careerTitle: string, overwrite: boolean) => {
+    setAiGenerating(true);
+    setAiGenStep(1); // Reading profile
+    
+    const stepTimer = (step: number, ms: number) => 
+      new Promise<void>((resolve) => setTimeout(() => { setAiGenStep(step); resolve(); }, ms));
+
+    try {
+      await stepTimer(2, 800); // Mapping skills
+      await stepTimer(3, 1000); // Aligning stream
+      
+      const response = await RoadmapService.generateRoadmap(careerId, overwrite);
+      
+      await stepTimer(4, 800); // Finalizing checkpoints
+      
+      if (response.exists) {
+        setConfirmModal({
+          show: true,
+          careerId,
+          careerTitle: response.careerTitle || careerTitle,
+          isRegen: false
+        });
+      } else if (response.roadmap) {
+        setRoadmap(response.roadmap);
+        selectFirstOrCurrentMilestone(response.roadmap);
       }
+    } catch (err: any) {
+      console.error('AI generation request failed:', err);
+      setError('Generation failed. Please try again.');
+    } finally {
+      setAiGenerating(false);
+      setLoading(false);
     }
-    
-    // Fallback to the first milestone if all are completed
-    if (!foundCurrent && rm.stages.length > 0 && rm.stages[0].milestones.length > 0) {
-      foundCurrent = rm.stages[0].milestones[0];
+  }, [selectFirstOrCurrentMilestone]);
+
+  // Initial check: if roadmap exists, load it. If not, generate immediately.
+  const handleInitialCheck = useCallback(async (careerId: string, careerTitle: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const existing = await RoadmapService.getRoadmap(careerId);
+      if (existing) {
+        setRoadmap(existing);
+        selectFirstOrCurrentMilestone(existing);
+        setLoading(false);
+      } else {
+        await startAiGeneration(careerId, careerTitle, false);
+      }
+    } catch (err) {
+      console.error('Error checking initial roadmap status:', err);
+      setError('Could not establish roadmap status.');
+      setLoading(false);
     }
-    
-    setSelectedMilestone(foundCurrent);
-    // Reset quiz state
-    setQuizActive(false);
-    setQuizResult(null);
-  };
+  }, [selectFirstOrCurrentMilestone, startAiGeneration]);
 
   // Triggered when entering page. Checks if we came from Career Match and need to auto-create
   useEffect(() => {
+    if (authLoading) return;
+
     fetchSavedCareers();
     
     const stateCareer = location.state?.selectedCareer as Career | undefined;
@@ -145,7 +205,7 @@ export const CareerRoadmapPage: React.FC = () => {
     } else {
       loadRoadmapData();
     }
-  }, [location.state, loadRoadmapData]);
+  }, [authLoading, location.state, loadRoadmapData, handleInitialCheck, fetchSavedCareers]);
 
   // Fetch learning resources videos when modal opens
   useEffect(() => {
@@ -178,61 +238,6 @@ export const CareerRoadmapPage: React.FC = () => {
       active = false;
     };
   }, [showResourcesModal, selectedMilestone]);
-
-  // Initial check: if roadmap exists, load it. If not, generate immediately.
-  const handleInitialCheck = async (careerId: string, careerTitle: string) => {
-    try {
-      setLoading(true);
-      const existing = await RoadmapService.getRoadmap(careerId);
-      if (existing) {
-        setRoadmap(existing);
-        selectFirstOrCurrentMilestone(existing);
-        setLoading(false);
-      } else {
-        startAiGeneration(careerId, careerTitle, false);
-      }
-    } catch (err) {
-      console.error('Error checking initial roadmap status:', err);
-      setError('Could not establish roadmap status.');
-      setLoading(false);
-    }
-  };
-
-  // 3. AI Generation steps trigger
-  const startAiGeneration = async (careerId: string, careerTitle: string, overwrite: boolean) => {
-    setAiGenerating(true);
-    setAiGenStep(1); // Reading profile
-    
-    const stepTimer = (step: number, ms: number) => 
-      new Promise<void>((resolve) => setTimeout(() => { setAiGenStep(step); resolve(); }, ms));
-
-    try {
-      await stepTimer(2, 800); // Mapping skills
-      await stepTimer(3, 1000); // Aligning stream
-      
-      const response = await RoadmapService.generateRoadmap(careerId, overwrite);
-      
-      await stepTimer(4, 800); // Finalizing checkpoints
-      
-      if (response.exists) {
-        setConfirmModal({
-          show: true,
-          careerId,
-          careerTitle: response.careerTitle || careerTitle,
-          isRegen: false
-        });
-        setAiGenerating(false);
-      } else if (response.roadmap) {
-        setRoadmap(response.roadmap);
-        selectFirstOrCurrentMilestone(response.roadmap);
-        setAiGenerating(false);
-      }
-    } catch (err: any) {
-      console.error('AI generation request failed:', err);
-      setError('Generation failed. Please try again.');
-      setAiGenerating(false);
-    }
-  };
 
   // 4. Milestone status actions
 
@@ -329,16 +334,18 @@ export const CareerRoadmapPage: React.FC = () => {
     setShowSwitchMenu(false);
     try {
       setLoading(true);
+      setError(null);
       const existing = await RoadmapService.getRoadmap(career.id);
       if (existing) {
         setRoadmap(existing);
         selectFirstOrCurrentMilestone(existing);
         setLoading(false);
       } else {
-        startAiGeneration(career.id, career.title, false);
+        await startAiGeneration(career.id, career.title, false);
       }
     } catch (err) {
       console.error('Failed to load roadmap selection:', err);
+      setError('Failed to load selected career roadmap.');
       setLoading(false);
     }
   };
@@ -424,14 +431,14 @@ export const CareerRoadmapPage: React.FC = () => {
       <div className={styles.container}>
         
         {/* Loading and Error States */}
-        {loading && !aiGenerating && (
+        {(authLoading || (loading && !aiGenerating)) && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '300px', gap: '16px' }}>
             <RefreshCw className={styles.loadingSpinner} size={32} />
             <p style={{ color: 'var(--text-secondary)' }}>Loading roadmap...</p>
           </div>
         )}
 
-        {error && (
+        {!authLoading && error && (
           <div className={styles.emptyState}>
             <AlertCircle size={48} style={{ color: '#ef4444' }} />
             <h2 className={styles.emptyTitle}>Error</h2>
@@ -480,7 +487,7 @@ export const CareerRoadmapPage: React.FC = () => {
         </AnimatePresence>
 
         {/* Empty State */}
-        {!loading && !roadmap && !error && (
+        {!authLoading && !loading && !roadmap && !error && (
           <div className={styles.emptyState}>
             <GitFork size={48} style={{ color: 'var(--color-primary)' }} />
             <h2 className={styles.emptyTitle}>Create Your Career Roadmap</h2>
@@ -527,7 +534,7 @@ export const CareerRoadmapPage: React.FC = () => {
         )}
 
         {/* Active Roadmap UI */}
-        {!loading && roadmap && (
+        {!authLoading && !loading && roadmap && (
           <>
             {/* Top Header Row */}
             <div className={styles.header}>
