@@ -82,14 +82,17 @@ export class CareerController {
         }
 
         let match = null;
+        let courseRelevance = null;
         if (userContext) {
           match = MatchService.calculateMatch(c, userContext);
+          courseRelevance = RecommendationService.evaluateCourseRelevance(c, userContext);
         }
 
         return {
           ...c,
           saved: savedIds.has(c.id),
           relevanceTag,
+          courseRelevance,
           match
         };
       });
@@ -422,6 +425,138 @@ export class CareerController {
 
       sendSuccess(res, 'Career match explanation generated successfully.', {
         explanation
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST /api/careers/compare or GET /api/careers/compare?ids=c1,c2,c3
+   * Compare 1 to 3 careers side-by-side with rich metadata and course relevance.
+   */
+  public static compareCareers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        sendError(res, 'Not authenticated.', [], 401);
+        return;
+      }
+
+      const userId = req.user.sub;
+      let careerIds: string[] = [];
+
+      if (req.body?.careerIds && Array.isArray(req.body.careerIds)) {
+        careerIds = req.body.careerIds;
+      } else if (req.query?.ids && typeof req.query.ids === 'string') {
+        careerIds = req.query.ids.split(',').map((s) => s.trim()).filter(Boolean);
+      } else if (req.query?.careerIds) {
+        careerIds = Array.isArray(req.query.careerIds)
+          ? req.query.careerIds as string[]
+          : (req.query.careerIds as string).split(',').map((s) => s.trim()).filter(Boolean);
+      }
+
+      if (!careerIds || careerIds.length === 0) {
+        sendError(res, 'Please select at least 1 career to compare.', [], 400);
+        return;
+      }
+
+      if (careerIds.length > 3) {
+        sendError(res, 'Maximum 3 careers can be compared at once.', [], 400);
+        return;
+      }
+
+      // Deduplicate careerIds
+      careerIds = Array.from(new Set(careerIds));
+
+      // Fetch user personalization context
+      let userContext: any = null;
+      try {
+        userContext = await PersonalizationService.getPersonalizationContext(userId);
+      } catch (err) {
+        console.warn('Could not load personalization context in compareCareers:', err);
+      }
+
+      // Fetch saved careers
+      const savedDocs = await SavedCareer.find({ userId });
+      const savedIds = new Set(savedDocs.map((doc) => doc.careerId));
+
+      // Resolve career objects from CAREERS_DATA
+      const careers = careerIds.map((id) => {
+        const found = CAREERS_DATA.find((c) => c.id === id || c.title.toLowerCase() === id.toLowerCase().replace(/_/g, ' '));
+        return found || null;
+      }).filter(Boolean);
+
+      if (careers.length === 0) {
+        sendError(res, 'None of the requested careers could be found.', [], 404);
+        return;
+      }
+
+      // Build comparison list
+      const comparisonList = careers.map((c: any) => {
+        const courseRelevance = userContext
+          ? RecommendationService.evaluateCourseRelevance(c, userContext)
+          : {
+              relevanceLevel: 'Relevant' as const,
+              relevanceTag: 'Career Pathway',
+              isStronglyRelevant: false,
+              reason: 'Explore career details and requirements.',
+              relevantSubjects: [],
+              entranceRequirements: [],
+              learningRequirements: []
+            };
+
+        const match = userContext ? MatchService.calculateMatch(c, userContext) : null;
+
+        return {
+          id: c.id,
+          title: c.title,
+          category: c.category,
+          description: c.description,
+          education: c.education,
+          responsibilities: c.responsibilities || [],
+          skills: c.skills || [],
+          salaryRange: c.salaryRange,
+          growthRate: c.growthRate,
+          demandLevel: c.demandLevel,
+          saved: savedIds.has(c.id),
+          isTargetCareer: userContext?.dreamCareer?.toLowerCase() === c.title.toLowerCase(),
+          courseRelevance,
+          match
+        };
+      });
+
+      // Compute shared skills and unique skills across compared careers
+      const allSkillsSets = comparisonList.map((c) => new Set(c.skills.map((s: string) => s.toLowerCase())));
+      
+      const sharedSkills = comparisonList.length > 1
+        ? comparisonList[0].skills.filter((skill: string) =>
+            allSkillsSets.every((set) => set.has(skill.toLowerCase()))
+          )
+        : comparisonList[0].skills;
+
+      const uniqueSkillsByCareer: Record<string, string[]> = {};
+      comparisonList.forEach((c) => {
+        const otherSets = allSkillsSets.filter((_, idx) => comparisonList[idx].id !== c.id);
+        if (otherSets.length === 0) {
+          uniqueSkillsByCareer[c.id] = c.skills;
+        } else {
+          uniqueSkillsByCareer[c.id] = c.skills.filter(
+            (s: string) => !otherSets.some((os) => os.has(s.toLowerCase()))
+          );
+        }
+      });
+
+      sendSuccess(res, 'Career comparison retrieved successfully.', {
+        careers: comparisonList,
+        sharedSkills,
+        uniqueSkillsByCareer,
+        userEducation: userContext ? {
+          level: userContext.educationLevel,
+          stream: userContext.discipline,
+          specialization: userContext.specialization,
+          currentClass: userContext.currentClass,
+          studyYear: userContext.studyYear
+        } : null
       });
     } catch (error) {
       next(error);

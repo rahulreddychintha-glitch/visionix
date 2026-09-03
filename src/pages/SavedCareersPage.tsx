@@ -11,11 +11,12 @@ import {
   ArrowUpRight,
   ArrowLeft
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './CareerExplorerPage.module.css';
 import { CareerDetailsModal } from '../components/dashboard/CareerDetailsModal';
 
 export const SavedCareersPage: React.FC = () => {
+  const navigate = useNavigate();
   const { profile, saveProfile } = useProfile();
   const [savedCareers, setSavedCareers] = useState<Career[]>([]);
   const [isMockMode, setIsMockMode] = useState<boolean>(false);
@@ -26,6 +27,7 @@ export const SavedCareersPage: React.FC = () => {
   const [selectedCareer, setSelectedCareer] = useState<Career | null>(null);
   const [compareList, setCompareList] = useState<Career[]>([]);
   const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
+  const [compareLimitToast, setCompareLimitToast] = useState<string | null>(null);
 
   const targetCareerTitle = profile?.careerGoals?.dreamCareer || '';
 
@@ -52,6 +54,13 @@ export const SavedCareersPage: React.FC = () => {
   useEffect(() => {
     fetchSavedCareers();
   }, [fetchSavedCareers]);
+
+  useEffect(() => {
+    if (compareLimitToast) {
+      const t = setTimeout(() => setCompareLimitToast(null), 3500);
+      return () => clearTimeout(t);
+    }
+  }, [compareLimitToast]);
 
   // Handle setting target career
   const handleSetTargetCareer = async (career: Career) => {
@@ -88,7 +97,7 @@ export const SavedCareersPage: React.FC = () => {
     }
   };
 
-  // Compare list actions
+  // Compare list actions (Max 3)
   const handleToggleCompare = (career: Career) => {
     setCompareList((prev) => {
       const exists = prev.some((c) => c.id === career.id);
@@ -96,6 +105,7 @@ export const SavedCareersPage: React.FC = () => {
         return prev.filter((c) => c.id !== career.id);
       }
       if (prev.length >= 3) {
+        setCompareLimitToast('Maximum 3 careers can be compared at once. Remove one to add another.');
         return prev;
       }
       return [...prev, career];
@@ -142,6 +152,30 @@ export const SavedCareersPage: React.FC = () => {
             </Link>
           </div>
         </div>
+
+        {compareLimitToast && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: 'rgba(239, 68, 68, 0.12)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            color: '#f87171',
+            padding: '10px 16px',
+            borderRadius: '8px',
+            fontSize: '0.86rem',
+            fontWeight: 500,
+            marginBottom: '16px'
+          }}>
+            <span>⚠️ {compareLimitToast}</span>
+            <button
+              onClick={() => setCompareLimitToast(null)}
+              style={{ background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px 6px' }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* Loading and Error States */}
         {loading ? (
@@ -241,7 +275,6 @@ export const SavedCareersPage: React.FC = () => {
                         className={styles.compareCheckbox}
                         checked={compareList.some((c) => c.id === career.id)}
                         onChange={() => handleToggleCompare(career)}
-                        disabled={compareList.length >= 3 && !compareList.some((c) => c.id === career.id)}
                       />
                       Compare
                     </label>
@@ -277,15 +310,24 @@ export const SavedCareersPage: React.FC = () => {
               ))}
             </div>
             
-            <button
-              className="premiumButtonPrimary"
-              style={{ padding: '8px 16px', fontSize: '0.82rem' }}
-              disabled={compareList.length < 2}
-              onClick={() => setShowCompareModal(true)}
-            >
-              <GitCompare size={14} />
-              <span>Compare Now</span>
-            </button>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                className="premiumButtonPrimary"
+                style={{ padding: '8px 16px', fontSize: '0.82rem' }}
+                onClick={() => navigate('/compare', { state: { selectedCareerIds: compareList.map(c => c.id), selectedCareers: compareList } })}
+              >
+                <GitCompare size={14} />
+                <span>Compare Careers ({compareList.length}/3)</span>
+              </button>
+
+              <button
+                className="premiumButtonSecondary"
+                style={{ padding: '8px 14px', fontSize: '0.82rem' }}
+                onClick={() => navigate('/compare', { state: { selectedCareerIds: compareList.map(c => c.id), selectedCareers: compareList, activeTab: 'roadmaps' } })}
+              >
+                <span>🗺️ Compare Roadmaps</span>
+              </button>
+            </div>
           </div>
         )}
 

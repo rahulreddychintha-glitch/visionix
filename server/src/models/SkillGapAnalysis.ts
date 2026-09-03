@@ -1,5 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export type SkillPriorityLevel = 'Critical' | 'High' | 'Medium' | 'Supporting';
+
 export interface ICurrentSkillsBreakdown {
   verified: Array<{
     name: string;
@@ -11,10 +13,27 @@ export interface ICurrentSkillsBreakdown {
   developing: string[];
 }
 
+export interface ISkillRoadmapMilestone {
+  stageNumber: number;
+  stageTitle: string;
+  milestoneTitle: string;
+  status: string;
+}
+
+export interface ISkillLearningResource {
+  title: string;
+  url: string;
+  provider: string;
+  type: string;
+  thumbnail?: string;
+}
+
 export interface ISkillGapDetail {
+  id?: string;
   skillName: string;
+  category: 'Foundational' | 'Technical' | 'Tooling' | 'Professional';
   status: 'Verified' | 'Strong' | 'Developing' | 'Needs Improvement' | 'Missing';
-  priority: 'High' | 'Medium' | 'Low';
+  priority: SkillPriorityLevel;
   currentLevel: string;
   requiredLevel: string;
   whyItMatters: string;
@@ -24,16 +43,23 @@ export interface ISkillGapDetail {
   actionRoute: string;
   hasAssessment: boolean;
   hasLearningResource: boolean;
+  learningResource?: ISkillLearningResource;
+  roadmapMilestone?: ISkillRoadmapMilestone;
+  learningProgressPercent?: number;
 }
 
 export interface IPrioritySkill {
+  id?: string;
   skillName: string;
-  priority: 'High' | 'Medium' | 'Low';
+  category: 'Foundational' | 'Technical' | 'Tooling' | 'Professional';
+  priority: SkillPriorityLevel;
   status: string;
   reason: string;
   quickAction: string;
   actionRoute: string;
   actionType: 'assessment' | 'learning' | 'roadmap' | 'interview' | 'project' | 'practice';
+  learningResource?: ISkillLearningResource;
+  roadmapMilestone?: ISkillRoadmapMilestone;
 }
 
 export interface INextStepItem {
@@ -44,7 +70,7 @@ export interface INextStepItem {
   targetRoute: string;
   targetSkill: string;
   actionText: string;
-  priority: 'High' | 'Medium' | 'Low';
+  priority: SkillPriorityLevel;
 }
 
 export interface ICareerComparisonItem {
@@ -67,12 +93,25 @@ export interface IAiSkillInsight {
   aiProviderUsed: 'gemini' | 'unconfigured' | 'deterministic_fallback';
 }
 
+export interface ISkillGapSummary {
+  totalRequired: number;
+  existingCount: number;
+  missingCount: number;
+  coveragePercentage: number;
+  coverageText: string;
+}
+
 export interface ISkillGapAnalysisDocument extends Document {
   userId: mongoose.Types.ObjectId;
+  hasTargetCareer: boolean;
   targetCareerId: string;
   targetCareerTitle: string;
   targetCategory: string;
-  readinessScore: number; // 0 to 100
+  salaryRange?: string;
+  growthRate?: string;
+  demandLevel?: string;
+  readinessScore: number; // 0 to 100 coverage percentage
+  summary: ISkillGapSummary;
   requiredSkillsCount: number;
   strongSkillsCount: number;
   developingSkillsCount: number;
@@ -82,7 +121,11 @@ export interface ISkillGapAnalysisDocument extends Document {
   quickWin: string;
   currentSkills: ICurrentSkillsBreakdown;
   skillGaps: ISkillGapDetail[];
+  existingSkills: ISkillGapDetail[];
+  requiredSkills: ISkillGapDetail[];
+  missingSkills: ISkillGapDetail[];
   prioritySkills: IPrioritySkill[];
+  recommendedNextSkill?: ISkillGapDetail | null;
   nextSteps: INextStepItem[];
   careerComparisons: ICareerComparisonItem[];
   aiAnalysis?: IAiSkillInsight;
@@ -106,9 +149,36 @@ const CurrentSkillsBreakdownSchema = new Schema<ICurrentSkillsBreakdown>(
   { _id: false }
 );
 
+const SkillRoadmapMilestoneSchema = new Schema<ISkillRoadmapMilestone>(
+  {
+    stageNumber: { type: Number, required: true },
+    stageTitle: { type: String, required: true },
+    milestoneTitle: { type: String, required: true },
+    status: { type: String, default: 'Not Started' },
+  },
+  { _id: false }
+);
+
+const SkillLearningResourceSchema = new Schema<ISkillLearningResource>(
+  {
+    title: { type: String, required: true },
+    url: { type: String, required: true },
+    provider: { type: String, default: 'YouTube' },
+    type: { type: String, default: 'Video' },
+    thumbnail: { type: String, default: '' },
+  },
+  { _id: false }
+);
+
 const SkillGapDetailSchema = new Schema<ISkillGapDetail>(
   {
+    id: { type: String },
     skillName: { type: String, required: true },
+    category: {
+      type: String,
+      enum: ['Foundational', 'Technical', 'Tooling', 'Professional'],
+      default: 'Technical',
+    },
     status: {
       type: String,
       enum: ['Verified', 'Strong', 'Developing', 'Needs Improvement', 'Missing'],
@@ -116,8 +186,8 @@ const SkillGapDetailSchema = new Schema<ISkillGapDetail>(
     },
     priority: {
       type: String,
-      enum: ['High', 'Medium', 'Low'],
-      required: true,
+      enum: ['Critical', 'High', 'Medium', 'Supporting', 'Low'],
+      default: 'High',
     },
     currentLevel: { type: String, default: 'None' },
     requiredLevel: { type: String, default: 'Proficient' },
@@ -132,16 +202,25 @@ const SkillGapDetailSchema = new Schema<ISkillGapDetail>(
     actionRoute: { type: String, default: '/courses' },
     hasAssessment: { type: Boolean, default: true },
     hasLearningResource: { type: Boolean, default: true },
+    learningResource: { type: SkillLearningResourceSchema, required: false },
+    roadmapMilestone: { type: SkillRoadmapMilestoneSchema, required: false },
+    learningProgressPercent: { type: Number, required: false },
   },
   { _id: false }
 );
 
 const PrioritySkillSchema = new Schema<IPrioritySkill>(
   {
+    id: { type: String },
     skillName: { type: String, required: true },
+    category: {
+      type: String,
+      enum: ['Foundational', 'Technical', 'Tooling', 'Professional'],
+      default: 'Technical',
+    },
     priority: {
       type: String,
-      enum: ['High', 'Medium', 'Low'],
+      enum: ['Critical', 'High', 'Medium', 'Supporting', 'Low'],
       required: true,
     },
     status: { type: String, required: true },
@@ -153,6 +232,8 @@ const PrioritySkillSchema = new Schema<IPrioritySkill>(
       enum: ['assessment', 'learning', 'roadmap', 'interview', 'project', 'practice'],
       default: 'learning',
     },
+    learningResource: { type: SkillLearningResourceSchema, required: false },
+    roadmapMilestone: { type: SkillRoadmapMilestoneSchema, required: false },
   },
   { _id: false }
 );
@@ -172,7 +253,7 @@ const NextStepItemSchema = new Schema<INextStepItem>(
     actionText: { type: String, required: true },
     priority: {
       type: String,
-      enum: ['High', 'Medium', 'Low'],
+      enum: ['Critical', 'High', 'Medium', 'Supporting', 'Low'],
       default: 'Medium',
     },
   },
@@ -217,6 +298,10 @@ const SkillGapAnalysisSchema = new Schema<ISkillGapAnalysisDocument>(
       required: true,
       index: true,
     },
+    hasTargetCareer: {
+      type: Boolean,
+      default: true,
+    },
     targetCareerId: {
       type: String,
       required: true,
@@ -230,10 +315,20 @@ const SkillGapAnalysisSchema = new Schema<ISkillGapAnalysisDocument>(
       type: String,
       required: true,
     },
+    salaryRange: { type: String },
+    growthRate: { type: String },
+    demandLevel: { type: String },
     readinessScore: {
       type: Number,
       required: true,
       default: 0,
+    },
+    summary: {
+      totalRequired: { type: Number, default: 0 },
+      existingCount: { type: Number, default: 0 },
+      missingCount: { type: Number, default: 0 },
+      coveragePercentage: { type: Number, default: 0 },
+      coverageText: { type: String, default: '' },
     },
     requiredSkillsCount: {
       type: Number,
@@ -271,9 +366,25 @@ const SkillGapAnalysisSchema = new Schema<ISkillGapAnalysisDocument>(
       type: [SkillGapDetailSchema],
       default: [],
     },
+    existingSkills: {
+      type: [SkillGapDetailSchema],
+      default: [],
+    },
+    requiredSkills: {
+      type: [SkillGapDetailSchema],
+      default: [],
+    },
+    missingSkills: {
+      type: [SkillGapDetailSchema],
+      default: [],
+    },
     prioritySkills: {
       type: [PrioritySkillSchema],
       default: [],
+    },
+    recommendedNextSkill: {
+      type: SkillGapDetailSchema,
+      required: false,
     },
     nextSteps: {
       type: [NextStepItemSchema],

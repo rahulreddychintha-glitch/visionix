@@ -21,11 +21,12 @@ const DashboardPage = React.lazy(() => import('./pages/DashboardPage').then(m =>
 const ProfilePage = React.lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const AiAssistantPage = React.lazy(() => import('./pages/AiAssistantPage').then(m => ({ default: m.AiAssistantPage })));
 const CareerExplorerPage = React.lazy(() => import('./pages/CareerExplorerPage').then(m => ({ default: m.CareerExplorerPage })));
+const CareerComparePage = React.lazy(() => import('./pages/CareerComparePage').then(m => ({ default: m.CareerComparePage })));
 const SavedCareersPage = React.lazy(() => import('./pages/SavedCareersPage').then(m => ({ default: m.SavedCareersPage })));
-const UnderDevelopmentPage = React.lazy(() => import('./pages/UnderDevelopmentPage').then(m => ({ default: m.UnderDevelopmentPage })));
 const CareerRoadmapPage = React.lazy(() => import('./pages/CareerRoadmapPage').then(m => ({ default: m.CareerRoadmapPage })));
 const MyProgressPage = React.lazy(() => import('./pages/MyProgressPage').then(m => ({ default: m.MyProgressPage })));
 const LearningHubPage = React.lazy(() => import('./pages/LearningHubPage').then(m => ({ default: m.LearningHubPage })));
+const CourseRecommendationsPage = React.lazy(() => import('./pages/CourseRecommendationsPage').then(m => ({ default: m.CourseRecommendationsPage })));
 const YouTubeLearningPage = React.lazy(() => import('./pages/YouTubeLearningPage').then(m => ({ default: m.YouTubeLearningPage })));
 const ExamsPage = React.lazy(() => import('./pages/ExamsPage').then(m => ({ default: m.ExamsPage })));
 const ResumeBuilderPage = React.lazy(() => import('./pages/ResumeBuilderPage').then(m => ({ default: m.ResumeBuilderPage })));
@@ -33,6 +34,7 @@ const InterviewPage = React.lazy(() => import('./pages/InterviewPage').then(m =>
 const BusinessPage = React.lazy(() => import('./pages/BusinessPage').then(m => ({ default: m.BusinessPage })));
 const SkillNavigatorPage = React.lazy(() => import('./pages/SkillNavigatorPage').then(m => ({ default: m.SkillNavigatorPage })));
 const SettingsPage = React.lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
+const WhatsNextPage = React.lazy(() => import('./pages/WhatsNextPage').then(m => ({ default: m.WhatsNextPage })));
 
 const RouteLoadingFallback = () => (
   <div style={{
@@ -144,6 +146,24 @@ function App() {
                       } 
                     />
 
+                    {/* Phase 21 Career & Roadmap Comparison Routes */}
+                    <Route 
+                      path="/compare" 
+                      element={
+                        <ProtectedRoute>
+                          <CareerComparePage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/career-compare" 
+                      element={
+                        <ProtectedRoute>
+                          <CareerComparePage />
+                        </ProtectedRoute>
+                      } 
+                    />
+
                     <Route 
                       path="/saved" 
                       element={
@@ -191,12 +211,28 @@ function App() {
                       path="/courses" 
                       element={
                         <ProtectedRoute>
-                          <LearningHubPage />
+                          <CourseRecommendationsPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/course-recommendations" 
+                      element={
+                        <ProtectedRoute>
+                          <CourseRecommendationsPage />
                         </ProtectedRoute>
                       } 
                     />
                     <Route 
                       path="/learning-hub" 
+                      element={
+                        <ProtectedRoute>
+                          <LearningHubPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/learning" 
                       element={
                         <ProtectedRoute>
                           <LearningHubPage />
@@ -283,14 +319,14 @@ function App() {
                       />
                     ))}
 
-                    {/* Under Development Routes */}
-                    {['/scholarships'].map((path) => (
+                    {/* Phase 22 What's Next? (Education Pathway) Route */}
+                    {['/whats-next', '/education-pathways'].map((path) => (
                       <Route 
                         key={path}
                         path={path} 
                         element={
                           <ProtectedRoute>
-                            <UnderDevelopmentPage title={path.substring(1).replace('-', ' ').toUpperCase()} />
+                            <WhatsNextPage />
                           </ProtectedRoute>
                         } 
                       />

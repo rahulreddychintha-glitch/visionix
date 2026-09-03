@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { CareerService } from '../services/career.service';
 import type { Career } from '../services/career.service';
+import { RoadmapService } from '../services/roadmap.service';
 import { useProfile } from '../hooks/useProfile';
 import { 
   Search, 
@@ -13,7 +14,8 @@ import {
   ArrowUpRight,
   Sparkles,
   Heart,
-  Compass
+  Compass,
+  Rocket
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './CareerExplorerPage.module.css';
@@ -45,6 +47,7 @@ export const CareerExplorerPage: React.FC = () => {
   const [isMockMode, setIsMockMode] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [existingRoadmaps, setExistingRoadmaps] = useState<Record<string, boolean>>({});
   
   const [showRecommended, setShowRecommended] = useState<boolean>(false);
   const [showCareerMatch, setShowCareerMatch] = useState<boolean>(false);
@@ -67,6 +70,25 @@ export const CareerExplorerPage: React.FC = () => {
     if (!targetCareerTitle) return false;
     return targetCareerTitle.toLowerCase() === c.title.toLowerCase() || targetCareerTitle.toLowerCase() === c.id.toLowerCase();
   }, [targetCareerTitle]);
+
+  // Fetch user roadmaps to accurately display View Roadmap vs Create Roadmap
+  const fetchUserRoadmaps = useCallback(async () => {
+    try {
+      const roadmaps = await RoadmapService.getUserRoadmaps();
+      const map: Record<string, boolean> = {};
+      roadmaps.forEach((r) => {
+        map[r.careerId.toLowerCase()] = true;
+        map[r.careerTitle.toLowerCase()] = true;
+      });
+      setExistingRoadmaps(map);
+    } catch (err) {
+      console.warn('Error fetching user roadmaps in explorer:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUserRoadmaps();
+  }, [fetchUserRoadmaps]);
 
   // Fetch careers from API
   const fetchCareers = useCallback(async () => {
@@ -165,7 +187,9 @@ export const CareerExplorerPage: React.FC = () => {
     }
   };
 
-  // Handle compare list modification
+  const [compareLimitToast, setCompareLimitToast] = useState<string | null>(null);
+
+  // Handle compare list modification (Strict limit: Max 3)
   const handleToggleCompare = (career: Career) => {
     setCompareList((prev) => {
       const exists = prev.some((c) => c.id === career.id);
@@ -173,11 +197,19 @@ export const CareerExplorerPage: React.FC = () => {
         return prev.filter((c) => c.id !== career.id);
       }
       if (prev.length >= 3) {
-        return prev; // Max 3 items
+        setCompareLimitToast('Maximum 3 careers can be compared at once. Remove one to add another.');
+        return prev;
       }
       return [...prev, career];
     });
   };
+
+  useEffect(() => {
+    if (compareLimitToast) {
+      const t = setTimeout(() => setCompareLimitToast(null), 3500);
+      return () => clearTimeout(t);
+    }
+  }, [compareLimitToast]);
 
   // Filter local careers array for relevance filtering
   const displayedCareers = careers.filter((c) => {
@@ -252,7 +284,9 @@ export const CareerExplorerPage: React.FC = () => {
                 <Sparkles size={16} />
                 <div style={{ textAlign: 'left' }}>
                   <div className={styles.pillTitle}>Recommended for You</div>
-                  <div className={styles.pillSubtitle}>Profile Picks</div>
+                  <div className={styles.pillSubtitle}>
+                    {profile?.education?.stream ? `Relevant to ${profile.education.stream}` : 'Profile Picks'}
+                  </div>
                 </div>
               </button>
               
@@ -309,6 +343,30 @@ export const CareerExplorerPage: React.FC = () => {
           <span style={{ color: 'var(--text-muted)', opacity: 0.6 }}>→</span>
           <span style={{ color: 'var(--text-secondary)' }}>6. Learn & Progress</span>
         </div>
+
+        {compareLimitToast && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: 'rgba(239, 68, 68, 0.12)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            color: '#f87171',
+            padding: '10px 16px',
+            borderRadius: '8px',
+            fontSize: '0.86rem',
+            fontWeight: 500,
+            animation: 'fadeIn 0.2s ease-in-out'
+          }}>
+            <span>⚠️ {compareLimitToast}</span>
+            <button
+              onClick={() => setCompareLimitToast(null)}
+              style={{ background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px 6px' }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {showCareerMatch && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(236, 72, 153, 0.08)', border: '1px solid rgba(236, 72, 153, 0.2)', padding: '12px 16px', borderRadius: '8px' }}>
@@ -454,10 +512,19 @@ export const CareerExplorerPage: React.FC = () => {
                       {!isTarget && career.relevanceTag === 'Dream Career' && (
                         <span className={`${styles.relevanceBadge} ${styles.dreamCareerBadge}`}>⭐ Dream Career</span>
                       )}
-                      {career.relevanceTag === 'Interested' && (
+                      {career.courseRelevance?.relevanceTag && (
+                        <span className={styles.relevanceBadge} style={{
+                          background: career.courseRelevance.relevanceLevel === 'Strongly Relevant' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                          color: career.courseRelevance.relevanceLevel === 'Strongly Relevant' ? '#34d399' : '#60a5fa',
+                          border: career.courseRelevance.relevanceLevel === 'Strongly Relevant' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(59, 130, 246, 0.3)'
+                        }}>
+                          {career.courseRelevance.relevanceLevel === 'Strongly Relevant' ? '✓ ' : ''}{career.courseRelevance.relevanceTag}
+                        </span>
+                      )}
+                      {!career.courseRelevance && career.relevanceTag === 'Interested' && (
                         <span className={`${styles.relevanceBadge} ${styles.interestedBadge}`}>💜 Interested</span>
                       )}
-                      {career.relevanceTag === 'Relevant' && (
+                      {!career.courseRelevance && career.relevanceTag === 'Relevant' && (
                         <span className={`${styles.relevanceBadge} ${styles.relevantBadge}`}>📚 Relevant</span>
                       )}
                     </div>
@@ -545,12 +612,11 @@ export const CareerExplorerPage: React.FC = () => {
                         className={styles.compareCheckbox}
                         checked={compareList.some((c) => c.id === career.id)}
                         onChange={() => handleToggleCompare(career)}
-                        disabled={compareList.length >= 3 && !compareList.some((c) => c.id === career.id)}
                       />
                       Compare
                     </label>
 
-                    <div style={{ display: 'flex', gap: '6px' }}>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                       <button
                         className={styles.detailsBtn}
                         onClick={() => setSelectedCareer(career)}
@@ -558,6 +624,35 @@ export const CareerExplorerPage: React.FC = () => {
                         <span>View Details</span>
                         <ArrowUpRight size={14} />
                       </button>
+
+                      {(() => {
+                        const hasRoadmap = Boolean(existingRoadmaps[career.id.toLowerCase()] || existingRoadmaps[career.title.toLowerCase()]);
+                        return (
+                          <button
+                            type="button"
+                            style={{
+                              padding: '5px 10px',
+                              borderRadius: '6px',
+                              border: 'none',
+                              fontSize: '0.78rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              color: '#fff',
+                              background: hasRoadmap 
+                                ? 'linear-gradient(135deg, #059669, #10b981)' 
+                                : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onClick={() => navigate('/roadmap', { state: { selectedCareer: career } })}
+                          >
+                            <Rocket size={13} />
+                            <span>{hasRoadmap ? 'View Roadmap' : 'Create Roadmap'}</span>
+                          </button>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -583,15 +678,24 @@ export const CareerExplorerPage: React.FC = () => {
               ))}
             </div>
             
-            <button
-              className="premiumButtonPrimary"
-              style={{ padding: '8px 16px', fontSize: '0.82rem' }}
-              disabled={compareList.length < 2}
-              onClick={() => setShowCompareModal(true)}
-            >
-              <GitCompare size={14} />
-              <span>Compare Now</span>
-            </button>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                className="premiumButtonPrimary"
+                style={{ padding: '8px 16px', fontSize: '0.82rem' }}
+                onClick={() => navigate('/compare', { state: { selectedCareerIds: compareList.map(c => c.id), selectedCareers: compareList } })}
+              >
+                <GitCompare size={14} />
+                <span>Compare Careers ({compareList.length}/3)</span>
+              </button>
+
+              <button
+                className="premiumButtonSecondary"
+                style={{ padding: '8px 14px', fontSize: '0.82rem' }}
+                onClick={() => navigate('/compare', { state: { selectedCareerIds: compareList.map(c => c.id), selectedCareers: compareList, activeTab: 'roadmaps' } })}
+              >
+                <span>🗺️ Compare Roadmaps</span>
+              </button>
+            </div>
           </div>
         )}
 
@@ -605,6 +709,7 @@ export const CareerExplorerPage: React.FC = () => {
             compareList={compareList}
             onSetTargetCareer={handleSetTargetCareer}
             targetCareerTitle={targetCareerTitle}
+            hasRoadmap={Boolean(existingRoadmaps[selectedCareer.id.toLowerCase()] || existingRoadmaps[selectedCareer.title.toLowerCase()])}
           />
         )}
 
@@ -718,27 +823,30 @@ export const CareerExplorerPage: React.FC = () => {
                     </tr>
                     <tr>
                       <td className={styles.compareRowHeader}>Action</td>
-                      {compareList.map((item) => (
-                        <td key={item.id}>
-                          <button
-                            className="premiumButtonPrimary"
-                            style={{ 
-                              padding: '6px 12px', 
-                              fontSize: '0.76rem',
-                              background: 'linear-gradient(135deg, #059669, #10b981)',
-                              border: 'none',
-                              color: '#fff',
-                              margin: '0 auto'
-                            }}
-                            onClick={() => {
-                              navigate('/roadmap', { state: { selectedCareer: item } });
-                              setShowCompareModal(false);
-                            }}
-                          >
-                            Create Roadmap →
-                          </button>
-                        </td>
-                      ))}
+                      {compareList.map((item) => {
+                        const hasRoadmap = Boolean(existingRoadmaps[item.id.toLowerCase()] || existingRoadmaps[item.title.toLowerCase()]);
+                        return (
+                          <td key={item.id}>
+                            <button
+                              className="premiumButtonPrimary"
+                              style={{ 
+                                padding: '6px 12px', 
+                                fontSize: '0.76rem',
+                                background: hasRoadmap ? 'linear-gradient(135deg, #059669, #10b981)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                border: 'none',
+                                color: '#fff',
+                                margin: '0 auto'
+                              }}
+                              onClick={() => {
+                                navigate('/roadmap', { state: { selectedCareer: item } });
+                                setShowCompareModal(false);
+                              }}
+                            >
+                              {hasRoadmap ? 'View Roadmap →' : 'Create Roadmap →'}
+                            </button>
+                          </td>
+                        );
+                      })}
                     </tr>
                   </tbody>
                 </table>

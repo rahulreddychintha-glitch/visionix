@@ -1,26 +1,59 @@
 import api from './api';
 
+export interface CourseRelevance {
+  relevanceLevel: 'Strongly Relevant' | 'Relevant' | 'Requires Additional Education / Transition';
+  relevanceTag: string;
+  isStronglyRelevant: boolean;
+  reason: string;
+  relevantSubjects: string[];
+  entranceRequirements: string[];
+  learningRequirements: string[];
+}
+
 export interface Career {
   id: string;
   title: string;
   category: string;
   description: string;
+  overview?: string;
   education: string;
   skills: string[];
   responsibilities: string[];
+  relevantDegrees?: string[];
+  relevantSubjects?: string[];
+  entranceExams?: string[];
+  careerPathway?: string;
   salaryRange: string;
   growthRate: string;
   demandLevel: string;
   saved: boolean;
+  isTargetCareer?: boolean;
   relevanceTag: 'Dream Career' | 'Interested' | 'Relevant' | null;
+  courseRelevance?: CourseRelevance;
+  relevanceLevel?: 'Strongly Relevant' | 'Relevant' | 'Requires Additional Education / Transition';
   recommendationReason?: string;
   relevanceScore?: number;
+  entranceRequirements?: string[];
+  learningRequirements?: string[];
   match?: CareerMatchResult;
 }
 
 export interface CareersListResponse {
   careers: Career[];
   isMockMode: boolean;
+}
+
+export interface CareerComparisonResponse {
+  careers: Career[];
+  sharedSkills: string[];
+  uniqueSkillsByCareer: Record<string, string[]>;
+  userEducation?: {
+    level?: string;
+    stream?: string;
+    specialization?: string;
+    currentClass?: string;
+    studyYear?: string;
+  } | null;
 }
 
 export interface CareerMatchResult {
@@ -190,6 +223,14 @@ export class CareerService {
   public static async unsaveCareer(id: string): Promise<{ careerId: string; saved: boolean }> {
     CareerService.clearCache();
     const response = await api.delete(`/careers/${id}/save`);
+    return response.data.data;
+  }
+
+  /**
+   * Compare 1 to 3 careers side-by-side.
+   */
+  public static async compareCareers(careerIds: string[]): Promise<CareerComparisonResponse> {
+    const response = await api.post('/careers/compare', { careerIds });
     return response.data.data;
   }
 

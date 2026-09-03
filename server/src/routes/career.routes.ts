@@ -26,6 +26,13 @@ router.get('/recommended', CareerController.listRecommendedCareers);
 router.get('/saved', CareerController.getSavedCareers);
 
 /**
+ * POST /api/careers/compare & GET /api/careers/compare
+ * Compare 1 to 3 careers side-by-side
+ */
+router.post('/compare', CareerController.compareCareers);
+router.get('/compare', CareerController.compareCareers);
+
+/**
  * POST /api/careers/:id/recommendation-explanation
  * Generate natural-language explanation for why a career is recommended
  */

@@ -1,5 +1,6 @@
 import React, { createContext, useState, useCallback } from 'react';
 import { UserService } from '../services/user.service';
+import { EducationPathwayService } from '../services/educationPathway.service';
 import { useAuth } from '../hooks/useAuth';
 
 export interface ProfileContextType {
@@ -64,6 +65,7 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({ children }) =>
 
       const response = await UserService.saveProfile(payload);
       setProfile(response.data);
+      EducationPathwayService.clearCache();
       
       if (isFinal) {
         // Sync the onboarding state back to AuthContext immediately

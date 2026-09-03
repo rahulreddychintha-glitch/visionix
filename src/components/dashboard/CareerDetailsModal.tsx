@@ -14,6 +14,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { CareerService } from '../../services/career.service';
 import type { Career, CareerMatchResult } from '../../services/career.service';
+import { RoadmapService } from '../../services/roadmap.service';
 import { AiApiService } from '../../services/ai.service';
 import { MarkdownRenderer } from '../ui/MarkdownRenderer';
 import styles from '../../pages/CareerExplorerPage.module.css';
@@ -26,6 +27,7 @@ interface CareerDetailsModalProps {
   compareList: Career[];
   onSetTargetCareer?: (career: Career) => void | Promise<void>;
   targetCareerTitle?: string;
+  hasRoadmap?: boolean;
 }
 
 export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
@@ -35,7 +37,8 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
   onToggleCompare,
   compareList,
   onSetTargetCareer,
-  targetCareerTitle
+  targetCareerTitle,
+  hasRoadmap
 }) => {
   const isInCompare = career ? compareList.some((c) => c.id === career.id) : false;
   const isCurrentTarget = career && targetCareerTitle 
@@ -58,6 +61,7 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
   const [loadingMatchExplanation, setLoadingMatchExplanation] = useState<boolean>(false);
   const [isSettingTarget, setIsSettingTarget] = useState<boolean>(false);
   const [targetSuccessMsg, setTargetSuccessMsg] = useState<string | null>(null);
+  const [hasExistingRoadmap, setHasExistingRoadmap] = useState<boolean>(Boolean(hasRoadmap));
 
   // Reset explanation and tabs when career changes
   useEffect(() => {
@@ -69,6 +73,19 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
     setLoadingMatchExplanation(false);
     setTargetSuccessMsg(null);
   }, [career?.id]);
+
+  useEffect(() => {
+    if (hasRoadmap !== undefined) {
+      setHasExistingRoadmap(hasRoadmap);
+    } else if (career) {
+      RoadmapService.getUserRoadmaps().then((roadmaps) => {
+        const found = roadmaps.some(
+          (r) => r.careerId.toLowerCase() === career.id.toLowerCase() || r.careerTitle.toLowerCase() === career.title.toLowerCase()
+        );
+        setHasExistingRoadmap(found);
+      }).catch(() => {});
+    }
+  }, [career?.id, hasRoadmap]);
 
   useEffect(() => {
     if (activeTab === 'match' && career && !matchData && !loadingMatch) {
@@ -342,16 +359,18 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
 
             {activeTab === 'details' ? (
               <>
+                {/* 1. Overview */}
                 <div className={styles.infoSection}>
-                  <p className={styles.infoLabel}>Description</p>
-                  <p className={styles.infoVal}>{career.description}</p>
+                  <p className={styles.infoLabel}>Overview</p>
+                  <p className={styles.infoVal}>{career.overview || career.description}</p>
                 </div>
 
+                {/* 2. Recommendation Insight (if available) */}
                 {career.recommendationReason && (
                   <div style={{ padding: '14px', borderRadius: '8px', background: 'rgba(124, 58, 237, 0.04)', border: '1px solid rgba(124, 58, 237, 0.12)', marginBottom: '16px' }}>
                     <p className={styles.infoLabel} style={{ color: '#a78bfa', display: 'flex', alignItems: 'center', gap: '6px', margin: '0 0 8px 0', fontSize: '0.74rem' }}>
                       <Sparkles size={14} />
-                      <span>Recommendation Insight</span>
+                      <span>Course Relevance & Recommendation Insight</span>
                     </p>
                     <p style={{ margin: '0 0 10px 0', fontSize: '0.88rem', color: 'var(--text-primary)', lineHeight: '1.45' }}>
                       {career.recommendationReason}
@@ -390,7 +409,21 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
                   </div>
                 )}
 
-                {/* Typical Skills Required with direct Skill Gap link */}
+                {/* 3. Core Responsibilities */}
+                {career.responsibilities && career.responsibilities.length > 0 && (
+                  <div className={styles.infoSection}>
+                    <p className={styles.infoLabel}>Core Responsibilities</p>
+                    <ul style={{ margin: '6px 0 0 0', paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {career.responsibilities.map((resp, idx) => (
+                        <li key={idx} style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.45' }}>
+                          {resp}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* 4. Typical Skills Required with direct Skill Gap link */}
                 <div className={styles.infoSection}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                     <p className={styles.infoLabel} style={{ margin: 0 }}>Typical Skills Required</p>
@@ -445,11 +478,65 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
                   )}
                 </div>
 
+                {/* 5. Studies & Education Requirements */}
                 <div className={styles.infoSection}>
-                  <p className={styles.infoLabel}>Education Pathway</p>
+                  <p className={styles.infoLabel}>Studies & Education Requirements</p>
                   <p className={styles.infoVal}>{career.education}</p>
                 </div>
 
+                {/* 6. Relevant Degrees & Courses */}
+                {career.relevantDegrees && career.relevantDegrees.length > 0 && (
+                  <div className={styles.infoSection}>
+                    <p className={styles.infoLabel}>Relevant Degrees & Courses</p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
+                      {career.relevantDegrees.map((deg, idx) => (
+                        <span key={idx} className={styles.skillTag} style={{ fontSize: '0.78rem', padding: '4px 10px', background: 'rgba(59, 130, 246, 0.08)', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
+                          {deg}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 7. Relevant Academic Subjects */}
+                {career.relevantSubjects && career.relevantSubjects.length > 0 && (
+                  <div className={styles.infoSection}>
+                    <p className={styles.infoLabel}>Relevant Academic Subjects</p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
+                      {career.relevantSubjects.map((subj, idx) => (
+                        <span key={idx} className={styles.skillTag} style={{ fontSize: '0.78rem', padding: '4px 10px', background: 'rgba(139, 92, 246, 0.08)', color: '#c084fc', borderColor: 'rgba(139, 92, 246, 0.2)' }}>
+                          {subj}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 8. Entrance & Qualifying Exams */}
+                {career.entranceExams && career.entranceExams.length > 0 && (
+                  <div className={styles.infoSection}>
+                    <p className={styles.infoLabel}>Entrance & Qualifying Exams</p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
+                      {career.entranceExams.map((exam, idx) => (
+                        <span key={idx} className={styles.skillTag} style={{ fontSize: '0.78rem', padding: '4px 10px', background: 'rgba(245, 158, 11, 0.08)', color: '#fbbf24', borderColor: 'rgba(245, 158, 11, 0.2)' }}>
+                          {exam}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 9. Career Progression Pathway */}
+                {career.careerPathway && (
+                  <div className={styles.infoSection}>
+                    <p className={styles.infoLabel}>Career Progression Pathway</p>
+                    <div style={{ padding: '12px 14px', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.06)', fontSize: '0.85rem', color: '#e0e7ff', lineHeight: '1.5' }}>
+                      {career.careerPathway}
+                    </div>
+                  </div>
+                )}
+
+                {/* 10. Market & Industry Outlook */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div className={styles.infoSection}>
                     <p className={styles.infoLabel}>Salary Range</p>
@@ -755,7 +842,9 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
             style={{ 
               flex: 1.2, 
               minWidth: '140px',
-              background: 'linear-gradient(135deg, #059669, #10b981)',
+              background: hasExistingRoadmap 
+                ? 'linear-gradient(135deg, #059669, #10b981)' 
+                : 'linear-gradient(135deg, #7c3aed, #a855f7)',
               border: 'none',
               color: 'white',
               display: 'flex',
@@ -769,7 +858,7 @@ export const CareerDetailsModal: React.FC<CareerDetailsModalProps> = ({
             }}
           >
             <Rocket size={15} />
-            <span>View Roadmap</span>
+            <span>{hasExistingRoadmap ? 'View Roadmap' : 'Create Roadmap'}</span>
           </button>
 
           {/* Skill Gap Analysis Link */}

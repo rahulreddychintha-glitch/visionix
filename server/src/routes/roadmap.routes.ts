@@ -15,6 +15,19 @@ router.use(authenticate);
 router.get('/', RoadmapController.getRoadmap);
 
 /**
+ * GET /api/roadmap/user-roadmaps
+ * Fetch summary list of all roadmaps created by user
+ */
+router.get('/user-roadmaps', RoadmapController.getUserRoadmaps);
+
+/**
+ * POST /api/roadmap/compare & GET /api/roadmap/compare
+ * Compare 1 to 3 career roadmaps side-by-side
+ */
+router.post('/compare', RoadmapController.compareRoadmaps);
+router.get('/compare', RoadmapController.compareRoadmaps);
+
+/**
  * GET /api/roadmap/assessment/history
  * Fetch past completed assessment attempts for the user
  */

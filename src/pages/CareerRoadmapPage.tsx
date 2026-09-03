@@ -32,7 +32,8 @@ import {
   Info,
   X,
   ExternalLink,
-  Video
+  Video,
+  Rocket
 } from 'lucide-react';
 import styles from './CareerRoadmapPage.module.css';
 
@@ -44,6 +45,7 @@ export const CareerRoadmapPage: React.FC = () => {
 
   // Roadmap State
   const [roadmap, setRoadmap] = useState<CareerRoadmap | null>(null);
+  const [pendingCareer, setPendingCareer] = useState<{ id: string; title: string } | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -113,7 +115,7 @@ export const CareerRoadmapPage: React.FC = () => {
     setQuizResult(null);
   }, []);
 
-  // 2. Fetch or generate a roadmap based on route location state or active settings
+  // 2. Fetch or load a roadmap based on route location state or active settings
   const loadRoadmapData = useCallback(async (careerIdInput?: string) => {
     try {
       setLoading(true);
@@ -123,6 +125,7 @@ export const CareerRoadmapPage: React.FC = () => {
       
       if (fetchedRoadmap) {
         setRoadmap(fetchedRoadmap);
+        setPendingCareer(null);
         selectFirstOrCurrentMilestone(fetchedRoadmap);
       } else {
         setRoadmap(null);
@@ -136,7 +139,7 @@ export const CareerRoadmapPage: React.FC = () => {
     }
   }, [selectFirstOrCurrentMilestone]);
 
-  // 3. AI Generation steps trigger
+  // 3. AI Generation steps trigger (ONLY called on explicit user action)
   const startAiGeneration = useCallback(async (careerId: string, careerTitle: string, overwrite: boolean) => {
     setAiGenerating(true);
     setAiGenStep(1); // Reading profile
@@ -161,6 +164,7 @@ export const CareerRoadmapPage: React.FC = () => {
         });
       } else if (response.roadmap) {
         setRoadmap(response.roadmap);
+        setPendingCareer(null);
         selectFirstOrCurrentMilestone(response.roadmap);
       }
     } catch (err: any) {
@@ -172,7 +176,7 @@ export const CareerRoadmapPage: React.FC = () => {
     }
   }, [selectFirstOrCurrentMilestone]);
 
-  // Initial check: if roadmap exists, load it. If not, generate immediately.
+  // Initial check: if roadmap exists, load it. If not, prompt to create without auto-generating.
   const handleInitialCheck = useCallback(async (careerId: string, careerTitle: string) => {
     try {
       setLoading(true);
@@ -180,19 +184,22 @@ export const CareerRoadmapPage: React.FC = () => {
       const existing = await RoadmapService.getRoadmap(careerId);
       if (existing) {
         setRoadmap(existing);
+        setPendingCareer(null);
         selectFirstOrCurrentMilestone(existing);
-        setLoading(false);
       } else {
-        await startAiGeneration(careerId, careerTitle, false);
+        setRoadmap(null);
+        setSelectedMilestone(null);
+        setPendingCareer({ id: careerId, title: careerTitle });
       }
     } catch (err) {
       console.error('Error checking initial roadmap status:', err);
       setError('Could not establish roadmap status.');
+    } finally {
       setLoading(false);
     }
-  }, [selectFirstOrCurrentMilestone, startAiGeneration]);
+  }, [selectFirstOrCurrentMilestone]);
 
-  // Triggered when entering page. Checks if we came from Career Match and need to auto-create
+  // Triggered when entering page. Checks if we came from Career Match and need to load
   useEffect(() => {
     if (authLoading) return;
 
@@ -329,7 +336,7 @@ export const CareerRoadmapPage: React.FC = () => {
     }
   };
 
-  // Switch to a different saved career or load it
+  // Switch to a different saved career or load it (checks existence without auto-generation)
   const handleSelectCareerToLoad = async (career: Career) => {
     setShowSwitchMenu(false);
     try {
@@ -338,14 +345,17 @@ export const CareerRoadmapPage: React.FC = () => {
       const existing = await RoadmapService.getRoadmap(career.id);
       if (existing) {
         setRoadmap(existing);
+        setPendingCareer(null);
         selectFirstOrCurrentMilestone(existing);
-        setLoading(false);
       } else {
-        await startAiGeneration(career.id, career.title, false);
+        setRoadmap(null);
+        setSelectedMilestone(null);
+        setPendingCareer({ id: career.id, title: career.title });
       }
     } catch (err) {
       console.error('Failed to load roadmap selection:', err);
       setError('Failed to load selected career roadmap.');
+    } finally {
       setLoading(false);
     }
   };
@@ -486,18 +496,33 @@ export const CareerRoadmapPage: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* Empty State */}
+        {/* Empty / Create State */}
         {!authLoading && !loading && !roadmap && !error && (
           <div className={styles.emptyState}>
             <GitFork size={48} style={{ color: 'var(--color-primary)' }} />
-            <h2 className={styles.emptyTitle}>Create Your Career Roadmap</h2>
+            <h2 className={styles.emptyTitle}>
+              {pendingCareer ? `Create Roadmap for ${pendingCareer.title}` : 'Create Your Career Roadmap'}
+            </h2>
             <p className={styles.emptyText}>
-              Track your skill development and test your knowledge. Select a saved career to start generating your personalized educational pathway.
+              {pendingCareer 
+                ? `No roadmap exists for "${pendingCareer.title}" yet. Click below to generate your personalized, stage-by-stage learning pathway and milestone quizzes.`
+                : 'Track your skill development and test your knowledge. Select a saved career to start generating your personalized educational pathway.'}
             </p>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-              <button className={`${styles.button} ${styles.primaryButton}`} onClick={() => navigate('/explore')}>
-                Explore Careers
-              </button>
+              {pendingCareer ? (
+                <button
+                  className={`${styles.button} ${styles.primaryButton}`}
+                  style={{ background: 'linear-gradient(135deg, #059669, #10b981)', color: '#fff', border: 'none' }}
+                  onClick={() => startAiGeneration(pendingCareer.id, pendingCareer.title, false)}
+                >
+                  <Rocket size={16} style={{ marginRight: '6px' }} />
+                  <span>Create Roadmap</span>
+                </button>
+              ) : (
+                <button className={`${styles.button} ${styles.primaryButton}`} onClick={() => navigate('/explore')}>
+                  Explore Careers
+                </button>
+              )}
               {savedCareers.length > 0 && (
                 <div style={{ position: 'relative' }}>
                   <button className={`${styles.button} ${styles.secondaryButton}`} onClick={() => setShowSwitchMenu(!showSwitchMenu)}>

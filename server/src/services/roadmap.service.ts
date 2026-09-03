@@ -122,14 +122,6 @@ export class RoadmapService {
       roadmap = await CareerRoadmap.findOne({ userId: new mongoose.Types.ObjectId(userId) }).sort({ updatedAt: -1 });
     } else {
       roadmap = await CareerRoadmap.findOne({ userId: new mongoose.Types.ObjectId(userId), careerId: targetCareerId });
-      // If user has a valid targetCareerId but no roadmap document exists yet, auto-generate initial roadmap!
-      if (!roadmap) {
-        try {
-          roadmap = await this.generateRoadmap(userId, targetCareerId);
-        } catch (genErr: any) {
-          console.warn('[RoadmapService] Could not auto-generate initial roadmap for target career:', genErr?.message || genErr);
-        }
-      }
     }
 
     // Apply on-the-fly status sanitization for backward compatibility
@@ -170,6 +162,22 @@ export class RoadmapService {
     }
 
     return roadmap;
+  }
+
+  /**
+   * Retrieves summary list of all existing career roadmaps for a user.
+   */
+  public static async getUserRoadmaps(userId: string): Promise<Array<{ careerId: string; careerTitle: string; progress: number; updatedAt: Date }>> {
+    const roadmaps = await CareerRoadmap.find({ userId: new mongoose.Types.ObjectId(userId) })
+      .select('careerId careerTitle progress updatedAt')
+      .sort({ updatedAt: -1 })
+      .lean();
+    return roadmaps.map((r: any) => ({
+      careerId: r.careerId,
+      careerTitle: r.careerTitle,
+      progress: r.progress,
+      updatedAt: r.updatedAt
+    }));
   }
 
   /**
@@ -1880,5 +1888,149 @@ JSON Schema:
     }
 
     return validatedQuestions;
+  }
+
+  /**
+   * Compares 1 to 3 career roadmaps side-by-side using existing roadmap data or deterministic generation.
+   */
+  public static async compareRoadmaps(userId: string, careerIds: string[]): Promise<any> {
+    if (!careerIds || careerIds.length === 0) {
+      throw new Error('Please select at least 1 career to compare roadmaps.');
+    }
+    if (careerIds.length > 3) {
+      throw new Error('Maximum 3 career roadmaps can be compared at once.');
+    }
+
+    const uniqueIds = Array.from(new Set(careerIds));
+    const pContext = await PersonalizationService.getPersonalizationContext(userId);
+
+    const roadmapItems: any[] = [];
+
+    for (const id of uniqueIds) {
+      const career = CAREERS_DATA.find((c) => c.id === id || c.title.toLowerCase() === id.toLowerCase().replace(/_/g, ' '));
+      if (!career) continue;
+
+      // 1. Check existing saved roadmap
+      let roadmapDoc = await CareerRoadmap.findOne({ userId: new mongoose.Types.ObjectId(userId), careerId: career.id });
+      let stages: IRoadmapStage[] = [];
+
+      if (roadmapDoc && roadmapDoc.stages && roadmapDoc.stages.length > 0) {
+        stages = roadmapDoc.stages;
+      } else {
+        // Deterministically generate roadmap for comparison without side-effects
+        const match = MatchService.calculateMatch(career, pContext);
+        stages = this.generateDeterministicRoadmap(pContext, career, match);
+      }
+
+      // 2. Extract stage-by-stage comparison summaries
+      const stageSummaries = stages.map((st, idx) => {
+        const stageSkills = Array.from(new Set(st.milestones.flatMap((m) => m.skills || [])));
+        const stageActivities = st.milestones.flatMap((m) => m.activities || []).filter(Boolean);
+        const stageMilestoneTitles = st.milestones.map((m) => m.title);
+
+        return {
+          stageIndex: idx + 1,
+          title: st.title,
+          milestonesCount: st.milestones.length,
+          milestoneTitles: stageMilestoneTitles,
+          skills: stageSkills,
+          activities: stageActivities,
+          learningFocus: st.milestones.map((m) => m.description).join(' ') || st.title,
+        };
+      });
+
+      const allRoadmapSkills = Array.from(new Set(stages.flatMap((st) => st.milestones.flatMap((m) => m.skills || []))));
+      const allProjects = stages.flatMap((st) => st.milestones.flatMap((m) => m.activities || [])).filter(Boolean);
+      const assessmentCheckpoints = stages.flatMap((st) =>
+        st.milestones
+          .filter((m) => m.learningObjectives && m.learningObjectives.length > 0)
+          .map((m) => `${m.title}: ${m.learningObjectives[0]}`)
+      ).slice(0, 6);
+
+      // Summarize core learning direction
+      let coreLearningDirection = '';
+      if (career.category.toLowerCase().includes('tech')) {
+        coreLearningDirection = 'Programming fundamentals, data structures, application architecture, frameworks & cloud deployments.';
+      } else if (career.category.toLowerCase().includes('eng')) {
+        coreLearningDirection = 'Engineering physics, CAD drafting, structural/mechanical dynamics, simulations & project execution.';
+      } else if (career.category.toLowerCase().includes('health')) {
+        coreLearningDirection = 'Anatomy, biochemical foundations, clinical diagnosis, patient care workflows & medical licensure prep.';
+      } else if (career.category.toLowerCase().includes('business') || career.category.toLowerCase().includes('finance')) {
+        coreLearningDirection = 'Financial modeling, economics, business strategy, enterprise tools, operations & case-study presentations.';
+      } else if (career.category.toLowerCase().includes('art') || career.category.toLowerCase().includes('design')) {
+        coreLearningDirection = 'Visual design principles, interactive UI/UX prototyping, digital software, and public design portfolio.';
+      } else {
+        coreLearningDirection = 'Core industry foundations, analytical methods, domain execution tools & practical portfolio showcase.';
+      }
+
+      roadmapItems.push({
+        careerId: career.id,
+        careerTitle: career.title,
+        category: career.category,
+        totalStages: stages.length,
+        totalMilestones: this.countMilestones(stages),
+        stages: stageSummaries,
+        allSkills: allRoadmapSkills,
+        keyProjects: allProjects,
+        coreLearningDirection,
+        assessmentCheckpoints,
+        salaryRange: career.salaryRange,
+        growthRate: career.growthRate,
+        demandLevel: career.demandLevel
+      });
+    }
+
+    if (roadmapItems.length === 0) {
+      throw new Error('None of the specified careers could be found for roadmap comparison.');
+    }
+
+    // 3. Compute cross-roadmap path differences
+    const allSkillsSets = roadmapItems.map((r) => new Set(r.allSkills.map((s: string) => s.toLowerCase())));
+    const sharedSkills = roadmapItems.length > 1
+      ? roadmapItems[0].allSkills.filter((skill: string) =>
+          allSkillsSets.every((set) => set.has(skill.toLowerCase()))
+        )
+      : roadmapItems[0].allSkills;
+
+    const uniqueSkillsByCareer: Record<string, string[]> = {};
+    roadmapItems.forEach((r) => {
+      const otherSets = allSkillsSets.filter((_, idx) => roadmapItems[idx].careerId !== r.careerId);
+      if (otherSets.length === 0) {
+        uniqueSkillsByCareer[r.careerId] = r.allSkills;
+      } else {
+        uniqueSkillsByCareer[r.careerId] = r.allSkills.filter(
+          (s: string) => !otherSets.some((os) => os.has(s.toLowerCase()))
+        );
+      }
+    });
+
+    const keyDifferences: string[] = [];
+    if (roadmapItems.length >= 2) {
+      roadmapItems.forEach((r) => {
+        keyDifferences.push(
+          `**${r.careerTitle}** emphasizes ${r.coreLearningDirection} (${r.totalStages} stages with ${r.totalMilestones} milestones).`
+        );
+      });
+    } else {
+      keyDifferences.push(`**${roadmapItems[0].careerTitle}** comprises ${roadmapItems[0].totalStages} comprehensive stages covering ${roadmapItems[0].allSkills.slice(0, 4).join(', ')}.`);
+    }
+
+    return {
+      roadmaps: roadmapItems,
+      pathDifferences: {
+        overview: roadmapItems.length > 1
+          ? `Comparison of learning paths across ${roadmapItems.map(r => r.careerTitle).join(', ')}.`
+          : `Roadmap progression for ${roadmapItems[0].careerTitle}.`,
+        keyDifferences,
+        sharedSkills,
+        uniqueSkillsByCareer,
+        focusComparison: roadmapItems.map((r) => ({
+          careerId: r.careerId,
+          careerTitle: r.careerTitle,
+          primaryFocus: r.coreLearningDirection,
+          typicalProjects: r.keyProjects.slice(0, 3),
+        })),
+      },
+    };
   }
 }

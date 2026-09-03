@@ -5,7 +5,7 @@ export type SkillStatus =
   | 'Needs Improvement'
   | 'Missing';
 
-export type SkillPriority = 'High' | 'Medium' | 'Low';
+export type SkillPriority = 'Critical' | 'High' | 'Medium' | 'Supporting' | 'Low';
 
 export type ActionType =
   | 'assessment'
@@ -28,8 +28,33 @@ export interface ICurrentSkillsBreakdown {
   developing: string[];
 }
 
+export interface ISkillLearningResource {
+  title: string;
+  url: string;
+  provider: string;
+  type: string;
+  thumbnail?: string;
+}
+
+export interface ISkillRoadmapMilestone {
+  stageNumber: number;
+  stageTitle: string;
+  milestoneTitle: string;
+  status: string;
+}
+
+export interface ISkillGapSummary {
+  totalRequired: number;
+  existingCount: number;
+  missingCount: number;
+  coveragePercentage: number;
+  coverageText: string;
+}
+
 export interface ISkillGapItem {
+  id?: string;
   skillName: string;
+  category: 'Foundational' | 'Technical' | 'Tooling' | 'Professional';
   status: SkillStatus;
   priority: SkillPriority;
   currentLevel: string;
@@ -41,16 +66,23 @@ export interface ISkillGapItem {
   actionRoute: string;
   hasAssessment: boolean;
   hasLearningResource: boolean;
+  learningResource?: ISkillLearningResource;
+  roadmapMilestone?: ISkillRoadmapMilestone;
+  learningProgressPercent?: number;
 }
 
 export interface IPrioritySkillItem {
+  id?: string;
   skillName: string;
+  category: 'Foundational' | 'Technical' | 'Tooling' | 'Professional';
   priority: SkillPriority;
   status: string;
   reason: string;
   quickAction: string;
   actionRoute: string;
   actionType: ActionType;
+  learningResource?: ISkillLearningResource;
+  roadmapMilestone?: ISkillRoadmapMilestone;
 }
 
 export interface INextStepItem {
@@ -87,10 +119,15 @@ export interface IAiSkillInsight {
 export interface ISkillGapAnalysis {
   _id?: string;
   userId: string;
+  hasTargetCareer: boolean;
   targetCareerId: string;
   targetCareerTitle: string;
   targetCategory: string;
+  salaryRange?: string;
+  growthRate?: string;
+  demandLevel?: string;
   readinessScore: number;
+  summary: ISkillGapSummary;
   requiredSkillsCount: number;
   strongSkillsCount: number;
   developingSkillsCount: number;
@@ -100,7 +137,11 @@ export interface ISkillGapAnalysis {
   quickWin: string;
   currentSkills: ICurrentSkillsBreakdown;
   skillGaps: ISkillGapItem[];
+  existingSkills: ISkillGapItem[];
+  requiredSkills: ISkillGapItem[];
+  missingSkills: ISkillGapItem[];
   prioritySkills: IPrioritySkillItem[];
+  recommendedNextSkill?: ISkillGapItem | null;
   nextSteps: INextStepItem[];
   careerComparisons: ICareerComparisonItem[];
   aiAnalysis?: IAiSkillInsight;

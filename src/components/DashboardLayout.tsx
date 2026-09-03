@@ -9,7 +9,6 @@ import {
   Video, 
   HelpCircle, 
   FileText, 
-  Landmark, 
   FileEdit, 
   Bookmark, 
   Lightbulb, 
@@ -24,7 +23,8 @@ import {
   Menu,
   X,
   Mic,
-  Target
+  Target,
+  Route
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { usePersonalization } from '../hooks/usePersonalization';
@@ -60,7 +60,7 @@ const NAV_GROUPS = [
   {
     title: 'Tools & Utilities',
     items: [
-      { label: 'Scholarships', path: '/scholarships', icon: Landmark },
+      { label: "What's Next?", path: '/whats-next', icon: Route },
       { label: 'Resume Builder', path: '/resume', icon: FileEdit },
       { label: 'Saved & Bookmarks', path: '/saved', icon: Bookmark },
       { label: 'Business & Startup', path: '/business', icon: Lightbulb },

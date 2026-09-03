@@ -65,8 +65,8 @@ export const YouTubeLearningPage: React.FC = () => {
           ...hubData.completedLearning.map(r => r.resourceId)
         ]);
         setUserState({
-          dreamCareer: hubData.dreamCareer,
-          hasRoadmap: hubData.hasRoadmap,
+          dreamCareer: hubData.targetCareer?.title || hubData.dreamCareer || null,
+          hasRoadmap: hubData.hasRoadmap ?? false,
           loaded: true
         });
       }

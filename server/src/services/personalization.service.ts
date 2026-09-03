@@ -13,6 +13,15 @@ export interface IPersonalizationContext {
   educationLevel: string;
   studentStatus: string;
   institution: string;
+  currentClass: string;
+  studyYear: string;
+  courses: Array<{
+    stream?: string;
+    branchSpecialization?: string;
+    studyYear?: string;
+    institution?: string;
+  }>;
+  graduationYear?: number;
   dreamCareer: string;
   currentOccupation: string;
   location: {
@@ -130,6 +139,10 @@ export class PersonalizationService {
           educationLevel: level,
           studentStatus: profile?.education?.studentStatus || 'Student',
           institution: profile?.education?.institution || '',
+          currentClass: profile?.education?.currentClass || '',
+          studyYear: profile?.education?.studyYear || '',
+          courses: profile?.education?.courses || [],
+          graduationYear: profile?.education?.graduationYear,
           dreamCareer: profile?.careerGoals?.dreamCareer || 'Career Explorer',
           currentOccupation: profile?.education?.currentOccupation || '',
           location: {
