@@ -37,7 +37,8 @@ const InterviewPage = React.lazy(() => import('./pages/InterviewPage').then(m =>
 const BusinessPage = React.lazy(() => import('./pages/BusinessPage').then(m => ({ default: m.BusinessPage })));
 const SkillNavigatorPage = React.lazy(() => import('./pages/SkillNavigatorPage').then(m => ({ default: m.SkillNavigatorPage })));
 const SettingsPage = React.lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
-const WhatsNextPage = React.lazy(() => import('./pages/WhatsNextPage').then(m => ({ default: m.WhatsNextPage })));
+const CareerPathExplorerPage = React.lazy(() => import('./pages/CareerPathExplorerPage').then(m => ({ default: m.CareerPathExplorerPage })));
+const WhatsNextPage = CareerPathExplorerPage;
 
 const RouteLoadingFallback = () => (
   <div style={{
@@ -340,14 +341,14 @@ function App() {
                       />
                     ))}
 
-                    {/* Phase 22 What's Next? (Education Pathway) Route */}
-                    {['/whats-next', '/education-pathways'].map((path) => (
+                    {/* Phase 32 Career Path Explorer & Pathway Aliases */}
+                    {['/whats-next', '/path-explorer', '/career-path-explorer', '/education-pathways'].map((path) => (
                       <Route 
                         key={path}
                         path={path} 
                         element={
                           <ProtectedRoute>
-                            <WhatsNextPage />
+                            <CareerPathExplorerPage />
                           </ProtectedRoute>
                         } 
                       />
@@ -364,6 +365,6 @@ function App() {
 }
 
 export default App;
-// Remove any unused references in compilation
-export { App };
+// Remove any unused references in compilation and export backward-compatible aliases
+export { App, WhatsNextPage };
 

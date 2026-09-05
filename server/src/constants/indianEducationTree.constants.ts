@@ -714,6 +714,25 @@ export const INDIAN_EDUCATION_TREE: IEducationTreeNode = {
               careerIds: ['journalist', 'content_creator', 'film_director']
             }
           ]
+        },
+
+        // ─── STREAM 7: INTERMEDIATE VOCATIONAL ───────────────────────────
+        {
+          id: 'stream-vocational',
+          title: 'Vocational Intermediate (2-Year Technical & Skill Track)',
+          subtitle: 'Applied Technical, Commercial & Paramedical Intermediate Education',
+          shortCode: 'Vocational',
+          nodeType: 'stream',
+          category: 'Vocational Trades',
+          description: '2-Year skill-oriented Senior Secondary curriculum approved by State Intermediate Boards and National Skills Qualification Framework (NSQF). Offers hands-on industry apprenticeships alongside academics in Computer Science, Accounting & Taxation, Medical Lab Technology (MLT), and Electrical Servicing.',
+          duration: '2 Years (Class 11 & Class 12)',
+          eligibility: 'Passed Class 10 from any recognized board',
+          entranceExams: ['Board Intermediate Vocational Exams', 'State Bridge Course Exams', 'Polycet Lateral Entry'],
+          majorBranches: ['Computer Science & DTP', 'Accounting & Taxation', 'Medical Lab Technology (MLT)', 'Automobile & Electrical Servicing'],
+          higherStudyOptions: ['Polytechnic Diploma Lateral Entry (2nd Year)', 'B.Voc (Bachelor of Vocation)', 'B.Com / B.A. / BCA', 'Industry Apprenticeships'],
+          skills: ['Applied Computer Operations', 'Financial Bookkeeping & Tally', 'Clinical Laboratory Diagnostics', 'Equipment Maintenance & Safety'],
+          outcomes: ['Direct entry into technician and associate jobs or lateral progression into professional polytechnics and B.Voc degree programs.'],
+          careerIds: ['electrician', 'mechanic', 'digital_creator']
         }
       ]
     },

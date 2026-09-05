@@ -63,7 +63,7 @@ const NAV_GROUPS = [
   {
     title: 'Tools & Utilities',
     items: [
-      { label: "What's Next?", path: '/whats-next', icon: Route },
+      { label: 'Career Path Explorer', path: '/whats-next', icon: Route }, // Formerly "What's Next?" / Indian Education Path Explorer
       { label: 'Career Readiness', path: '/career-readiness', icon: ShieldCheck },
       { label: 'Resume Builder', path: '/resume', icon: FileEdit },
       { label: 'Saved & Bookmarks', path: '/saved', icon: Bookmark },

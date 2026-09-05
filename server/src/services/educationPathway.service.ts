@@ -138,6 +138,7 @@ export class EducationPathwayService {
       if (streamRaw.includes('mec') || (streamRaw.includes('math') && streamRaw.includes('commerce'))) return 'stream-mec';
       if (streamRaw.includes('cec') || (streamRaw.includes('civic') && streamRaw.includes('commerce'))) return 'stream-cec';
       if (streamRaw.includes('hec') || streamRaw.includes('arts') || streamRaw.includes('humanities')) return 'stream-hec';
+      if (streamRaw.includes('vocational') || streamRaw.includes('skill')) return 'stream-vocational';
       return 'stage-intermediate';
     }
 
