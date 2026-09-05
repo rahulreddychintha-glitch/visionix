@@ -12,7 +12,6 @@ import {
   FileEdit, 
   Bookmark, 
   Lightbulb, 
-  TrendingUp, 
   Settings,
   Search,
   Sparkles,
@@ -24,7 +23,10 @@ import {
   X,
   Mic,
   Target,
-  Route
+  Route,
+  ShieldCheck,
+  GitBranch,
+  Footprints
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { usePersonalization } from '../hooks/usePersonalization';
@@ -44,6 +46,7 @@ const NAV_GROUPS = [
       { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
       { label: 'AI Career Assistant', path: '/ai-assistant', icon: Brain, isNew: true },
       { label: 'Career Roadmap', path: '/roadmap', icon: GitFork },
+      { label: 'Career Paths', path: '/career-paths', icon: GitBranch },
       { label: 'Explore Careers', path: '/explore', icon: Compass },
     ]
   },
@@ -61,10 +64,11 @@ const NAV_GROUPS = [
     title: 'Tools & Utilities',
     items: [
       { label: "What's Next?", path: '/whats-next', icon: Route },
+      { label: 'Career Readiness', path: '/career-readiness', icon: ShieldCheck },
       { label: 'Resume Builder', path: '/resume', icon: FileEdit },
       { label: 'Saved & Bookmarks', path: '/saved', icon: Bookmark },
       { label: 'Business & Startup', path: '/business', icon: Lightbulb },
-      { label: 'My Progress', path: '/progress', icon: TrendingUp },
+      { label: 'Your Next Step', path: '/next-step', icon: Footprints },
       { label: 'Settings', path: '/settings', icon: Settings },
     ]
   }
@@ -175,7 +179,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </p>
           <button
             className={styles.upgradeBtn}
-            onClick={() => navigate('/ai-assistant')}
+            onClick={() => {
+              if (isSidebarOpen) setIsSidebarOpen(false);
+              navigate('/ai-assistant');
+            }}
             aria-label="Open AI Career Assistant"
           >
             <span>Ask AI Assistant</span>
@@ -183,6 +190,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </button>
         </div>
       </aside>
+
+      {/* Mobile Backdrop Overlay (Tap outside to dismiss drawer) */}
+      {isSidebarOpen && (
+        <div 
+          className={styles.mobileOverlay} 
+          onClick={() => setIsSidebarOpen(false)}
+          aria-label="Close sidebar overlay"
+        />
+      )}
 
       {/* Main Container */}
       <div className={styles.mainContainer}>
@@ -371,10 +387,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                         className={styles.dropdownItem} 
                         onClick={() => {
                           setIsProfileDropdownOpen(false);
-                          navigate('/progress');
+                          navigate('/next-step');
                         }}
                       >
-                        My Progress
+                        Your Next Step
                       </div>
                     </div>
                     <div className={styles.dropdownSection} style={{ borderTop: '1px solid rgba(255, 255, 255, 0.04)', paddingTop: '8px' }}>

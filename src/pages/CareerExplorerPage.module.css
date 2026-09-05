@@ -747,3 +747,52 @@
   box-shadow: none;
 }
 
+@media (max-width: 640px) {
+  .titleRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .controlsSection {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .searchBarRow {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .filterSelect {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .modalOverlay {
+    padding: 10px;
+  }
+
+  .modalContent {
+    padding: 18px 14px;
+    gap: 14px;
+    border-radius: 14px;
+    max-height: 92vh;
+  }
+
+  .compareTable th,
+  .compareTable td {
+    padding: 10px 12px;
+    font-size: 0.82rem;
+  }
+
+  .compareRowHeader {
+    width: 120px;
+  }
+}
+

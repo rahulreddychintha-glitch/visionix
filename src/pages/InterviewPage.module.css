@@ -263,3 +263,46 @@
   gap: 12px;
   margin-top: 8px;
 }
+
+@media (max-width: 640px) {
+  .container {
+    padding: 16px 12px 40px;
+  }
+
+  .headerTitleWrapper h1 {
+    font-size: 1.55rem;
+  }
+
+  .navTabs {
+    width: 100%;
+    display: flex;
+  }
+
+  .navTabBtn {
+    flex: 1;
+    justify-content: center;
+    padding: 7px 10px;
+    font-size: 0.8rem;
+  }
+
+  .modalOverlay {
+    padding: 10px;
+  }
+
+  .modalContent {
+    padding: 18px 14px;
+    border-radius: 14px;
+    gap: 12px;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .modalActions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

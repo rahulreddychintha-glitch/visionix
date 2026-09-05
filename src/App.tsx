@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { AuthProvider } from './contexts/AuthContext';
@@ -9,6 +9,7 @@ import { AiModalProvider } from './contexts/AiModalContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { GuestRoute } from './components/GuestRoute';
+import { DashboardLayout } from './components/DashboardLayout';
 import { Loader2 } from 'lucide-react';
 import './App.css';
 
@@ -24,7 +25,9 @@ const CareerExplorerPage = React.lazy(() => import('./pages/CareerExplorerPage')
 const CareerComparePage = React.lazy(() => import('./pages/CareerComparePage').then(m => ({ default: m.CareerComparePage })));
 const SavedCareersPage = React.lazy(() => import('./pages/SavedCareersPage').then(m => ({ default: m.SavedCareersPage })));
 const CareerRoadmapPage = React.lazy(() => import('./pages/CareerRoadmapPage').then(m => ({ default: m.CareerRoadmapPage })));
-const MyProgressPage = React.lazy(() => import('./pages/MyProgressPage').then(m => ({ default: m.MyProgressPage })));
+const YourNextStepPage = React.lazy(() => import('./pages/YourNextStepPage').then(m => ({ default: m.YourNextStepPage })));
+const CareerReadinessPage = React.lazy(() => import('./pages/CareerReadinessPage').then(m => ({ default: m.CareerReadinessPage })));
+const CareerPathsPage = React.lazy(() => import('./pages/CareerPathsPage').then(m => ({ default: m.CareerPathsPage })));
 const LearningHubPage = React.lazy(() => import('./pages/LearningHubPage').then(m => ({ default: m.LearningHubPage })));
 const CourseRecommendationsPage = React.lazy(() => import('./pages/CourseRecommendationsPage').then(m => ({ default: m.CourseRecommendationsPage })));
 const YouTubeLearningPage = React.lazy(() => import('./pages/YouTubeLearningPage').then(m => ({ default: m.YouTubeLearningPage })));
@@ -191,18 +194,36 @@ function App() {
                     />
 
                     <Route 
-                      path="/progress" 
+                      path="/next-step" 
                       element={
                         <ProtectedRoute>
-                          <MyProgressPage />
+                          <YourNextStepPage />
                         </ProtectedRoute>
                       } 
                     />
                     <Route 
+                      path="/progress" 
+                      element={<Navigate to="/next-step" replace />} 
+                    />
+                    <Route 
                       path="/my-progress" 
+                      element={<Navigate to="/next-step" replace />} 
+                    />
+                    <Route 
+                      path="/career-readiness" 
                       element={
                         <ProtectedRoute>
-                          <MyProgressPage />
+                          <DashboardLayout>
+                            <CareerReadinessPage />
+                          </DashboardLayout>
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/career-paths" 
+                      element={
+                        <ProtectedRoute>
+                          <CareerPathsPage />
                         </ProtectedRoute>
                       } 
                     />

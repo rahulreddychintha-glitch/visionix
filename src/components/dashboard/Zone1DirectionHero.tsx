@@ -172,7 +172,7 @@ export const Zone1DirectionHero: React.FC<Zone1DirectionHeroProps> = ({
       {/* ─── Master Zone 1 Action & Direction Card ─────────────────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
         gap: '16px',
         width: '100%',
         alignItems: 'stretch'

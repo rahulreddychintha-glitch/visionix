@@ -614,3 +614,32 @@
   gap: 1rem;
   color: #94a3b8;
 }
+
+@media (max-width: 640px) {
+  .modalOverlay {
+    padding: 10px;
+  }
+
+  .playerModal {
+    border-radius: 14px;
+  }
+
+  .playerModalHeader {
+    padding: 0.85rem 1rem;
+  }
+
+  .playerModalFooter {
+    padding: 0.85rem 1rem;
+  }
+
+  .filterSelect {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 120px;
+  }
+
+  .resetFiltersBtn {
+    width: 100%;
+    text-align: center;
+  }
+}
+

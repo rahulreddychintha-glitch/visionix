@@ -224,6 +224,13 @@
   }
 }
 
+@media (max-width: 420px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+}
+
 .statCard {
   background: rgba(30, 41, 59, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -823,3 +830,17 @@
   gap: 1rem;
   color: #94a3b8;
 }
+
+@media (max-width: 640px) {
+  .switcherModal {
+    padding: 1.1rem;
+    border-radius: 14px;
+    max-height: 90vh;
+  }
+
+  .switcherGrid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+}
+

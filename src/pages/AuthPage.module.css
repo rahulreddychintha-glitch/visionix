@@ -340,3 +340,34 @@
   border-color: #ef4444 !important;
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.25) !important;
 }
+
+@media (max-width: 480px) {
+  .container {
+    padding: 32px 14px 48px;
+    min-height: 70vh;
+  }
+
+  .card {
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+
+  .title {
+    font-size: 1.65rem;
+  }
+
+  .subtitle {
+    font-size: 0.88rem;
+    margin-bottom: 20px;
+  }
+
+  .formGroup {
+    margin-bottom: 16px;
+  }
+
+  .input {
+    padding: 12px 14px 12px 40px;
+    font-size: 0.9rem;
+  }
+}
+

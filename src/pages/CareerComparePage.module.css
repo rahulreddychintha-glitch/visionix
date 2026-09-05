@@ -848,3 +848,31 @@
     justify-content: center;
   }
 }
+
+@media (max-width: 480px) {
+  .metricsRow {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .compareContainer {
+    padding: 0.85rem 0.75rem 2.5rem;
+  }
+
+  .modalOverlay {
+    padding: 8px;
+  }
+
+  .modalHeader {
+    padding: 1rem 1.2rem;
+  }
+
+  .modalSearch {
+    padding: 0.75rem 1.2rem 0.35rem;
+  }
+
+  .modalList {
+    padding: 0.4rem 1.2rem 1.2rem;
+  }
+}
+

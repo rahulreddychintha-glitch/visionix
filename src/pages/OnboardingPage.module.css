@@ -406,3 +406,33 @@
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+@media (max-width: 480px) {
+  .container {
+    padding: 24px 12px 40px 12px;
+  }
+
+  .card {
+    padding: 20px 14px;
+    gap: 16px;
+  }
+
+  .title {
+    font-size: 1.65rem;
+  }
+
+  .subtitle {
+    font-size: 0.88rem;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

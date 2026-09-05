@@ -11,6 +11,7 @@
 /* Sidebar Shell Container */
 .sidebar {
   width: 240px;
+  max-width: min(280px, 85vw);
   height: 100vh;
   position: fixed;
   top: 0;
@@ -752,7 +753,22 @@
   }
 }
 
+.mobileOverlay {
+  display: none;
+}
+
 @media (max-width: 1024px) {
+  .mobileOverlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 45;
+    cursor: pointer;
+  }
+
   .sidebar {
     transform: translateX(-100%);
   }
@@ -825,6 +841,23 @@
   
   .profileInfo, .chevron {
     display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 14px 12px;
+    gap: 14px;
+  }
+
+  .navbar {
+    padding: 0 12px;
+    height: 58px;
+  }
+
+  .mainContainer {
+    margin-top: 58px;
+    height: calc(100vh - 58px);
   }
 }
 

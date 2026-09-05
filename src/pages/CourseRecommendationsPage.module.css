@@ -523,3 +523,34 @@
   gap: 1rem;
   color: #94a3b8;
 }
+
+@media (max-width: 640px) {
+  .allCoursesGrid,
+  .skillCoursesGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .modalOverlay {
+    padding: 10px;
+  }
+
+  .courseModal {
+    border-radius: 14px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .courseModalHeader {
+    padding: 1rem 1.25rem;
+  }
+
+  .courseModalBody {
+    padding: 1.2rem;
+  }
+
+  .courseModalFooter {
+    padding: 0.85rem 1.25rem;
+  }
+}
+

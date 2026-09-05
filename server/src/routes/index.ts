@@ -16,6 +16,10 @@ import skillNavigatorRoutes from './skillNavigator.routes';
 import settingsRoutes from './settings.routes';
 import educationPathwayRoutes from './educationPathway.routes';
 import courseRoutes from './course.routes';
+import progressRoutes from './progress.routes';
+import careerReadinessRoutes from './careerReadiness.routes';
+import careerPathsRoutes from './careerPaths.routes';
+import nextStepRoutes from './nextStep.routes';
 
 const router = Router();
 
@@ -40,5 +44,9 @@ router.use('/skill-navigator', skillNavigatorRoutes);
 router.use('/skill-gap', skillNavigatorRoutes);
 router.use('/settings', settingsRoutes);
 router.use('/education-pathways', educationPathwayRoutes);
+router.use('/progress', progressRoutes);
+router.use('/career-readiness', careerReadinessRoutes);
+router.use('/career-paths', careerPathsRoutes);
+router.use('/next-step', nextStepRoutes);
 
 export default router;
